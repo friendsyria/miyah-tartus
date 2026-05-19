@@ -16,8 +16,10 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    
+    <!-- تم إضافة async لمنع تجميد الصفحة إذا كان الاتصال بطيئاً -->
+    <script async src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <style>
         html, body {
@@ -290,7 +292,7 @@
         }
         
         .android-notification { 
-            background: var(--bg-card); border-right: 5px solid #ffcc00; 
+            background: var(--bg-card); border-right:5px solid #ffcc00; 
             border-radius: 16px; padding: 12px 15px; margin-bottom: 10px; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: flex; 
             align-items: center; gap: 12px; pointer-events: auto; 
@@ -361,6 +363,7 @@
         .btn-sanitation { background: linear-gradient(135deg, #17a2b8, #138496); }
         .btn-facebook { background: linear-gradient(135deg, #FF7F00, #e67300); }
         .btn-install { background: linear-gradient(135deg, #6f42c1, #5e35b1); }
+        .btn-help { background: linear-gradient(135deg, #00bcd4, #0097a7); }
         
         .btn-back { 
             background: linear-gradient(135deg, #757575, #616161); 
@@ -391,8 +394,106 @@
         }
 
         .btn-pdf-inv { background: linear-gradient(135deg, #dc3545, #b02a37); }
+        
+        /* الأزرار الدائرية للمفضلة */
+        .fav-btn {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            border: none;
+            color: white;
+            cursor: pointer;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+        }
 
-        .btn-help { background: linear-gradient(135deg, #17a2b8, #0f6b7a); }
+        .fav-btn:hover { transform: scale(1.05); }
+
+        .fav-btn.active {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        /* قائمة المفضلات */
+        .favorites-list {
+            background: var(--input-bg);
+            border-radius: 20px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .favorites-header {
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            color: white;
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .favorites-header i { font-size: 0.9rem; }
+        
+        .favorites-items {
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .fav-item {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+        }
+        
+        .fav-item:hover { background: var(--border-color); }
+        
+        .fav-item-info { flex: 1; }
+        
+        .fav-item-title {
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+        
+        .fav-item-sub {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+        }
+        
+        .fav-item-delete {
+            background: rgba(220, 53, 69, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            color: #dc3545;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .fav-item-delete:hover { background: rgba(220, 53, 69, 0.2); transform: scale(1.05); }
+        
+        .fav-collapsed .favorites-items { display: none; }
 
         .actions-row {
             display: flex;
@@ -804,251 +905,339 @@
             width: 100%;
         }
 
-        /* ========== الأزرار الدائرية - المفضلة ========== */
-        .fav-btn {
-            background: linear-gradient(135deg, #28a745, #1e7e34);
-            border: none;
+        /* ========== STYLES FOR GUIDE PAGE ========== */
+        .guide-wrapper {
+            direction: rtl;
+        }
+        
+        .guide-header {
+            background: linear-gradient(135deg, #007BFF, #004999);
             color: white;
-            cursor: pointer;
-            width: 38px;
-            height: 38px;
+            padding: 25px 20px;
+            border-radius: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .guide-header h2 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+        }
+        
+        .guide-header h2 i {
+            margin-left: 10px;
+        }
+        
+        .guide-header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .guide-section {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 18px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .guide-section-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #007BFF;
+            border-right: 4px solid #007BFF;
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .guide-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--input-bg);
+            padding: 12px 15px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .guide-step-num {
+            background: #007BFF;
+            color: white;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            font-weight: 800;
             flex-shrink: 0;
         }
-
-        .fav-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        .fav-btn.active {
-            background: linear-gradient(135deg, #dc3545, #c82333);
-        }
-
-        .fav-btn.active:hover {
-            transform: scale(1.05);
-        }
-
-        /* ========== قائمة المفضلات ========== */
-        .favorites-list {
-            background: var(--input-bg);
-            border-radius: 20px;
-            margin-bottom: 15px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-        }
         
-        .favorites-header {
-            background: linear-gradient(135deg, #ffc107, #ff9800);
-            color: white;
-            padding: 8px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            cursor: pointer;
-        }
-        
-        .favorites-header i { font-size: 0.9rem; }
-        
-        .favorites-items {
-            padding: 8px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            max-height: 200px;
-            overflow-y: auto;
-        }
-        
-        .fav-item {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 10px 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: 1px solid var(--border-color);
-        }
-        
-        .fav-item:hover { background: var(--border-color); }
-        
-        .fav-item-info { flex: 1; }
-        
-        .fav-item-title {
-            font-weight: bold;
+        .guide-step-text {
+            flex: 1;
             font-size: 0.85rem;
             color: var(--text-main);
         }
         
-        .fav-item-sub {
-            font-size: 0.7rem;
-            color: var(--text-sub);
+        .guide-step-text strong {
+            color: #007BFF;
         }
         
-        .fav-item-delete {
-            background: rgba(220, 53, 69, 0.1);
-            border: none;
-            border-radius: 50%;
-            width: 32px;
-            height: 32px;
-            cursor: pointer;
-            color: #dc3545;
+        .guide-tip {
+            background: #fff3cd;
+            border-right: 4px solid #ffc107;
+            padding: 12px 15px;
+            border-radius: 14px;
+            margin: 12px 0;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        [data-theme="dark"] .guide-tip {
+            background: #2e2a1a;
+            border-right-color: #ffc107;
+        }
+        
+        .guide-tip i {
+            color: #ffc107;
+            font-size: 1.2rem;
+        }
+        
+        .guide-tip span {
+            flex: 1;
+            font-size: 0.8rem;
+            color: var(--text-main);
+        }
+        
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .button-card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #e9ecef;
             transition: all 0.2s;
         }
+
+        [data-theme="dark"] .button-card {
+            background: #383838;
+            border-color: #555;
+        }
+
+        .button-card:hover { background: #e9ecef; }
+        [data-theme="dark"] .button-card:hover { background: #444; }
+
+        .button-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+
+        .button-icon.complaint { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; }
+        .button-icon.plan { background: linear-gradient(135deg, #007BFF, #0056b3); color: white; }
+        .button-icon.invoice { background: linear-gradient(135deg, #84cc16, #65a30d); color: white; }
+        .button-icon.sanitation { background: linear-gradient(135deg, #17a2b8, #138496); color: white; }
+        .button-icon.facebook { background: linear-gradient(135deg, #FF7F00, #e67300); color: white; }
+        .button-icon.install { background: linear-gradient(135deg, #6f42c1, #5e35b1); color: white; }
+        .button-icon.clear { background: linear-gradient(135deg, #90a4ae, #78909c); color: white; }
+        .button-icon.help { background: linear-gradient(135deg, #00bcd4, #0097a7); color: white; }
+
+        .button-info h4 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+            color: var(--text-main);
+        }
+
+        .button-info p {
+            font-size: 0.75rem;
+            color: #666;
+        }
         
-        .fav-item-delete:hover { background: rgba(220, 53, 69, 0.2); transform: scale(1.05); }
-        
-        .fav-collapsed .favorites-items { display: none; }
+        [data-theme="dark"] .button-info p { color: #aaa; }
 
-        /* ========== COMING SOON ========== */
-        .coming-soon-wrapper {
-            position: relative;
-            padding: 40px 20px;
-            text-align: center;
-            border-radius: 28px;
-            overflow: hidden;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            box-shadow: 0 10px 30px rgba(118, 75, 162, 0.4);
-            animation: fadeIn 1s ease-out;
-            min-height: 450px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .cs-bg-blob {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            z-index: 1;
-        }
-
-        .cs-blob-1 { width: 300px; height: 300px; top: -50px; left: -100px; animation: float 6s ease-in-out infinite; }
-        .cs-blob-2 { width: 200px; height: 200px; bottom: -50px; right: -50px; animation: float 8s ease-in-out infinite reverse; }
-
-        .cs-content { position: relative; z-index: 2; width: 100%; }
-
-        .cs-icon-wrapper {
-            width: 100px;
-            height: 100px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(5px);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 25px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }
-
-        .cs-icon-wrapper i {
-            font-size: 3rem;
-            animation: pulse-glow 2s infinite;
-        }
-
-        .cs-title-en {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 2.5rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            margin-bottom: 10px;
-            background: -webkit-linear-gradient(#fff, #e0c3fc);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .cs-title-ar {
-            font-size: 1.4rem;
-            font-weight: 700;
-            opacity: 0.9;
-            margin-bottom: 30px;
-        }
-
-        .cs-loader-container {
-            width: 200px;
-            height: 6px;
-            background: rgba(255,255,255,0.3);
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .cs-loader-bar {
-            height: 100%;
-            background: #fff;
-            width: 0%;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(255,255,255,0.7);
-            animation: loading-progress 3s ease-in-out infinite;
-        }
-
-        .cs-sub-text {
-            margin-top: 15px;
-            font-size: 0.85rem;
-            opacity: 0.8;
-        }
-
-        .cs-back-btn {
-            margin-top: 35px;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            color: white;
-            font-size: 1rem;
-            font-weight: 700;
-            padding: 12px 24px;
-            border-radius: 50px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            z-index: 10;
+        .info-table {
             width: 100%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-collapse: collapse;
+            margin: 15px 0;
         }
 
-        .cs-back-btn:active { transform: scale(0.95); }
-        .cs-back-btn:hover { background: rgba(255, 255, 255, 0.3); }
-
-        @keyframes float {
-            0% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-            100% { transform: translateY(0px) rotate(0deg); }
+        .info-table th, .info-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        @keyframes pulse-glow {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
+        .info-table th {
+            background: var(--input-bg);
+            color: #007BFF;
+            font-weight: 800;
         }
 
-        @keyframes loading-progress {
-            0% { width: 0%; margin-left: 0; }
-            50% { width: 70%; }
-            100% { width: 100%; margin-left: 100%; }
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .tip-card {
+            background: #e8f5e9;
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        [data-theme="dark"] .tip-card {
+            background: #1b3a1b;
+        }
+
+        .tip-card i {
+            font-size: 2rem;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+
+        .tip-card h4 {
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .tip-card p {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+        }
+
+        .fav-demo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .fav-demo.green { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; }
+        .fav-demo.gold { background: linear-gradient(135deg, #ffc107, #ff9800); color: white; }
+        
+        .fav-action-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 15px;
         }
         
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .fav-action-header {
+            font-weight: 800;
+            color: #004999;
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fav-action-body {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .fav-visual {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            background: var(--input-bg);
+            padding: 15px 20px;
+            border-radius: 16px;
+            border: 1px dashed #ccc;
+        }
+
+        .fav-explain {
+            flex: 1;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            line-height: 1.7;
+        }
+        
+        .arrow-icon {
+            color: #adb5bd;
+            font-size: 1.2rem;
+        }
+        
+        .alert-box {
+            background: #fff3cd;
+            border-right: 5px solid #ffc107;
+            padding: 15px 20px;
+            border-radius: 16px;
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        [data-theme="dark"] .alert-box {
+            background: #2e2a1a;
+        }
+        
+        .alert-box i {
+            color: #ffc107;
+            font-size: 1.5rem;
+        }
+        
+        .alert-box.warning {
+            background: #ffe0e0;
+            border-right-color: #dc3545;
+        }
+        
+        [data-theme="dark"] .alert-box.warning {
+            background: #3a1a1a;
+        }
+        
+        .alert-box.warning i {
+            color: #dc3545;
+        }
+        
+        .alert-box.info {
+            background: #e0f0ff;
+            border-right-color: #007BFF;
+        }
+        
+        [data-theme="dark"] .alert-box.info {
+            background: #1a2a3a;
+        }
+        
+        .alert-box.info i {
+            color: #007BFF;
+        }
+        
+        .btn-guide-back {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            margin-top: 10px;
         }
 
         @media (max-width: 600px) { 
@@ -1065,7 +1254,7 @@
             header img { height: 45px; width: 45px; }
             .dark-mode-toggle { width: 38px; height: 38px; font-size: 1rem; }
             header { min-height: 72px; padding: 8px; }
-            .detail-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+            .detail-grid { grid-template-columns:1fr 1fr; gap: 6px; }
             .detail-item { padding: 8px; }
             .detail-item .detail-label { font-size: 0.63rem; }
             .detail-item .detail-value { font-size: 0.8rem; }
@@ -1076,9 +1265,10 @@
             .fees-disclaimer { font-size: 1rem; }
             .warning-badge i { font-size: 1.3rem; }
             .warning-badge { padding: 8px 12px; }
-            .cs-title-en { font-size: 2rem; }
-            .cs-title-ar { font-size: 1.1rem; }
             .fav-btn { width: 32px; height: 32px; font-size: 0.85rem; }
+            .guide-header h2 { font-size: 1.3rem; }
+            .guide-section-title { font-size: 1rem; }
+            .buttons-grid { grid-template-columns: 1fr; }
         }
         
         .table-container::-webkit-scrollbar { height: 4px; }
@@ -1089,8 +1279,8 @@
             .fixed-top, footer, .actions-row, .invoice-footer-actions, .form-controls, 
             .dark-mode-toggle, .invoice-search-box, .disclaimer-box, 
             .news-bar, #notification-center, #toast-container,
-            .results-count-label, #pull-to-refresh, .empty-state, .coming-soon-wrapper, .cs-back-btn,
-            .favorites-list {
+            .results-count-label, #pull-to-refresh, .empty-state, 
+            .favorites-list, .guide-wrapper {
                 display: none !important;
             }
             .page { 
@@ -1120,7 +1310,6 @@
             }
             .detail-item { background: #f5f5f5 !important; }
             .result-cards { gap: 0; }
-            #invoice-form-container { display: block !important; }
         }
     </style>
 </head>
@@ -1145,6 +1334,7 @@
         </div>
 
         <div class="scrollable-content" id="scrollableContent">
+            <!-- ==================== الصفحة الرئيسية ==================== -->
             <div id="page-home" class="page active">
                 <div class="main-buttons">
                     <button onclick="navigateTo('report')" class="btn btn-complaint">
@@ -1175,13 +1365,15 @@
                         <i class="fas fa-broom btn-icon"></i>
                         <span class="btn-text">🧹 افراغ الذاكرة المؤقتة</span>
                     </button>
-                    <button onclick="openHelpPage()" class="btn btn-help">
+                    <!-- زر التعليمات والدعم - آخر زر -->
+                    <button onclick="navigateTo('guide')" class="btn btn-help">
                         <i class="fas fa-question-circle btn-icon"></i>
                         <span class="btn-text">📖 التعليمات والدعم الفني</span>
                     </button>
                 </div>
             </div>
 
+            <!-- ==================== صفحة خطة المياه ==================== -->
             <div id="page-plan" class="page">
                 <div class="plan-header">
                     <span class="plan-main-title">📅 خطة توزيع المياه</span>
@@ -1189,7 +1381,7 @@
                     <span class="plan-subtitle">اختر الوحدة والمشروع الخاص بك</span>
                 </div>
 
-                <!-- ========== قائمة المفضلات ========== -->
+                <!-- قائمة المفضلات -->
                 <div class="favorites-list" id="planFavoritesList" style="display:none;">
                     <div class="favorites-header" onclick="togglePlanFavoritesCollapse()">
                         <span><i class="fas fa-star" style="color:#ffc107;"></i> مشاريعي المفضلة</span>
@@ -1206,7 +1398,6 @@
                     <div class="input-group">
                         <label>
                             <span><i class="fas fa-tachometer-alt"></i> مشروع الضخ:</span>
-                            <!-- ========== زر المفضلة ========== -->
                             <button class="fav-btn" id="btn-fav-plan" onclick="togglePlanFavorite()" title="إضافة هذا المشروع إلى قائمتي">
                                 <i class="fas fa-plus"></i>
                             </button>
@@ -1218,91 +1409,56 @@
                 <div class="table-container" id="tableWrapper">
                     <table id="resultTable">
                         <thead>
-                            <tr>
-                                <th>📅 اليوم</th>
-                                <th>🗓️ التاريخ</th>
-                                <th>⚙️ المشروع</th>
-                                <th>👥 المستفيدين</th>
-                                <th>⏱️ الساعات</th>
-                            </tr>
+                            <tr><th>📅 اليوم</th><th>🗓️ التاريخ</th><th>⚙️ المشروع</th><th>👥 المستفيدين</th><th>⏱️ الساعات</th></tr>
                         </thead>
                         <tbody id="scheduleBody"></tbody>
                     </table>
                 </div>
 
                 <div class="actions-row">
-                    <button onclick="shareWhatsApp()" class="btn-action btn-whatsapp">
-                        <i class="fab fa-whatsapp"></i> مشاركة الخطة
-                    </button>
-                    <button onclick="exportToPDF()" class="btn-action btn-pdf">
-                        <i class="fas fa-file-pdf"></i> تصدير PDF
-                    </button>
+                    <button onclick="shareWhatsApp()" class="btn-action btn-whatsapp"><i class="fab fa-whatsapp"></i> مشاركة الخطة</button>
+                    <button onclick="exportToPDF()" class="btn-action btn-pdf"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
                 </div>
-                
                 <div class="btn-back-full">
-                    <button onclick="navigateTo('home')" class="btn btn-back">
-                        <i class="fas fa-home"></i> العودة للرئيسية
-                    </button>
+                    <button onclick="navigateTo('home')" class="btn btn-back"><i class="fas fa-home"></i> العودة للرئيسية</button>
                 </div>
             </div>
 
+            <!-- ==================== صفحة الفواتير ==================== -->
             <div id="page-invoice" class="page">
-                <div class="coming-soon-wrapper">
-                    <div class="cs-bg-blob cs-blob-1"></div>
-                    <div class="cs-bg-blob cs-blob-2"></div>
-                    <div class="cs-content">
-                        <div class="cs-icon-wrapper">
-                            <i class="fas fa-cogs"></i>
-                        </div>
-                        <h2 class="cs-title-en">Coming Soon</h2>
-                        <p class="cs-title-ar">قريباً مع التحديث الجديد للتطبيق</p>
-                        <div class="cs-loader-container">
-                            <div class="cs-loader-bar"></div>
-                        </div>
-                        <p class="cs-sub-text">نقوم حالياً بتطوير الخدمة لتقديم تجربة أفضل</p>
-                        <button class="cs-back-btn" onclick="navigateTo('home')">
-                            <i class="fas fa-home"></i> العودة للرئيسية
-                        </button>
-                    </div>
+                <div class="plan-header">
+                    <span class="plan-main-title" style="color: #65a30d;">🧾 استعلام عن فاتورة</span>
+                    <span class="plan-subtitle">ابحث عن اشتراكك بأي من الطرق التالية</span>
                 </div>
 
-                <div id="invoice-form-container" style="display:none;">
-                    <div class="plan-header">
-                        <span class="plan-main-title" style="color: #65a30d;">🧾 استعلام عن فاتورة</span>
-                        <span class="plan-subtitle">ابحث عن اشتراكك بأي من الطرق التالية</span>
+                <div class="invoice-search-box">
+                    <div class="input-group">
+                        <label><i class="fas fa-search"></i> نوع البحث:</label>
+                        <select id="searchType" onchange="updateSearchPlaceholder()">
+                            <option value="">-- اختر نوع البحث --</option>
+                            <option value="nationalId">الرقم الوطني</option>
+                            <option value="name">اسم المشترك</option>
+                            <option value="barcode">الباركود</option>
+                            <option value="phone">رقم الجوال</option>
+                            <option value="subNumber">رقم الاشتراك</option>
+                        </select>
                     </div>
-                    <div class="invoice-search-box">
-                        <div class="input-group">
-                            <label><i class="fas fa-search"></i> نوع البحث:</label>
-                            <select id="searchType" onchange="updateSearchPlaceholder()">
-                                <option value="">-- اختر نوع البحث --</option>
-                                <option value="nationalId">الرقم الوطني</option>
-                                <option value="name">اسم المشترك</option>
-                                <option value="barcode">الباركود</option>
-                                <option value="phone">رقم الجوال</option>
-                                <option value="subNumber">رقم الاشتراك</option>
-                            </select>
-                        </div>
-                        <div class="input-group">
-                            <label><i class="fas fa-keyboard"></i> قيمة البحث:</label>
-                            <input type="text" id="searchInput" placeholder="أدخل قيمة البحث هنا..." autocomplete="off" onkeydown="if(event.key==='Enter')searchInvoice()">
-                        </div>
-                        <button class="btn-search" onclick="searchInvoice()">
-                            <i class="fas fa-search"></i> بحث
-                        </button>
+                    <div class="input-group">
+                        <label><i class="fas fa-keyboard"></i> قيمة البحث:</label>
+                        <input type="text" id="searchInput" placeholder="أدخل قيمة البحث هنا..." autocomplete="off" onkeydown="if(event.key==='Enter')searchInvoice()">
                     </div>
-                    <div id="invoiceResults"></div>
-                    <div class="invoice-footer-actions">
-                        <button onclick="exportInvoicePDF()" class="btn-action btn-pdf-inv">
-                            <i class="fas fa-file-pdf"></i> تصدير PDF
-                        </button>
-                        <button onclick="navigateTo('home')" class="btn-action btn-back">
-                            <i class="fas fa-home"></i> العودة للرئيسية
-                        </button>
-                    </div>
+                    <button class="btn-search" onclick="searchInvoice()"><i class="fas fa-search"></i> بحث</button>
+                </div>
+
+                <div id="invoiceResults"></div>
+
+                <div class="invoice-footer-actions">
+                    <button onclick="exportInvoicePDF()" class="btn-action btn-pdf-inv"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
+                    <button onclick="navigateTo('home')" class="btn-action btn-back"><i class="fas fa-home"></i> العودة للرئيسية</button>
                 </div>
             </div>
 
+            <!-- ==================== صفحة الإبلاغ ==================== -->
             <div id="page-report" class="page">
                 <p class="instruction-text"><i class="fas fa-water"></i> يرجى اختيار المنطقة لإرسال البلاغ</p>
                 <div class="main-buttons">
@@ -1318,6 +1474,150 @@
                     <button onclick="navigateTo('home')" class="btn btn-back"><i class="fas fa-arrow-right btn-icon"></i><span class="btn-text">العودة للرئيسية</span></button>
                 </div>
             </div>
+
+            <!-- ==================== صفحة التعليمات والدعم (الكامل) ==================== -->
+            <div id="page-guide" class="page">
+                <div class="guide-wrapper">
+                    <div class="guide-header">
+                        <h2><i class="fas fa-question-circle"></i> دليل استخدام تطبيق شركة مياه طرطوس</h2>
+                        <p>دليل كامل وشامل لكل وظائف التطبيق - خطوة بخطوة</p>
+                        <div class="badge" style="background:rgba(255,255,255,0.2); padding:8px 20px; border-radius:50px; display:inline-block; margin-top:10px;"><i class="fas fa-mobile-alt"></i> متوافق مع أجهزة Android و iOS</div>
+                    </div>
+
+                    <!-- Quick Navigation -->
+                    <div class="quick-nav" style="background:var(--bg-card); border-radius:20px; padding:20px; margin-bottom:20px;">
+                        <h3 style="color:#007BFF; margin-bottom:15px;"><i class="fas fa-bars"></i> أقسام الدليل</h3>
+                        <div style="display:flex; flex-wrap:wrap; gap:12px;">
+                            <a href="#guide-start" style="background:var(--input-bg); padding:8px 16px; border-radius:50px; text-decoration:none; color:#007BFF; font-size:0.8rem;" onclick="scrollToGuideSection('guide-start')">▶️ بدء التشغيل</a>
+                            <a href="#guide-home" style="background:var(--input-bg); padding:8px 16px; border-radius:50px; text-decoration:none; color:#007BFF; font-size:0.8rem;" onclick="scrollToGuideSection('guide-home')">🏠 الصفحة الرئيسية</a>
+                            <a href="#guide-plan" style="background:var(--input-bg); padding:8px 16px; border-radius:50px; text-decoration:none; color:#007BFF; font-size:0.8rem;" onclick="scrollToGuideSection('guide-plan')">🗓️ خطة المياه</a>
+                            <a href="#guide-invoice" style="background:var(--input-bg); padding:8px 16px; border-radius:50px; text-decoration:none; color:#007BFF; font-size:0.8rem;" onclick="scrollToGuideSection('guide-invoice')">🧾 الفاتورة</a>
+                            <a href="#guide-report" style="background:var(--input-bg); padding:8px 16px; border-radius:50px; text-decoration:none; color:#007BFF; font-size:0.8rem;" onclick="scrollToGuideSection('guide-report')">📢 الإبلاغ</a>
+                            <a href="#guide-fav" style="background:var(--input-bg); padding:8px 16px; border-radius:50px; text-decoration:none; color:#007BFF; font-size:0.8rem;" onclick="scrollToGuideSection('guide-fav')">⭐ المفضلات</a>
+                            <a href="#guide-notify" style="background:var(--input-bg); padding:8px 16px; border-radius:50px; text-decoration:none; color:#007BFF; font-size:0.8rem;" onclick="scrollToGuideSection('guide-notify')">🔔 الإشعارات</a>
+                            <a href="#guide-tips" style="background:var(--input-bg); padding:8px 16px; border-radius:50px; text-decoration:none; color:#007BFF; font-size:0.8rem;" onclick="scrollToGuideSection('guide-tips')">💡 نصائح سريعة</a>
+                        </div>
+                    </div>
+
+                    <!-- بدء التشغيل -->
+                    <div class="guide-section" id="guide-start">
+                        <div class="guide-section-title"><i class="fas fa-play-circle"></i> أولاً: تشغيل التطبيق لأول مرة</div>
+                        <div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-text"><strong>افتح التطبيق</strong> - ستظهر شاشة ترحيب عليها شعار المؤسسة</div></div>
+                        <div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-text"><strong>اضغط على الزر الأزرق</strong> المكتوب عليه "اضغط لتفعيل الصوت والدخول"</div></div>
+                        <div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-text"><strong>سيتم نقلك تلقائياً</strong> إلى الصفحة الرئيسية للتطبيق</div></div>
+                        <div class="guide-tip"><i class="fas fa-info-circle"></i><span><strong>ملاحظة:</strong> بعد المرة الأولى، لن تظهر لك شاشة الترحيب مرة أخرى، وستفتح مباشرة على الصفحة الرئيسية.</span></div>
+                    </div>
+
+                    <!-- الصفحة الرئيسية -->
+                    <div class="guide-section" id="guide-home">
+                        <div class="guide-section-title"><i class="fas fa-home"></i> ثانياً: الصفحة الرئيسية (الواجهة)</div>
+                        <p style="margin-bottom:15px;">الصفحة الرئيسية تحتوي على أزرار كبيرة ملونة، هذا شرح كل زر وماذا يفعل:</p>
+                        <div class="buttons-grid">
+                            <div class="button-card"><div class="button-icon complaint"><i class="fas fa-exclamation-triangle"></i></div><div class="button-info"><h4>📢 إبلاغ عن هدر المياه</h4><p>ينقلك لصفحة فيها روابط جميع مناطق طرطوس للإبلاغ</p></div></div>
+                            <div class="button-card"><div class="button-icon plan"><i class="fas fa-tint"></i></div><div class="button-info"><h4>🗓️ خطة توزيع المياه</h4><p>يعرض مواعيد ضخ المياه حسب منطقتك ومشروع الضخ</p></div></div>
+                            <div class="button-card"><div class="button-icon invoice"><i class="fas fa-file-invoice-dollar"></i></div><div class="button-info"><h4>🧾 استعلام عن فاتورة</h4><p>للبحث عن فاتورة المياه (قيد التطوير)</p></div></div>
+                            <div class="button-card"><div class="button-icon sanitation"><i class="fas fa-wrench"></i></div><div class="button-info"><h4>🔧 خدمات الصرف الصحي</h4><p>رابط مباشر لمنصة تقديم طلبات الصرف الصحي</p></div></div>
+                            <div class="button-card"><div class="button-icon facebook"><i class="fab fa-facebook-f"></i></div><div class="button-info"><h4>📘 تابعونا على فيسبوك</h4><p>يفتح صفحة المؤسسة الرسمية على فيسبوك</p></div></div>
+                            <div class="button-card"><div class="button-icon install"><i class="fas fa-download"></i></div><div class="button-info"><h4>📲 حمل التطبيق الآن</h4><p>رابط تحميل APK لمشاركة التطبيق مع الآخرين</p></div></div>
+                            <div class="button-card"><div class="button-icon clear"><i class="fas fa-broom"></i></div><div class="button-info"><h4>🧹 افراغ الذاكرة المؤقتة</h4><p>لتنظيف التطبيق (دون فقدان المفضلات)</p></div></div>
+                            <div class="button-card"><div class="button-icon help"><i class="fas fa-question-circle"></i></div><div class="button-info"><h4>📖 التعليمات والدعم</h4><p>هذا الدليل الشامل لاستخدام التطبيق</p></div></div>
+                        </div>
+                    </div>
+
+                    <!-- خطة المياه -->
+                    <div class="guide-section" id="guide-plan">
+                        <div class="guide-section-title"><i class="fas fa-calendar-alt"></i> ثالثاً: استخدام خطة توزيع المياه</div>
+                        <div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-text"><strong>الدخول إلى الخطة</strong> - من الصفحة الرئيسية، اضغط على الزر الأزرق "🗓️ خطة توزيع المياه"</div></div>
+                        <div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-text"><strong>اختر الوحدة الإدارية</strong> - اضغط على القائمة المنسدلة واختر منطقتك (مثال: مدينة طرطوس)</div></div>
+                        <div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-text"><strong>اختر مشروع الضخ</strong> - بعد اختيار الوحدة، ستظهر قائمة ثانية، اختر مشروعك</div></div>
+                        <div class="guide-step"><div class="guide-step-num">4</div><div class="guide-step-text"><strong>شاهد الجدول</strong> - سيظهر جدول يحتوي على أيام الضخ والمناطق المستفيدة وعدد الساعات</div></div>
+                        <div class="guide-tip"><i class="fas fa-star"></i><span><strong>🌟 اليوم الحالي</strong> يظهر بلون أخضر فاتح وعليه شارة مكتوب عليها "اليوم"</span></div>
+                        
+                        <div class="guide-section-title" style="font-size:1rem; margin-top:20px;"><i class="fas fa-star"></i> كيفية حفظ مشروعك المفضل (حتى 5 مشاريع)</div>
+                        <div class="fav-action-card"><div class="fav-action-header"><i class="fas fa-plus-circle" style="color:#28a745"></i> إضافة مشروع إلى قائمتي</div><div class="fav-action-body"><div class="fav-visual"><span class="fav-demo green"><i class="fas fa-plus"></i></span><i class="fas fa-arrow-left arrow-icon"></i><span class="fav-demo gold"><i class="fas fa-check"></i></span></div><div class="fav-explain">اضغط على الزر <strong>الأخضر "أضف لقائمتي"</strong> بجانب "مشروع الضخ". سيتحول الزر إلى لون <strong>ذهبي</strong> مكتوب عليه <strong>"✓ في قائمتي"</strong> للدلالة على نجاح الإضافة.</div></div></div>
+                        <div class="fav-action-card"><div class="fav-action-header"><i class="fas fa-minus-circle" style="color:#dc3545"></i> إزالة مشروع من قائمتي</div><div class="fav-action-body"><div class="fav-visual"><span class="fav-demo gold"><i class="fas fa-check"></i></span><i class="fas fa-arrow-left arrow-icon"></i><span class="fav-demo green"><i class="fas fa-plus"></i></span></div><div class="fav-explain">اضغط على الزر <strong>الذهبي "✓ في قائمتي"</strong> مرة أخرى. سيعود الزر إلى لونه <strong>الأخضر</strong> وسيتم إزالة المشروع من القائمة المحفوظة.</div></div></div>
+                        
+                        <div class="guide-section-title" style="font-size:1rem; margin-top:20px;"><i class="fas fa-list"></i> قائمة المشاريع المحفوظة</div>
+                        <div class="guide-step"><div class="guide-step-num">📋</div><div class="guide-step-text"><strong>عند حفظ مشاريعك، ستظهر قائمة زرقاء عنوانها "قائمتي":</strong><br>• <strong>لتصفح مشروع محفوظ بسرعة:</strong> اضغط على اسم المشروع في القائمة<br>• <strong>لإزالة مشروع من القائمة:</strong> اضغط على علامة <strong>(X)</strong> الرمادية بجانبه</div></div>
+                        
+                        <div class="guide-section-title" style="font-size:1rem; margin-top:20px;"><i class="fas fa-share-alt"></i> مشاركة الخطة وحفظها</div>
+                        <div class="buttons-grid" style="grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));">
+                            <div class="button-card"><div class="button-icon" style="background:linear-gradient(135deg, #25D366, #128C7E);"><i class="fab fa-whatsapp"></i></div><div class="button-info"><h4>مشاركة واتساب</h4><p>يرسل تفاصيل خطة اليوم عبر واتساب</p></div></div>
+                            <div class="button-card"><div class="button-icon" style="background:linear-gradient(135deg, #dc3545, #b02a37);"><i class="fas fa-file-pdf"></i></div><div class="button-info"><h4>تصدير PDF</h4><p>يحفظ الخطة كملف PDF على هاتفك</p></div></div>
+                        </div>
+                    </div>
+
+                    <!-- الفاتورة -->
+                    <div class="guide-section" id="guide-invoice">
+                        <div class="guide-section-title"><i class="fas fa-file-invoice-dollar"></i> رابعاً: استعلام عن فاتورة</div>
+                        <div class="alert-box warning"><i class="fas fa-exclamation-triangle"></i><div><strong>⚠️ تنبيه مهم جداً:</strong> هذه الخدمة حالياً <strong>للتجربة والاختبار فقط</strong>. في <strong>التحديث القادم للتطبيق</strong>، سيتم تفعيل الاستعلام عن الفواتير بشكل حقيقي.</div></div>
+                        <div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-text"><strong>اختر نوع البحث</strong> من القائمة المنسدلة</div></div>
+                        <div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-text"><strong>أدخل القيمة المطلوبة</strong> في مربع البحث</div></div>
+                        <div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-text"><strong>اضغط على زر "بحث"</strong> (باللون الأخضر)</div></div>
+                        <div class="guide-step"><div class="guide-step-num">📄</div><div class="guide-step-text"><strong>تصدير PDF:</strong> اضغط على الزر الأحمر "تصدير PDF" في أسفل الصفحة لحفظ الفاتورة كملف PDF</div></div>
+                    </div>
+
+                    <!-- الإبلاغ -->
+                    <div class="guide-section" id="guide-report">
+                        <div class="guide-section-title"><i class="fas fa-exclamation-triangle"></i> خامساً: الإبلاغ عن هدر المياه</div>
+                        <div class="guide-step"><div class="guide-step-num">1</div><div class="guide-step-text"><strong>من الصفحة الرئيسية، اضغط على الزر الأخضر</strong> "📢 إبلاغ عن هدر المياه"</div></div>
+                        <div class="guide-step"><div class="guide-step-num">2</div><div class="guide-step-text"><strong>ستظهر لك قائمة بـ 9 أزرار</strong> لكل منطقة من مناطق طرطوس</div></div>
+                        <div class="guide-step"><div class="guide-step-num">3</div><div class="guide-step-text"><strong>اختر منطقتك</strong> (مدينة طرطوس، ريف طرطوس، بانياس، صافيتا، ...)</div></div>
+                        <div class="guide-step"><div class="guide-step-num">4</div><div class="guide-step-text"><strong>سيفتح رابط الإبلاغ</strong> في متصفح هاتفك، املأ البيانات وأرسل البلاغ</div></div>
+                    </div>
+
+                    <!-- المفضلات -->
+                    <div class="guide-section" id="guide-fav">
+                        <div class="guide-section-title"><i class="fas fa-star"></i> سادساً: ملخص أزرار المفضلة</div>
+                        <table class="info-table">
+                            <thead><tr><th>الزر</th><th>اللون</th><th>مكانه في التطبيق</th><th>الوظيفة</th></tr></thead>
+                            <tbody>
+                                <tr><td style="text-align:center"><span class="fav-demo green" style="width:35px;height:35px;font-size:0.9rem;"><i class="fas fa-plus"></i></span></td><td>🟢 أخضر</td><td>صفحة خطة المياه (بجانب "مشروع الضخ")</td><td><strong>أضف لقائمتي:</strong> يضيف مشروع الضخ للقائمة</td></tr>
+                                <tr><td style="text-align:center"><span class="fav-demo gold" style="width:35px;height:35px;font-size:0.9rem;"><i class="fas fa-check"></i></span></td><td>🟡 ذهبي</td><td>صفحة خطة المياه</td><td><strong>✓ في قائمتي:</strong> يعني أن العنصر محفوظ مسبقاً</td></tr>
+                            </tbody>
+                        </table>
+                        <div class="guide-tip"><i class="fas fa-lightbulb"></i><span><strong>تذكير مهم:</strong> يمكنك حفظ <strong>5 مشاريع ضخ</strong> كحد أقصى.</span></div>
+                    </div>
+
+                    <!-- الإشعارات -->
+                    <div class="guide-section" id="guide-notify">
+                        <div class="guide-section-title"><i class="fas fa-bell"></i> سابعاً: الإشعارات والتنبيهات</div>
+                        <div class="guide-step"><div class="guide-step-num">🔔</div><div class="guide-step-text"><strong>متى تظهر؟</strong> - فقط عندما تكون في <strong>الصفحة الرئيسية</strong></div></div>
+                        <div class="guide-step"><div class="guide-step-num">📢</div><div class="guide-step-text"><strong>ماذا تحتوي؟</strong> - أخبار وتنبيهات مهمة من المؤسسة</div></div>
+                        <div class="guide-step"><div class="guide-step-num">⏱️</div><div class="guide-step-text"><strong>كم تبقى؟</strong> - تختفي تلقائياً بعد 7 ثوانٍ</div></div>
+                        <div class="guide-step"><div class="guide-step-num">👆</div><div class="guide-step-text"><strong>كيف تخفيها؟</strong> - اسحب الإشعار إلى <strong>اليسار</strong> لإخفائه فوراً</div></div>
+                        <div class="guide-step"><div class="guide-step-num">🔊</div><div class="guide-step-text"><strong>صوت الإشعار</strong> - يصدر صوت قطرات ماء مع كل إشعار جديد</div></div>
+                    </div>
+
+                    <!-- نصائح سريعة -->
+                    <div class="guide-section" id="guide-tips">
+                        <div class="guide-section-title"><i class="fas fa-lightbulb"></i> ثامناً: نصائح سريعة وحلول للمشاكل</div>
+                        <div class="tips-grid">
+                            <div class="tip-card"><i class="fas fa-sync-alt"></i><h4>التطبيق لا يستجيب؟</h4><p>اسحب الشاشة من أعلى إلى أسفل للتحديث</p></div>
+                            <div class="tip-card"><i class="fas fa-star"></i><h4>نسيت مشروعي المفضل؟</h4><p>افتح قائمة "قائمتي" في صفحة الخطة</p></div>
+                            <div class="tip-card"><i class="fas fa-share-alt"></i><h4>أريد مشاركة التطبيق مع صديق</h4><p>استخدم زر "📲 حمل التطبيق الآن"</p></div>
+                            <div class="tip-card"><i class="fas fa-bell-slash"></i><h4>لا أرى الإشعارات</h4><p>تأكد أنك في الصفحة الرئيسية</p></div>
+                            <div class="tip-card"><i class="fas fa-trash-alt"></i><h4>حذف مشروع من المفضلة</h4><p>اضغط على علامة (X) بجانبه في القائمة</p></div>
+                            <div class="tip-card"><i class="fas fa-moon"></i><h4>تفعيل الوضع الليلي</h4><p>اضغط على زر القمر/الشمس في أعلى اليمين</p></div>
+                        </div>
+                    </div>
+
+                    <!-- التحديثات القادمة -->
+                    <div class="guide-section">
+                        <div class="guide-section-title"><i class="fas fa-clock"></i> التحديثات القادمة</div>
+                        <div class="tips-grid">
+                            <div class="tip-card" style="background:#e0f0ff;"><i class="fas fa-search" style="color:#007BFF"></i><h4 style="color:#004999">استعلام عن الفواتير</h4><p>تتيح لك معرفة قيمة فواتيرك بكل سهولة</p></div>
+                            <div class="tip-card" style="background:#e0f0ff;"><i class="fas fa-brain" style="color:#007BFF"></i><h4 style="color:#004999">إشعارات أكثر ذكاء</h4><p>تنبيهات مخصصة حسب استهلاكك</p></div>
+                            <div class="tip-card" style="background:#e0f0ff;"><i class="fas fa-chart-line" style="color:#007BFF"></i><h4 style="color:#004999">سجل الاستهلاك</h4><p>لمتابعة كمية المياه المستهلكة</p></div>
+                            <div class="tip-card" style="background:#e0f0ff;"><i class="fas fa-money-bill-wave" style="color:#007BFF"></i><h4 style="color:#004999">دفع الفواتير</h4><p>دفع آمن وسريع عبر التطبيق</p></div>
+                        </div>
+                    </div>
+
+                    <button onclick="navigateTo('home')" class="btn btn-guide-back" style="width:100%; padding:12px; border-radius:60px; background:linear-gradient(135deg, #6c757d, #495057); color:white; border:none; cursor:pointer; margin-top:20px;">
+                        <i class="fas fa-home"></i> العودة للرئيسية
+                    </button>
+                </div>
+            </div>
         </div>
 
         <footer>
@@ -1330,9 +1630,7 @@
             <img src="logo.png?v=2" alt="شعار المؤسسة" id="splash-logo">
             <h1>💧 شركة مياه طرطوس</h1>
             <p>خدمات مائية موثوقة</p>
-            <div class="audio-btn" onclick="grantAudioPermission()">
-                <i class="fas fa-volume-up"></i> <span>اضغط لتفعيل الصوت والدخول</span>
-            </div>
+            <div class="audio-btn" onclick="grantAudioPermission()"><i class="fas fa-volume-up"></i> <span>اضغط لتفعيل الصوت والدخول</span></div>
         </div>
     </div>
 
@@ -1348,6 +1646,7 @@
     <div id="toast-container"></div>
 
     <script>
+        // ========== المتغيرات العامة ==========
         let notificationSound = null;
         let audioAllowed = false;
         let notificationQueue = [];
@@ -1358,21 +1657,13 @@
         let pendingPeriodicNotification = false;
         let cachedNotificationMessages = [];
 
-        // ========== فتح صفحة التعليمات ==========
-        function openHelpPage() {
-            try { window.open('Help.html', '_blank'); }
-            catch(e) { showToast('⚠️ حدث خطأ في فتح صفحة التعليمات'); }
-        }
-
         // ========== إدارة المفضلات - خطة المياه (حتى 5 مشاريع) ==========
         function getPlanFavorites() {
-            try { return JSON.parse(localStorage.getItem('planFavorites') || '[]'); }
-            catch(e) { return []; }
+            return JSON.parse(localStorage.getItem('planFavorites') || '[]');
         }
         
         function savePlanFavorites(favorites) {
-            try { localStorage.setItem('planFavorites', JSON.stringify(favorites.slice(0, 5))); }
-            catch(e) {}
+            localStorage.setItem('planFavorites', JSON.stringify(favorites.slice(0, 5)));
         }
         
         function togglePlanFavorite() {
@@ -1451,7 +1742,17 @@
             favorites.splice(index, 1);
             savePlanFavorites(favorites);
             renderPlanFavorites();
-            checkPlanFavoriteStatus();
+            const currentUnit = document.getElementById('unitSelect').value;
+            const currentProject = document.getElementById('projectSelect').value;
+            const btn = document.getElementById('btn-fav-plan');
+            const isFav = favorites.some(f => f.unit === currentUnit && f.project === currentProject);
+            if (isFav) {
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                btn.classList.add('active');
+            } else {
+                btn.innerHTML = '<i class="fas fa-plus"></i>';
+                btn.classList.remove('active');
+            }
             showToast('✓ تم حذف المشروع من قائمتي');
         }
         
@@ -1466,21 +1767,6 @@
             } else {
                 items.parentElement.classList.remove('fav-collapsed');
                 icon.className = 'fas fa-chevron-down';
-            }
-        }
-
-        function checkPlanFavoriteStatus() {
-            const unit = document.getElementById('unitSelect').value;
-            const project = document.getElementById('projectSelect').value;
-            const btn = document.getElementById('btn-fav-plan');
-            const favorites = getPlanFavorites();
-            const isFav = favorites.some(f => f.unit === unit && f.project === project);
-            if (isFav) {
-                btn.innerHTML = '<i class="fas fa-check"></i>';
-                btn.classList.add('active');
-            } else {
-                btn.innerHTML = '<i class="fas fa-plus"></i>';
-                btn.classList.remove('active');
             }
         }
 
@@ -1506,8 +1792,19 @@
             }
         }
 
-        function initAudio() { try { notificationSound = new Audio('water_drops.mp3'); notificationSound.volume = 0.5; } catch(e) {} }
-        function playSound() { if(audioAllowed && notificationSound) { notificationSound.currentTime = 0; notificationSound.play().catch(()=>{}); } }
+        function initAudio() { 
+            try { 
+                notificationSound = new Audio('water_drops.mp3'); 
+                notificationSound.volume = 0.5; 
+            } catch(e) {} 
+        }
+        
+        function playSound() { 
+            if(audioAllowed && notificationSound) { 
+                notificationSound.currentTime = 0; 
+                notificationSound.play().catch(()=>{}); 
+            } 
+        }
 
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
@@ -1539,12 +1836,6 @@
             } else {
                 splash.style.display = 'flex';
             }
-        }
-
-        function shouldShowNotificationsNow() {
-            const lastTime = localStorage.getItem('lastNotificationTime');
-            if (!lastTime) return true;
-            return (Date.now() - parseInt(lastTime)) >= (24 * 60 * 60 * 1000);
         }
 
         function handleOfflineStatus() {
@@ -1591,8 +1882,8 @@
         }
 
         document.addEventListener('click', (e) => {
-            const target = e.target.closest('.btn, .btn-action, .cs-back-btn, .fav-btn, .fav-item-delete');
-            if (target) {
+            const target = e.target.closest('.btn, .btn-action, .fav-btn, .fav-item-delete');
+            if (target && !target.classList.contains('fav-item-delete')) {
                 const circle = document.createElement('span'); 
                 circle.className = 'ripple-effect';
                 const d = Math.max(target.clientWidth, target.clientHeight), r = d / 2;
@@ -1603,6 +1894,13 @@
                 setTimeout(() => circle.remove(), 600);
             }
         });
+
+        function scrollToGuideSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
 
         function navigateTo(pageName) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1616,12 +1914,8 @@
                 mainTitle.innerHTML = 'شركة مياه طرطوس'; 
                 subTitle.innerHTML = 'التطبيق الرسمي'; 
                 m.content = '#004999'; 
-                if (pendingPeriodicNotification && shouldShowNotificationsNow() && cachedNotificationMessages.length) {
-                    pendingPeriodicNotification = false;
-                    notificationQueue = [];
-                    cachedNotificationMessages.forEach(n => notificationQueue.push(n));
-                    processQueue();
-                    localStorage.setItem('lastNotificationTime', Date.now().toString());
+                if (cachedNotificationMessages.length > 0 && notificationQueue.length === 0) {
+                    cachedNotificationMessages.forEach(n => showNotification(n));
                 }
             }
             else if(pageName === 'plan') { 
@@ -1637,88 +1931,36 @@
             }
             else if(pageName === 'invoice') { 
                 mainTitle.innerHTML = '🧾 استعلام عن فاتورة'; 
-                subTitle.innerHTML = 'خدمة قيد التطوير'; 
+                subTitle.innerHTML = 'ابحث عن اشتراكك'; 
                 m.content = '#65a30d'; 
+                showInvoiceEmptyState();
             }
             else if(pageName === 'report') { 
                 mainTitle.innerHTML = 'الإبلاغ عن أعطال<br>الشبكات وهدر المياه'; 
                 subTitle.innerHTML = 'محافظة طرطوس - اختر المنطقة'; 
                 m.content = '#1e7e34'; 
             }
+            else if(pageName === 'guide') { 
+                mainTitle.innerHTML = '📚 التعليمات والدعم'; 
+                subTitle.innerHTML = 'دليل استخدام التطبيق'; 
+                m.content = '#0097a7'; 
+            }
             scrollableDiv.scrollTo({ top: 0, behavior: 'smooth' });
         }
-
-        function exportToPDF() {
-            const tableWrapper = document.getElementById('tableWrapper');
-            if (!tableWrapper || tableWrapper.style.display !== 'block') {
-                showToast('الرجاء اختيار الوحدة والمشروع أولاً');
-                return;
-            }
-            
+        
+        function checkPlanFavoriteStatus() {
             const unit = document.getElementById('unitSelect').value;
             const project = document.getElementById('projectSelect').value;
-            const monthText = document.getElementById('planMonthDisplay').innerHTML;
-            
-            const printContent = document.createElement('div');
-            printContent.style.direction = 'rtl';
-            printContent.style.fontFamily = 'Tajawal, sans-serif';
-            printContent.style.padding = '20px';
-            printContent.style.background = 'white';
-            
-            const header = document.createElement('div');
-            header.style.textAlign = 'center';
-            header.style.marginBottom = '20px';
-            header.style.borderBottom = '2px solid #007BFF';
-            header.style.paddingBottom = '10px';
-            header.innerHTML = `
-                <h1 style="color: #007BFF; margin:0;">📅 خطة توزيع المياه</h1>
-                <h2 style="color: #ff9800; margin:5px 0;">${monthText}</h2>
-                <p style="color: #666; margin:5px 0;">الوحدة: ${unit} | مشروع الضخ: ${project}</p>
-                <p style="color: #999; font-size:12px;">تم التصدير بتاريخ: ${new Date().toLocaleDateString('ar-EG')}</p>
-            `;
-            printContent.appendChild(header);
-            
-            const originalTable = document.getElementById('resultTable');
-            const tableClone = originalTable.cloneNode(true);
-            tableClone.style.width = '100%';
-            tableClone.style.borderCollapse = 'collapse';
-            tableClone.style.fontSize = '12px';
-            
-            const style = document.createElement('style');
-            style.textContent = `
-                th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-                th { background: #f0f0f0; color: #0056a7; }
-                .highlight-today { background: #d4f5d0; }
-                .today-badge { background: #2b7d1e; color: white; border-radius: 20px; padding: 2px 8px; font-size: 10px; display: inline-block; margin-bottom: 4px; }
-            `;
-            printContent.appendChild(style);
-            printContent.appendChild(tableClone);
-            
-            const footer = document.createElement('div');
-            footer.style.textAlign = 'center';
-            footer.style.marginTop = '20px';
-            footer.style.paddingTop = '10px';
-            footer.style.borderTop = '1px solid #ccc';
-            footer.style.fontSize = '10px';
-            footer.style.color = '#999';
-            footer.innerHTML = 'المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا';
-            printContent.appendChild(footer);
-            
-            const opt = {
-                margin: [0.5, 0.5, 0.5, 0.5],
-                filename: `خطة_توزيع_المياه_${unit}_${project}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
-            
-            showToast('جاري تجهيز ملف PDF...');
-            html2pdf().set(opt).from(printContent).save().then(() => {
-                showToast('تم حفظ ملف PDF بنجاح');
-            }).catch(err => {
-                console.error(err);
-                showToast('حدث خطأ أثناء تصدير PDF');
-            });
+            const btn = document.getElementById('btn-fav-plan');
+            const favorites = getPlanFavorites();
+            const isFav = favorites.some(f => f.unit === unit && f.project === project);
+            if (isFav) {
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                btn.classList.add('active');
+            } else {
+                btn.innerHTML = '<i class="fas fa-plus"></i>';
+                btn.classList.remove('active');
+            }
         }
 
         function showNotification(msg) { 
@@ -1726,7 +1968,7 @@
             if(msg && isHomePage) { 
                 notificationQueue.push(msg); 
                 processQueue(); 
-            } 
+            }
         }
 
         function createSwipeableNotification(msg) {
@@ -1778,21 +2020,21 @@
             }, 7000); 
         }
 
-        function sendSystemNotifications(messages) {
-            if (!window.median || !window.median.localNotification) return;
-            messages.forEach((msg, i) => { 
-                setTimeout(() => { 
-                    median.localNotification.schedule({ 
-                        title: "💧 مياه طرطوس", 
-                        body: msg, delay: 0, id: 100 + i 
-                    }); 
-                }, i * 5000); 
-            });
-        }
-
         async function loadExcelData() {
             const newsEl = document.getElementById('scrolling-news');
             newsEl.className = 'news-bar-inner skeleton'; newsEl.style.width = '60%'; newsEl.innerHTML = '&nbsp;';
+            
+            if (typeof XLSX === 'undefined') {
+                newsEl.className = 'news-bar-inner'; newsEl.style.width=''; 
+                newsEl.innerHTML = "🚰 مياه طرطوس - جاري تحميل المكتبة...";
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                if (typeof XLSX === 'undefined') {
+                    newsEl.innerHTML = "🚰 مياه طرطوس - لا يوجد اتصال"; 
+                    showToast('⚠️ مكتبة الجداول غير محملة، تحقق من الإنترنت');
+                    return;
+                }
+            }
+
             try {
                 const res = await fetch('toze3.xlsx?v=' + Date.now());
                 if(!res.ok) throw new Error('Network error');
@@ -1813,17 +2055,10 @@
                 cachedNotificationMessages = notifs;
                 localStorage.setItem('cached_notifications', JSON.stringify(notifs));
 
-                if (shouldShowNotificationsNow()) {
+                if (document.getElementById('page-home').classList.contains('active')) {
                     notificationQueue = [];
                     notifs.forEach(n => showNotification(n));
-                    localStorage.setItem('lastNotificationTime', Date.now().toString());
-                } else {
-                    pendingPeriodicNotification = true;
                 }
-
-                const sysAlerts = [];
-                for(let i=2; i<=10; i++) { if(sheet['J'+i] && sheet['J'+i].v && String(sheet['J'+i].v).trim() !== "") sysAlerts.push(String(sheet['J'+i].v)); }
-                if(sysAlerts.length > 0) sendSystemNotifications(sysAlerts);
 
                 waterPlanData = XLSX.utils.sheet_to_json(sheet);
                 
@@ -1851,6 +2086,7 @@
                 }
 
                 populateUnits();
+                renderPlanFavorites();
                 localStorage.setItem('cached_news', JSON.stringify(news));
             } catch(e) { 
                 newsEl.className = 'news-bar-inner'; newsEl.style.width=''; 
@@ -1929,13 +2165,7 @@
                 if(isT) tr.classList.add('highlight-today'); 
                 let dt = formatDate(r['التاريخ']); 
                 if(isT) dt = `<span class="today-badge">اليوم 🌟</span><br>${dt}`; 
-                tr.innerHTML = `
-                    <td>${r['اليوم'] || '—'}</td>
-                    <td>${dt}</td>
-                    <td>${r['محور الضخ'] || '—'}</td>
-                    <td style="white-space:normal; font-size:0.7rem; text-align:right;">${r['المجمعات المستفيدة'] || '—'}</td>
-                    <td>${r['عدد ساعات الضخ'] || '—'}</td>
-                `; 
+                tr.innerHTML = `<td>${r['اليوم'] || '—'}</td><td>${dt}</td><td>${r['محور الضخ'] || '—'}</td><td style="white-space:normal; font-size:0.7rem; text-align:right;">${r['المجمعات المستفيدة'] || '—'}</td><td>${r['عدد ساعات الضخ'] || '—'}</td>`; 
                 tbody.appendChild(tr); 
             });
             wrapper.style.display = 'block';
@@ -1953,33 +2183,70 @@
             window.open(`https://api.whatsapp.com/send?text=${t}`, '_blank');
         }
 
-        /* ========== وظائف صفحة استعلام عن الفاتورة ========== */
+        function exportToPDF() {
+            if (typeof html2pdf === 'undefined') {
+                showToast('⚠️ مكتبة التصدير غير محملة، تحقق من اتصالك بالإنترنت');
+                return;
+            }
+            const tableWrapper = document.getElementById('tableWrapper');
+            if (!tableWrapper || tableWrapper.style.display !== 'block') { showToast('الرجاء اختيار الوحدة والمشروع أولاً'); return; }
+            const unit = document.getElementById('unitSelect').value;
+            const project = document.getElementById('projectSelect').value;
+            const monthText = document.getElementById('planMonthDisplay').innerHTML;
+            const printContent = document.createElement('div');
+            printContent.style.direction = 'rtl';
+            printContent.style.fontFamily = 'Tajawal, sans-serif';
+            printContent.style.padding = '20px';
+            printContent.style.background = 'white';
+            const header = document.createElement('div');
+            header.style.textAlign = 'center';
+            header.style.marginBottom = '20px';
+            header.style.borderBottom = '2px solid #007BFF';
+            header.style.paddingBottom = '10px';
+            header.innerHTML = `<h1 style="color: #007BFF; margin:0;">📅 خطة توزيع المياه</h1><h2 style="color: #ff9800; margin:5px 0;">${monthText}</h2><p style="color: #666; margin:5px 0;">الوحدة: ${unit} | مشروع الضخ: ${project}</p><p style="color: #999; font-size:12px;">تم التصدير بتاريخ: ${new Date().toLocaleDateString('ar-EG')}</p>`;
+            printContent.appendChild(header);
+            const originalTable = document.getElementById('resultTable');
+            const tableClone = originalTable.cloneNode(true);
+            tableClone.style.width = '100%';
+            tableClone.style.borderCollapse = 'collapse';
+            tableClone.style.fontSize = '12px';
+            const style = document.createElement('style');
+            style.textContent = `th, td { border: 1px solid #ddd; padding: 8px; text-align: center; } th { background: #f0f0f0; color: #0056a7; } .highlight-today { background: #d4f5d0; } .today-badge { background: #2b7d1e; color: white; border-radius: 20px; padding: 2px 8px; font-size: 10px; display: inline-block; margin-bottom: 4px; }`;
+            printContent.appendChild(style);
+            printContent.appendChild(tableClone);
+            const footerDiv = document.createElement('div');
+            footerDiv.style.textAlign = 'center';
+            footerDiv.style.marginTop = '20px';
+            footerDiv.style.paddingTop = '10px';
+            footerDiv.style.borderTop = '1px solid #ccc';
+            footerDiv.style.fontSize = '10px';
+            footerDiv.style.color = '#999';
+            footerDiv.innerHTML = 'المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا';
+            printContent.appendChild(footerDiv);
+            const opt = { margin: [0.5, 0.5, 0.5, 0.5], filename: `خطة_توزيع_المياه_${unit}_${project}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, letterRendering: true }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+            showToast('جاري تجهيز ملف PDF...');
+            html2pdf().set(opt).from(printContent).save().then(() => showToast('تم حفظ ملف PDF بنجاح')).catch(err => { console.error(err); showToast('حدث خطأ أثناء تصدير PDF'); });
+        }
 
+        // ========== دوال الفواتير ==========
         function updateSearchPlaceholder() {
             const input = document.getElementById('searchInput');
             const type = document.getElementById('searchType').value;
-            const placeholders = {
-                nationalId: 'أدخل الرقم الوطني...',
-                name: 'أدخل اسم المشترك...',
-                barcode: 'أدخل رقم الباركود...',
-                phone: 'أدخل رقم الجوال...',
-                subNumber: 'أدخل رقم الاشتراك...'
-            };
+            const placeholders = { nationalId: 'أدخل الرقم الوطني...', name: 'أدخل اسم المشترك...', barcode: 'أدخل رقم الباركود...', phone: 'أدخل رقم الجوال...', subNumber: 'أدخل رقم الاشتراك...' };
             input.placeholder = placeholders[type] || 'أدخل قيمة البحث هنا...';
         }
 
         function showInvoiceEmptyState() {
-            document.getElementById('invoiceResults').innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-file-invoice-dollar"></i>
-                    <p>ابحث عن فاتورتك</p>
-                    <span>اختر نوع البحث وأدخل القيمة للبحث في بيانات المشتركين</span>
-                </div>
-            `;
+            const container = document.getElementById('invoiceResults');
+            container.innerHTML = `<div class="empty-state"><i class="fas fa-file-invoice-dollar"></i><p>ابحث عن فاتورتك</p><span>اختر نوع البحث وأدخل القيمة للبحث في بيانات المشتركين</span></div>`;
         }
 
         async function loadInvoiceData() {
             if (invoiceDataLoaded) return;
+            if (typeof XLSX === 'undefined') {
+                showToast('⚠️ مكتبة الجداول غير محملة بعد، يرجى الانتظار أو التحقق من الاتصال');
+                return;
+            }
             try {
                 const res = await fetch('Foater.xlsx?v=' + Date.now());
                 if (!res.ok) throw new Error('File not found');
@@ -1988,47 +2255,14 @@
                 const sheet = wb.Sheets[wb.SheetNames[0]];
                 invoiceData = XLSX.utils.sheet_to_json(sheet, { raw: true });
                 invoiceDataLoaded = true;
-            } catch(e) {
-                invoiceData = [];
-                invoiceDataLoaded = false;
-                console.error('خطأ في تحميل بيانات الفواتير:', e);
-            }
+            } catch(e) { invoiceData = []; invoiceDataLoaded = false; console.error('خطأ في تحميل بيانات الفواتير:', e); }
         }
 
         function findColumnValue(row, possibleNames) {
             for (const name of possibleNames) {
-                if (row.hasOwnProperty(name) && row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== '') {
-                    return row[name];
-                }
-            }
-            const normalizedKeys = Object.keys(row).map(k => ({
-                original: k,
-                normalized: k.replace(/[\s\-–—_]/g, '')
-            }));
-            for (const name of possibleNames) {
-                const normName = name.replace(/[\s\-–—_]/g, '');
-                for (const nk of normalizedKeys) {
-                    if (nk.normalized === normName && row[nk.original] !== undefined && row[nk.original] !== null && String(row[nk.original]).trim() !== '') {
-                        return row[nk.original];
-                    }
-                }
-            }
-            const keywords = possibleNames.filter(n => n.length > 3).map(n => n.replace(/[\s\-–—_]/g, ''));
-            for (const nk of normalizedKeys) {
-                for (const kw of keywords) {
-                    if (nk.normalized.includes(kw) || kw.includes(nk.normalized)) {
-                        const val = row[nk.original];
-                        if (val !== undefined && val !== null && String(val).trim() !== '') {
-                            return val;
-                        }
-                    }
-                }
+                if (row.hasOwnProperty(name) && row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== '') return row[name];
             }
             return null;
-        }
-
-        function formatCurrentBill(val) {
-            return '—';
         }
 
         function getStatusInfo(status) {
@@ -2058,61 +2292,15 @@
             num = parseInt(num);
             if (isNaN(num)) return '—';
             if (num === 0) return 'صفر ليرة سورية فقط';
-
             const units = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'];
             const teens = ['عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
             const tensArr = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
             const hundredsArr = ['', 'مائة', 'مائتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
-
-            function convertBelow100(n) {
-                if (n === 0) return '';
-                if (n >= 10 && n <= 19) return teens[n - 10];
-                if (n >= 20) {
-                    const rem = n % 10;
-                    return (rem > 0 ? units[rem] + ' و' : '') + tensArr[Math.floor(n / 10)];
-                }
-                return units[n];
-            }
-
-            function convertBelow1000(n) {
-                if (n === 0) return '';
-                if (n >= 100) {
-                    const h = Math.floor(n / 100);
-                    const rem = n % 100;
-                    return hundredsArr[h] + (rem > 0 ? ' و' + convertBelow100(rem) : '');
-                }
-                return convertBelow100(n);
-            }
-
-            function convertBelowMillion(n) {
-                if (n === 0) return '';
-                if (n >= 1000) {
-                    const thousands = Math.floor(n / 1000);
-                    const rem = n % 1000;
-                    let r = '';
-                    if (thousands === 1) r = 'ألف';
-                    else if (thousands === 2) r = 'ألفان';
-                    else if (thousands <= 10) r = convertBelow1000(thousands) + ' آلاف';
-                    else r = convertBelow1000(thousands) + ' ألف';
-                    if (rem > 0) r += ' و' + convertBelow1000(rem);
-                    return r;
-                }
-                return convertBelow1000(n);
-            }
-
+            function convertBelow100(n) { if (n === 0) return ''; if (n >= 10 && n <= 19) return teens[n - 10]; if (n >= 20) { const rem = n % 10; return (rem > 0 ? units[rem] + ' و' : '') + tensArr[Math.floor(n / 10)]; } return units[n]; }
+            function convertBelow1000(n) { if (n === 0) return ''; if (n >= 100) { const h = Math.floor(n / 100); const rem = n % 100; return hundredsArr[h] + (rem > 0 ? ' و' + convertBelow100(rem) : ''); } return convertBelow100(n); }
+            function convertBelowMillion(n) { if (n === 0) return ''; if (n >= 1000) { const thousands = Math.floor(n / 1000); const rem = n % 1000; let r = ''; if (thousands === 1) r = 'ألف'; else if (thousands === 2) r = 'ألفان'; else if (thousands <= 10) r = convertBelow1000(thousands) + ' آلاف'; else r = convertBelow1000(thousands) + ' ألف'; if (rem > 0) r += ' و' + convertBelow1000(rem); return r; } return convertBelow1000(n); }
             let result = '';
-            if (num >= 1000000) {
-                const millions = Math.floor(num / 1000000);
-                const rem = num % 1000000;
-                if (millions === 1) result = 'مليون';
-                else if (millions === 2) result = 'مليونان';
-                else if (millions <= 10) result = convertBelow1000(millions) + ' ملايين';
-                else result = convertBelow1000(millions) + ' مليون';
-                if (rem > 0) result += ' و' + convertBelowMillion(rem);
-            } else {
-                result = convertBelowMillion(num);
-            }
-
+            if (num >= 1000000) { const millions = Math.floor(num / 1000000); const rem = num % 1000000; if (millions === 1) result = 'مليون'; else if (millions === 2) result = 'مليونان'; else if (millions <= 10) result = convertBelow1000(millions) + ' ملايين'; else result = convertBelow1000(millions) + ' مليون'; if (rem > 0) result += ' و' + convertBelowMillion(rem); } else { result = convertBelowMillion(num); }
             return result + ' ليرة سورية فقط';
         }
 
@@ -2120,245 +2308,95 @@
             const searchType = document.getElementById('searchType').value;
             const searchValue = document.getElementById('searchInput').value.trim();
             const container = document.getElementById('invoiceResults');
-
-            if (!searchType || !searchValue) {
-                showToast('يرجى اختيار نوع البحث وإدخال القيمة');
+            if (!searchType || !searchValue) { showToast('يرجى اختيار نوع البحث وإدخال القيمة'); return; }
+            
+            if (typeof XLSX === 'undefined') {
+                container.innerHTML = `<div class="no-results"><i class="fas fa-exclamation-circle"></i><p>مكتبة الجداول غير محملة بعد</p></div>`;
                 return;
             }
 
-            container.innerHTML = '<div class="invoice-loading"><div class="spinner"></div><p style="color:var(--text-sub);font-size:0.9rem;">جاري البحث...</p></div>';
-
-            if (!invoiceDataLoaded) {
-                await loadInvoiceData();
-            }
-
+            container.innerHTML = '<div class="invoice-loading"><div class="spinner"></div><p>جاري البحث...</p></div>';
+            
+            if (!invoiceDataLoaded) await loadInvoiceData();
             if (!invoiceDataLoaded || invoiceData.length === 0) {
-                container.innerHTML = `
-                    <div class="no-results">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p>لم يتم تحميل بيانات الفواتير</p>
-                        <p style="font-size:0.8rem;margin-top:5px;opacity:0.7;">تأكد من اتصالك بالإنترنت وأن ملف Foater.xlsx متوفر</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="no-results"><i class="fas fa-exclamation-circle"></i><p>لم يتم تحميل بيانات الفواتير</p></div>`;
                 return;
             }
-
+            
             const sv = searchValue.toLowerCase();
             let results = [];
-
-            if (searchType === 'nationalId') {
-                results = invoiceData.filter(r => String(r['الرقم الوطني'] || '').includes(sv));
-            } else if (searchType === 'name') {
-                results = invoiceData.filter(r => r['الاسم'] && String(r['الاسم']).toLowerCase().includes(sv));
-            } else if (searchType === 'barcode') {
-                results = invoiceData.filter(r => {
-                    const bc = String(r['باركود'] || '');
-                    const svClean = sv.replace(/^0+/, '');
-                    const bcClean = bc.replace(/^0+/, '');
-                    return bc.includes(sv) || bc === searchValue || bcClean === svClean;
-                });
-            } else if (searchType === 'phone') {
-                const cleanPhone = sv.replace(/^0/, '');
-                results = invoiceData.filter(r => {
-                    const phone = String(r['رقم الجوال'] || '');
-                    return phone.includes(sv) || phone.includes(cleanPhone);
-                });
-            } else if (searchType === 'subNumber') {
-                results = invoiceData.filter(r => String(r['رقم الاشتراك'] || '').includes(sv));
-            }
+            if (searchType === 'nationalId') results = invoiceData.filter(r => String(r['الرقم الوطني'] || '').includes(sv));
+            else if (searchType === 'name') results = invoiceData.filter(r => r['الاسم'] && String(r['الاسم']).toLowerCase().includes(sv));
+            else if (searchType === 'barcode') results = invoiceData.filter(r => { const bc = String(r['باركود'] || ''); return bc.includes(sv); });
+            else if (searchType === 'phone') results = invoiceData.filter(r => { const phone = String(r['رقم الجوال'] || ''); return phone.includes(sv); });
+            else if (searchType === 'subNumber') results = invoiceData.filter(r => String(r['رقم الاشتراك'] || '').includes(sv));
 
             if (results.length === 0) {
-                container.innerHTML = `
-                    <div class="no-results">
-                        <i class="fas fa-search"></i>
-                        <p>لا توجد نتائج مطابقة لـ "${searchValue}"</p>
-                        <p style="font-size:0.8rem;margin-top:5px;opacity:0.7;">تأكد من صحة البيانات المدخلة وحاول مرة أخرى</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><p>لا توجد نتائج مطابقة لـ "${searchValue}"</p></div>`;
                 return;
             }
-
+            
             let html = '';
-            if (results.length > 1) {
-                html += `<div class="results-count-label">تم العثور على ${results.length} نتيجة</div>`;
-            }
+            if (results.length > 1) html += `<div class="results-count-label">تم العثور على ${results.length} نتيجة</div>`;
             html += '<div class="result-cards">';
-
             results.forEach((r, idx) => {
                 const status = getStatusInfo(findColumnValue(r, ['حالة العداد']));
                 const calcType = getCalcType(findColumnValue(r, ['رمز الاحتساب']));
                 const total = Number(findColumnValue(r, ['إجمالي الفواتير الغير مدفوعة', 'إجمالي الفواتير غير المدفوعة']) || 0);
                 const count = Number(findColumnValue(r, ['عدد الفواتير الغير مدفوعة', 'عدد الفواتير غير المدفوعة']) || 0);
-                const phone = String(findColumnValue(r, ['رقم الجوال']) || '');
-                const address = String(findColumnValue(r, ['العنوان']) || '—';
-                const subNum = String(findColumnValue(r, ['رقم الاشتراك']) || '—';
-                const barcode = String(findColumnValue(r, ['باركود']) || '—';
+                const address = String(findColumnValue(r, ['العنوان']) || '—');
+                const subNum = String(findColumnValue(r, ['رقم الاشتراك']) || '—');
+                const barcode = String(findColumnValue(r, ['باركود']) || '—');
                 const meterNum = String(findColumnValue(r, ['رقم العداد']) || '');
-                const meterDisplay = (meterNum === '' || meterNum === 'undefined' || meterNum === 'null') ? '—' : meterNum;
-                const natId = String(findColumnValue(r, ['الرقم الوطني']) || '—';
-                const phoneDisplay = (phone === '*' || phone === 'undefined' || phone === 'null') ? '—' : phone;
-
-                html += `
-                    <div class="invoice-result-card" style="animation-delay:${idx * 0.1}s">
-                        <div class="result-header">
-                            <div class="subscriber-name">${r['الاسم'] || '—'}</div>
-                            <div class="subscriber-meta">
-                                <span><i class="fas fa-id-card"></i> ${natId}</span>
-                                <span><i class="fas fa-map-marker-alt"></i> ${address}</span>
-                                <span class="status-badge ${status.cls}">${status.text}</span>
-                            </div>
-                        </div>
-                        <div class="result-body">
-                            <div class="detail-grid">
-                                <div class="detail-item">
-                                    <span class="detail-label">رقم الاشتراك</span>
-                                    <span class="detail-value">${subNum}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">الباركود</span>
-                                    <span class="detail-value">${barcode}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">رقم العداد</span>
-                                    <span class="detail-value">${meterDisplay}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">نوع الاحتساب</span>
-                                    <span class="detail-value">${calcType}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">رقم الجوال</span>
-                                    <span class="detail-value">${phoneDisplay}</span>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-label">التأشيرة الحالية</span>
-                                    <span class="detail-value">${formatCurrentBill()}</span>
-                                </div>
-                            </div>
-                            <div class="amount-section">
-                                <div class="amount-value">${formatNumber(total)} ل.س</div>
-                                <div class="arabic-amount">${toArabicWords(total)}</div>
-                                <div class="warning-badge">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                    <span class="fees-disclaimer">غير متضمنة الرسوم</span>
-                                </div>
-                                <div class="invoices-count">📄 عدد الفواتير الغير مدفوعة: ${count}</div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                const meterDisplay = (meterNum === '' || meterNum === 'undefined') ? '—' : meterNum;
+                const natId = String(findColumnValue(r, ['الرقم الوطني']) || '—');
+                const subName = r['الاسم'] || '—';
+                html += `<div class="invoice-result-card"><div class="result-header"><div class="subscriber-name">${subName}</div><div class="subscriber-meta"><span><i class="fas fa-id-card"></i> ${natId}</span><span><i class="fas fa-map-marker-alt"></i> ${address}</span><span class="status-badge ${status.cls}">${status.text}</span></div></div><div class="result-body"><div class="detail-grid"><div class="detail-item"><span class="detail-label">رقم الاشتراك</span><span class="detail-value">${subNum}</span></div><div class="detail-item"><span class="detail-label">الباركود</span><span class="detail-value">${barcode}</span></div><div class="detail-item"><span class="detail-label">رقم العداد</span><span class="detail-value">${meterDisplay}</span></div><div class="detail-item"><span class="detail-label">نوع الاحتساب</span><span class="detail-value">${calcType}</span></div></div><div class="amount-section"><div class="amount-value">${formatNumber(total)} ل.س</div><div class="arabic-amount">${toArabicWords(total)}</div><div class="warning-badge"><i class="fas fa-exclamation-circle"></i><span class="fees-disclaimer">غير متضمنة الرسوم</span></div><div class="invoices-count">📄 عدد الفواتير الغير مدفوعة: ${count}</div></div></div></div>`;
             });
-
-            html += '</div>';
-
-            html += `
-                <div class="disclaimer-box">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div>
-                        <strong>تنبيه هام:</strong> القيمة الظاهرة أعلاه هي البيانات المتوفرة بشكل <strong>أوف لاين</strong> (غير متصلة بالخادم المباشر).
-                        من الممكن أن يكون المشترك قد قام بسداد فاتورته ولكنها ستظل ظاهرة هنا لحين تحديث الملف من قبل الإدارة.
-                        يرجى مراجعة قسم الحسابات في المؤسسة للتأكد من الرصيد الفعلي.
-                    </div>
-                </div>
-            `;
-
+            html += '</div><div class="disclaimer-box"><i class="fas fa-exclamation-triangle"></i><div><strong>تنبيه هام:</strong> القيمة الظاهرة أعلاه هي بيانات غير متصلة بالخادم المباشر. يرجى مراجعة قسم الحسابات في المؤسسة للتأكد من الرصيد الفعلي.</div></div>';
             container.innerHTML = html;
         }
 
         async function exportInvoicePDF() {
-            const cards = document.querySelectorAll('.invoice-result-card');
-            if (!cards.length) {
-                showToast('لا توجد نتائج للتصدير');
+            if (typeof html2pdf === 'undefined') {
+                showToast('⚠️ مكتبة التصدير غير محملة');
                 return;
             }
-
+            const cards = document.querySelectorAll('.invoice-result-card');
+            if (!cards.length) { showToast('لا توجد نتائج للتصدير'); return; }
             showToast('جاري تجهيز ملف PDF...');
-
             const printContent = document.createElement('div');
             printContent.style.direction = 'rtl';
             printContent.style.fontFamily = 'Tajawal, sans-serif';
             printContent.style.padding = '20px';
             printContent.style.background = 'white';
-
             const header = document.createElement('div');
             header.style.textAlign = 'center';
             header.style.marginBottom = '20px';
             header.style.borderBottom = '3px solid #007BFF';
             header.style.paddingBottom = '12px';
-            header.innerHTML = `
-                <h1 style="color:#007BFF;margin:0;">🧾 استعلام عن فاتورة</h1>
-                <p style="color:#666;font-size:12px;margin-top:6px;">شركة مياه طرطوس | تاريخ الاستعلام: ${new Date().toLocaleDateString('ar-EG')}</p>
-            `;
+            header.innerHTML = `<h1 style="color:#007BFF;margin:0;">🧾 استعلام عن فاتورة</h1><p style="color:#666;font-size:12px;">شركة مياه طرطوس | تاريخ الاستعلام: ${new Date().toLocaleDateString('ar-EG')}</p>`;
             printContent.appendChild(header);
-
-            cards.forEach(card => {
-                const cardClone = card.cloneNode(true);
-                cardClone.style.boxShadow = 'none';
-                cardClone.style.border = '1px solid #ddd';
-                cardClone.style.animation = 'none';
-                cardClone.style.marginBottom = '20px';
-                printContent.appendChild(cardClone);
-            });
-
+            cards.forEach(card => { const cardClone = card.cloneNode(true); cardClone.style.boxShadow = 'none'; cardClone.style.border = '1px solid #ddd'; cardClone.style.marginBottom = '20px'; printContent.appendChild(cardClone); });
             const disclaimer = document.querySelector('.disclaimer-box');
-            if (disclaimer) {
-                const disclaimerClone = disclaimer.cloneNode(true);
-                disclaimerClone.style.marginTop = '15px';
-                disclaimerClone.style.padding = '10px 15px';
-                printContent.appendChild(disclaimerClone);
-            }
-
-            const footer = document.createElement('div');
-            footer.style.textAlign = 'center';
-            footer.style.marginTop = '15px';
-            footer.style.paddingTop = '10px';
-            footer.style.borderTop = '1px solid #ccc';
-            footer.style.fontSize = '10px';
-            footer.style.color = '#999';
-            footer.innerHTML = 'المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا';
-            printContent.appendChild(footer);
-
+            if (disclaimer) printContent.appendChild(disclaimer.cloneNode(true));
+            const footerDiv = document.createElement('div');
+            footerDiv.style.textAlign = 'center';
+            footerDiv.style.marginTop = '15px';
+            footerDiv.style.paddingTop = '10px';
+            footerDiv.style.borderTop = '1px solid #ccc';
+            footerDiv.style.fontSize = '10px';
+            footerDiv.style.color = '#999';
+            footerDiv.innerHTML = 'المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا';
+            printContent.appendChild(footerDiv);
             const style = document.createElement('style');
-            style.textContent = `
-                .result-header { background: #007BFF !important; color: white !important; padding: 12px 15px; }
-                .result-header * { color: white !important; }
-                .subscriber-name { font-size: 14px; font-weight: 800; }
-                .subscriber-meta { display: flex; gap: 10px; font-size: 11px; flex-wrap: wrap; margin-top: 6px; }
-                .status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; color: white; }
-                .status-active { background: #28a745; }
-                .status-disabled { background: #dc3545; }
-                .status-closed { background: #6c757d; }
-                .status-connection { background: #17a2b8; }
-                .result-body { padding: 12px 15px; }
-                .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-                .detail-item { padding: 8px; background: #f5f5f5; border-radius: 10px; }
-                .detail-label { font-size: 10px; color: #666; }
-                .detail-value { font-size: 12px; font-weight: 700; color: #333; }
-                .amount-section { margin-top: 12px; padding: 14px; background: #f0fff0; border-radius: 12px; text-align: center; border: 1px solid #c8e6c9; }
-                .amount-value { font-size: 20px; font-weight: 800; color: #1b5e20; }
-                .arabic-amount { font-size: 12px; color: #2e7d32; margin-top: 4px; font-weight: 700; }
-                .warning-badge { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: rgba(211,47,47,0.12); padding: 8px 12px; border-radius: 40px; margin-top: 8px; }
-                .fees-disclaimer { color: #d32f2f; font-weight: bold; font-size: 12px; }
-                .invoices-count { font-size: 11px; color: #666; margin-top: 6px; }
-            `;
+            style.textContent = `.result-header { background: #007BFF !important; color: white !important; } .status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; } .status-active { background: #28a745; } .status-disabled { background: #dc3545; } .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } .detail-item { padding: 8px; background: #f5f5f5; border-radius: 10px; } .amount-section { margin-top: 12px; padding: 14px; background: #f0fff0; border-radius: 12px; text-align: center; } .amount-value { font-size: 20px; font-weight: 800; color: #1b5e20; } .warning-badge { display: inline-flex; align-items: center; gap: 8px; background: rgba(211,47,47,0.12); padding: 8px 12px; border-radius: 40px; }`;
             printContent.appendChild(style);
-
-            const opt = {
-                margin: [0.4, 0.4, 0.4, 0.4],
-                filename: `فاتورة_${new Date().getTime()}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().set(opt).from(printContent).save().then(() => {
-                showToast('تم حفظ ملف PDF بنجاح');
-            }).catch(err => {
-                console.error(err);
-                showToast('حدث خطأ أثناء التصدير');
-            });
+            const opt = { margin: [0.4, 0.4, 0.4, 0.4], filename: `فاتورة_${new Date().getTime()}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+            html2pdf().set(opt).from(printContent).save().then(() => showToast('تم حفظ ملف PDF بنجاح')).catch(err => { console.error(err); showToast('حدث خطأ أثناء التصدير'); });
         }
 
+        // تفريغ ذاكرة ذكي
         function clearAppMemory() {
             notificationQueue = [];
             isShowingNotification = false;
@@ -2366,46 +2404,44 @@
             cachedNotificationMessages = [];
             const notifCenter = document.getElementById('notification-center');
             if (notifCenter) notifCenter.innerHTML = '';
-            
-            // نسخ احتياطي للمفضلات
             const planFavBackup = getPlanFavorites();
-            
+            const themeBackup = localStorage.getItem('theme');
+            const audioPermissionBackup = localStorage.getItem('audioPermissionGranted');
+            const lastNotificationBackup = localStorage.getItem('lastNotificationTime');
+            const cachedNewsBackup = localStorage.getItem('cached_news');
+            const cachedNotifsBackup = localStorage.getItem('cached_notifications');
+            const currentPlanMonthBackup = localStorage.getItem('currentPlanMonth');
             localStorage.clear();
             sessionStorage.clear();
-            
-            // إعادة المفضلات فقط
             savePlanFavorites(planFavBackup);
-            
-            if ('caches' in window) {
-                caches.keys().then(names => {
-                    names.forEach(name => caches.delete(name));
-                }).catch(() => {});
-            }
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.getRegistrations().then(registrations => {
-                    registrations.forEach(reg => reg.unregister());
-                }).catch(() => {});
-            }
+            if (themeBackup) localStorage.setItem('theme', themeBackup);
+            if (audioPermissionBackup) localStorage.setItem('audioPermissionGranted', audioPermissionBackup);
+            if (lastNotificationBackup) localStorage.setItem('lastNotificationTime', lastNotificationBackup);
+            if (cachedNewsBackup) localStorage.setItem('cached_news', cachedNewsBackup);
+            if (cachedNotifsBackup) localStorage.setItem('cached_notifications', cachedNotifsBackup);
+            if (currentPlanMonthBackup) localStorage.setItem('currentPlanMonth', currentPlanMonthBackup);
+            if ('caches' in window) { caches.keys().then(names => { names.forEach(name => caches.delete(name)); }).catch(() => {}); }
+            if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(registrations => { registrations.forEach(reg => reg.unregister()); }).catch(() => {}); }
             invoiceDataLoaded = false;
             invoiceData = [];
-            showToast('تم افراغ الذاكرة بنجاح، جاري إعادة التحميل...');
-            setTimeout(() => {
-                window.location.reload(true);
-            }, 1500);
+            showToast('✓ تم افراغ الذاكرة بنجاح، جاري إعادة التحميل...');
+            setTimeout(() => { window.location.reload(true); }, 1500);
         }
 
-        window.onload = () => {
+        document.addEventListener('DOMContentLoaded', () => {
             const lc = '?v=' + Date.now();
             ['splash-logo', 'header-logo'].forEach(id => { 
                 const img = document.getElementById(id); 
                 if (img) { 
                     if (!img.src.includes('?v=')) img.src = 'logo.png' + lc; 
-                    img.onerror = function() { this.src = 'https://placehold.co/100x100/007BFF/white?text=💧'; }; 
+                    img.onerror = function() { 
+                        this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007BFF" rx="15"/><text x="50" y="65" font-size="45" text-anchor="middle" fill="white">💧</text></svg>'; 
+                    }; 
                 }
             });
             handleOfflineStatus();
             checkAppStartup();
-        };
+        });
     </script>
 </body>
 </html>
