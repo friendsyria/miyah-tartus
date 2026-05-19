@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>دليل استخدام تطبيق مياه طرطوس</title>
+    
+    <!-- أيقونة المتصفح (Favicon) -->
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
+    
+    <!-- أكواد المعاينة لمواقع التواصل (Open Graph) -->
+    <!-- ⚠️ تنبيه: استبدل logo.png بالرابط الكامل للصورة لكي تعمل المعاينة في فيسبوك وواتساب، مثال: https://twc.ct.ws/app/logo.png -->
+    <meta property="og:title" content="دليل استخدام تطبيق شركة مياه طرطوس">
+    <meta property="og:description" content="دليل المواطن التفاعلي الشامل لاستخدام تطبيق مياه طرطوس - خطوة بخطوة">
+    <meta property="og:image" content="logo.png">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #e8f0fe 0%, #d4e0f0 100%);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .guide-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .guide-header {
+            background: linear-gradient(135deg, #007BFF, #004999);
+            color: white;
+            padding: 40px 30px;
+            border-radius: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .guide-header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .guide-header h1 i {
+            margin-left: 15px;
+        }
+
+        .guide-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .guide-header .badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 50px;
+            margin-top: 15px;
+            font-size: 0.85rem;
+        }
+
+        /* Quick Navigation */
+        .quick-nav {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .quick-nav h3 {
+            color: #007BFF;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .nav-links a {
+            background: #f0f4f8;
+            padding: 10px 18px;
+            border-radius: 50px;
+            text-decoration: none;
+            color: #007BFF;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .nav-links a:hover {
+            background: #007BFF;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Section Styles */
+        .section {
+            background: white;
+            border-radius: 25px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+
+        .section:hover {
+            transform: translateY(-3px);
+        }
+
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #007BFF;
+            border-right: 5px solid #007BFF;
+            padding-right: 15px;
+            margin-bottom: 20px;
+        }
+
+        .section-title i {
+            margin-left: 10px;
+            color: #ff9800;
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #ff9800;
+            margin: 20px 0 15px 0;
+            padding-right: 10px;
+            border-right: 3px solid #ff9800;
+        }
+
+        /* Step Box */
+        .step-box {
+            background: #f8f9fa;
+            border-radius: 18px;
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            border: 1px solid #e9ecef;
+        }
+
+        .step-number {
+            background: #007BFF;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content strong {
+            color: #007BFF;
+            font-size: 1rem;
+        }
+
+        /* Buttons Grid */
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .button-card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s;
+        }
+
+        .button-card:hover {
+            background: #e9ecef;
+        }
+
+        .button-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            flex-shrink: 0;
+        }
+
+        .button-icon.complaint { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; }
+        .button-icon.plan { background: linear-gradient(135deg, #007BFF, #0056b3); color: white; }
+        .button-icon.invoice { background: linear-gradient(135deg, #84cc16, #65a30d); color: white; }
+        .button-icon.sanitation { background: linear-gradient(135deg, #17a2b8, #138496); color: white; }
+        .button-icon.facebook { background: linear-gradient(135deg, #FF7F00, #e67300); color: white; }
+        .button-icon.install { background: linear-gradient(135deg, #6f42c1, #5e35b1); color: white; }
+        .button-icon.clear { background: linear-gradient(135deg, #90a4ae, #78909c); color: white; }
+
+        .button-info h4 {
+            font-size: 0.95rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+
+        .button-info p {
+            font-size: 0.75rem;
+            color: #666;
+        }
+
+        /* ======= Favorite Action Cards (New Design) ======= */
+        .fav-action-card {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+        }
+        
+        .fav-action-header {
+            font-weight: 800;
+            color: #004999;
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fav-action-body {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .fav-visual {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-radius: 16px;
+            border: 1px dashed #ccc;
+        }
+
+        .fav-explain {
+            flex: 1;
+            font-size: 0.9rem;
+            color: #444;
+            line-height: 1.7;
+        }
+
+        .fav-demo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .fav-demo.green { background: linear-gradient(135deg, #28a745, #1e7e34); color: white; }
+        .fav-demo.gold { background: linear-gradient(135deg, #ffc107, #ff9800); color: white; }
+        
+        .arrow-icon {
+            color: #adb5bd;
+            font-size: 1.2rem;
+        }
+        /* ==================================================== */
+
+        /* Alert Box */
+        .alert-box {
+            background: #fff3cd;
+            border-right: 5px solid #ffc107;
+            padding: 15px 20px;
+            border-radius: 16px;
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .alert-box i {
+            color: #ffc107;
+            font-size: 1.5rem;
+        }
+
+        .alert-box.warning {
+            background: #ffe0e0;
+            border-right-color: #dc3545;
+        }
+
+        .alert-box.warning i {
+            color: #dc3545;
+        }
+
+        .alert-box.info {
+            background: #e0f0ff;
+            border-right-color: #007BFF;
+        }
+
+        .alert-box.info i {
+            color: #007BFF;
+        }
+
+        /* Table */
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+
+        .info-table th, .info-table td {
+            padding: 12px;
+            text-align: right;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .info-table th {
+            background: #f0f4f8;
+            color: #007BFF;
+            font-weight: 800;
+        }
+
+        /* Tips Grid */
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .tip-card {
+            background: #e8f5e9;
+            border-radius: 16px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .tip-card i {
+            font-size: 2rem;
+            color: #28a745;
+            margin-bottom: 10px;
+        }
+
+        .tip-card h4 {
+            font-weight: 800;
+            margin-bottom: 8px;
+        }
+
+        .tip-card p {
+            font-size: 0.8rem;
+            color: #555;
+        }
+
+        /* ShamCash Logo Style */
+        .shamcash-badge {
+            background: linear-gradient(135deg, #1a5f7a, #0d3b4f);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        /* Footer */
+        .guide-footer {
+            text-align: center;
+            padding: 25px;
+            background: #004999;
+            color: white;
+            border-radius: 25px;
+            margin-top: 20px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .guide-header h1 { font-size: 1.5rem; }
+            .section-title { font-size: 1.3rem; }
+            .buttons-grid { grid-template-columns: 1fr; }
+            .step-box { flex-direction: column; text-align: center; }
+            .fav-action-body { flex-direction: column; text-align: center; }
+            .fav-visual { margin: 0 auto; }
+        }
+    </style>
+</head>
+<body>
+    <div class="guide-container">
+        <!-- Header -->
+        <div class="guide-header">
+            <h1><i class="fas fa-tint"></i> دليل استخدام تطبيق شركة مياه طرطوس</h1>
+            <p>دليل كامل وشامل لكل وظائف التطبيق - خطوة بخطوة</p>
+            <div class="badge"><i class="fas fa-mobile-alt"></i> متوافق مع أجهزة Android و iOS</div>
+        </div>
+
+        <!-- Quick Navigation -->
+        <div class="quick-nav">
+            <h3><i class="fas fa-bars"></i> أقسام الدليل</h3>
+            <div class="nav-links">
+                <a href="#start">▶️ بدء التشغيل</a>
+                <a href="#home">🏠 الصفحة الرئيسية</a>
+                <a href="#plan">🗓️ خطة المياه</a>
+                <a href="#invoice">🧾 الفاتورة</a>
+                <a href="#report">📢 الإبلاغ</a>
+                <a href="#fav">⭐ المفضلات</a>
+                <a href="#notify">🔔 الإشعارات</a>
+                <a href="#tips">💡 نصائح سريعة</a>
+            </div>
+        </div>
+
+        <!-- ==================== Section 1: Start ==================== -->
+        <div class="section" id="start">
+            <h2 class="section-title"><i class="fas fa-play-circle"></i> أولاً: تشغيل التطبيق لأول مرة</h2>
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <div class="step-content"><strong>افتح التطبيق</strong> - ستظهر شاشة ترحيب عليها شعار المؤسسة</div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <div class="step-content"><strong>اضغط على الزر الأزرق</strong> المكتوب عليه "اضغط لتفعيل الصوت والدخول"</div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <div class="step-content"><strong>سيتم نقلك تلقائياً</strong> إلى الصفحة الرئيسية للتطبيق</div>
+            </div>
+            <div class="alert-box info">
+                <i class="fas fa-info-circle"></i>
+                <div><strong>ملاحظة:</strong> بعد المرة الأولى، لن تظهر لك شاشة الترحيب مرة أخرى، وستفتح مباشرة على الصفحة الرئيسية.</div>
+            </div>
+        </div>
+
+        <!-- ==================== Section 2: Home Page ==================== -->
+        <div class="section" id="home">
+            <h2 class="section-title"><i class="fas fa-home"></i> ثانياً: الصفحة الرئيسية (الواجهة)</h2>
+            <p style="margin-bottom: 15px;">الصفحة الرئيسية تحتوي على <strong>7 أزرار كبيرة ملونة</strong>، هذا شرح كل زر وماذا يفعل:</p>
+            
+            <div class="buttons-grid">
+                <div class="button-card">
+                    <div class="button-icon complaint"><i class="fas fa-exclamation-triangle"></i></div>
+                    <div class="button-info">
+                        <h4>📢 إبلاغ عن هدر المياه</h4>
+                        <p>ينقلك لصفحة فيها روابط جميع مناطق طرطوس للإبلاغ</p>
+                    </div>
+                </div>
+                <div class="button-card">
+                    <div class="button-icon plan"><i class="fas fa-tint"></i></div>
+                    <div class="button-info">
+                        <h4>🗓️ خطة توزيع المياه</h4>
+                        <p>يعرض مواعيد ضخ المياه حسب منطقتك ومشروع الضخ</p>
+                    </div>
+                </div>
+                <div class="button-card">
+                    <div class="button-icon invoice"><i class="fas fa-file-invoice-dollar"></i></div>
+                    <div class="button-info">
+                        <h4>🧾 استعلام عن فاتورة</h4>
+                        <p>للبحث عن فاتورة المياه (تجريبي حالياً)</p>
+                    </div>
+                </div>
+                <div class="button-card">
+                    <div class="button-icon sanitation"><i class="fas fa-wrench"></i></div>
+                    <div class="button-info">
+                        <h4>🔧 خدمات الصرف الصحي</h4>
+                        <p>رابط مباشر لمنصة تقديم طلبات الصرف الصحي</p>
+                    </div>
+                </div>
+                <div class="button-card">
+                    <div class="button-icon facebook"><i class="fab fa-facebook-f"></i></div>
+                    <div class="button-info">
+                        <h4>📘 تابعونا على فيسبوك</h4>
+                        <p>يفتح صفحة المؤسسة الرسمية على فيسبوك</p>
+                    </div>
+                </div>
+                <div class="button-card">
+                    <div class="button-icon install"><i class="fas fa-download"></i></div>
+                    <div class="button-info">
+                        <h4>📲 حمل التطبيق الآن</h4>
+                        <p>رابط تحميل APK لمشاركة التطبيق مع الآخرين</p>
+                    </div>
+                </div>
+                <div class="button-card">
+                    <div class="button-icon clear"><i class="fas fa-broom"></i></div>
+                    <div class="button-info">
+                        <h4>🧹 افراغ الذاكرة المؤقتة</h4>
+                        <p>لتنظيف التطبيق (دون فقدان المفضلات)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Section 3: Water Plan ==================== -->
+        <div class="section" id="plan">
+            <h2 class="section-title"><i class="fas fa-calendar-alt"></i> ثالثاً: استخدام خطة توزيع المياه</h2>
+            
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <div class="step-content"><strong>الدخول إلى الخطة</strong> - من الصفحة الرئيسية، اضغط على الزر الأزرق "🗓️ خطة توزيع المياه"</div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <div class="step-content"><strong>اختر الوحدة الإدارية</strong> - اضغط على القائمة المنسدلة واختر منطقتك (مثال: مدينة طرطوس)</div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <div class="step-content"><strong>اختر مشروع الضخ</strong> - بعد اختيار الوحدة، ستظهر قائمة ثانية، اختر مشروعك</div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">4</div>
+                <div class="step-content"><strong>شاهد الجدول</strong> - سيظهر جدول يحتوي على أيام الضخ والمناطق المستفيدة وعدد الساعات</div>
+            </div>
+
+            <div class="alert-box">
+                <i class="fas fa-star"></i>
+                <div><strong>🌟 اليوم الحالي</strong> يظهر بلون أخضر فاتح وعليه شارة مكتوب عليها "اليوم"</div>
+            </div>
+
+            <!-- تنسيق المفضلة الجديد -->
+            <div class="section-subtitle"><i class="fas fa-star"></i> كيفية حفظ مشروعك المفضل (حتى 5 مشاريع)</div>
+            
+            <div class="fav-action-card">
+                <div class="fav-action-header"><i class="fas fa-plus-circle" style="color:#28a745"></i> إضافة مشروع إلى قائمتي</div>
+                <div class="fav-action-body">
+                    <div class="fav-visual">
+                        <span class="fav-demo green"><i class="fas fa-plus"></i></span>
+                        <i class="fas fa-arrow-left arrow-icon"></i>
+                        <span class="fav-demo gold"><i class="fas fa-check"></i></span>
+                    </div>
+                    <div class="fav-explain">
+                        اضغط على الزر <strong>الأخضر "أضف لقائمتي"</strong> بجانب "مشروع الضخ". <br>
+                        سيتحول الزر إلى لون <strong>ذهبي</strong> مكتوب عليه <strong>"✓ في قائمتي"</strong> للدلالة على نجاح الإضافة.
+                    </div>
+                </div>
+            </div>
+
+            <div class="fav-action-card">
+                <div class="fav-action-header"><i class="fas fa-minus-circle" style="color:#dc3545"></i> إزالة مشروع من قائمتي</div>
+                <div class="fav-action-body">
+                    <div class="fav-visual">
+                        <span class="fav-demo gold"><i class="fas fa-check"></i></span>
+                        <i class="fas fa-arrow-left arrow-icon"></i>
+                        <span class="fav-demo green"><i class="fas fa-plus"></i></span>
+                    </div>
+                    <div class="fav-explain">
+                        اضغط على الزر <strong>الذهبي "✓ في قائمتي"</strong> مرة أخرى.<br>
+                        سيعود الزر إلى لونه <strong>الأخضر</strong> وسيتم إزالة المشروع من القائمة المحفوظة.
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-subtitle"><i class="fas fa-list"></i> قائمة المشاريع المحفوظة</div>
+            <div class="step-box">
+                <div class="step-number">📋</div>
+                <div class="step-content"><strong>عند حفظ مشاريعك، ستظهر قائمة زرقاء عنوانها "قائمتي":</strong><br>
+                • <strong>لتصفح مشروع محفوظ بسرعة:</strong> اضغط على اسم المشروع في القائمة<br>
+                • <strong>لإزالة مشروع من القائمة:</strong> اضغط على علامة <strong>(X)</strong> الرمادية بجانبه</div>
+            </div>
+
+            <div class="section-subtitle"><i class="fas fa-share-alt"></i> مشاركة الخطة وحفظها</div>
+            <div class="buttons-grid" style="grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));">
+                <div class="button-card">
+                    <div class="button-icon" style="background: linear-gradient(135deg, #25D366, #128C7E);"><i class="fab fa-whatsapp"></i></div>
+                    <div class="button-info"><h4>مشاركة واتساب</h4><p>يرسل تفاصيل خطة اليوم عبر واتساب</p></div>
+                </div>
+                <div class="button-card">
+                    <div class="button-icon" style="background: linear-gradient(135deg, #dc3545, #b02a37);"><i class="fas fa-file-pdf"></i></div>
+                    <div class="button-info"><h4>تصدير PDF</h4><p>يحفظ الخطة كملف PDF على هاتفك</p></div>
+                </div>
+                <div class="button-card">
+                    <div class="button-icon" style="background: linear-gradient(135deg, #757575, #616161);"><i class="fas fa-home"></i></div>
+                    <div class="button-info"><h4>العودة للرئيسية</h4><p>في أسفل الصفحة</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Section 4: Invoice ==================== -->
+        <div class="section" id="invoice">
+            <h2 class="section-title"><i class="fas fa-file-invoice-dollar"></i> رابعاً: استعلام عن فاتورة</h2>
+            
+            <div class="alert-box warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div><strong>⚠️ تنبيه مهم جداً:</strong><br>
+                هذه الخدمة حالياً <strong>للتجربة والاختبار فقط</strong>. في <strong>التحديث القادم للتطبيق</strong>، سيتم تفعيل الاستعلام عن الفواتير بشكل حقيقي، وستتيح لك هذه الميزة معرفة قيمة فواتيرك بكل سهولة. البيانات المعروضة حالياً هي نموذجية للتدريب.</div>
+            </div>
+
+            <div class="section-subtitle"><i class="fas fa-search"></i> طريقة البحث الحالية (للاختبار)</div>
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <div class="step-content"><strong>اختر نوع البحث</strong> من القائمة المنسدلة:<br>
+                • الرقم الوطني • اسم المشترك • الباركود • رقم الجوال • رقم الاشتراك</div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <div class="step-content"><strong>أدخل القيمة المطلوبة</strong> في مربع البحث</div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <div class="step-content"><strong>اضغط على زر "بحث"</strong> (باللون الأخضر)</div>
+            </div>
+
+            <!-- تنسيق المفضلة الجديد للفواتير -->
+            <div class="section-subtitle"><i class="fas fa-star"></i> حفظ الاشتراك المفضل (حتى 5 اشتراكات)</div>
+            
+            <div class="fav-action-card">
+                <div class="fav-action-header"><i class="fas fa-plus-circle" style="color:#28a745"></i> إضافة اشتراك إلى قائمتي</div>
+                <div class="fav-action-body">
+                    <div class="fav-visual">
+                        <span class="fav-demo green"><i class="fas fa-plus"></i></span>
+                        <i class="fas fa-arrow-left arrow-icon"></i>
+                        <span class="fav-demo gold"><i class="fas fa-check"></i></span>
+                    </div>
+                    <div class="fav-explain">
+                        داخل بطاقة النتيجة، اضغط على الزر <strong>الأخضر "أضف لقائمتي"</strong>.<br>
+                        سيتحول الزر إلى لون <strong>ذهبي</strong> مكتوب عليه <strong>"✓ في قائمتي"</strong> للدلالة على نجاح الإضافة.
+                    </div>
+                </div>
+            </div>
+
+            <div class="fav-action-card">
+                <div class="fav-action-header"><i class="fas fa-minus-circle" style="color:#dc3545"></i> إزالة اشتراك من قائمتي</div>
+                <div class="fav-action-body">
+                    <div class="fav-visual">
+                        <span class="fav-demo gold"><i class="fas fa-check"></i></span>
+                        <i class="fas fa-arrow-left arrow-icon"></i>
+                        <span class="fav-demo green"><i class="fas fa-plus"></i></span>
+                    </div>
+                    <div class="fav-explain">
+                        اضغط على الزر <strong>الذهبي "✓ في قائمتي"</strong> مرة أخرى.<br>
+                        سيعود الزر إلى لونه <strong>الأخضر</strong> وسيتم إزالة الاشتراك من القائمة المحفوظة.
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-subtitle"><i class="fas fa-list"></i> قائمة الاشتراكات المحفوظة</div>
+            <div class="step-box">
+                <div class="step-number">📋</div>
+                <div class="step-content"><strong>عند حفظ اشتراكاتك، ستظهر قائمة خضراء عنوانها "قائمتي":</strong><br>
+                • <strong>للبحث السريع:</strong> اضغط على اسم المشترك في القائمة ليتم البحث عنه تلقائياً<br>
+                • <strong>لإزالة اشتراك:</strong> اضغط على علامة <strong>(X)</strong> الرمادية بجانبه</div>
+            </div>
+
+            <div class="section-subtitle"><i class="fas fa-print"></i> حفظ الفاتورة</div>
+            <div class="step-box">
+                <div class="step-number">📄</div>
+                <div class="step-content"><strong>تصدير PDF:</strong> اضغط على الزر الأحمر "تصدير PDF" في أسفل الصفحة لحفظ الفاتورة كملف PDF</div>
+            </div>
+
+            <div class="alert-box info">
+                <i class="fas fa-clock"></i>
+                <div><strong>⚡ التحديث القادم سيضيف:</strong><br>
+                • <strong>استعلام عن الفواتير</strong> - تتيح لك معرفة قيمة فواتيرك بسهولة<br>
+                • <strong>إشعارات أكثر ذكاء</strong> - تنبيهات مخصصة حسب استهلاكك<br>
+                • <i class="fas fa-chart-line"></i> <strong>سجل الاستهلاك</strong> - لمتابعة كمية المياه المستهلكة<br>
+                • <strong>دفع الفواتير عبر تطبيق <span class="shamcash-badge">ShamCash</span></strong> - دفع آمن وسريع</div>
+            </div>
+        </div>
+
+        <!-- ==================== Section 5: Report ==================== -->
+        <div class="section" id="report">
+            <h2 class="section-title"><i class="fas fa-exclamation-triangle"></i> خامساً: الإبلاغ عن هدر المياه</h2>
+            
+            <div class="step-box">
+                <div class="step-number">1</div>
+                <div class="step-content"><strong>من الصفحة الرئيسية، اضغط على الزر الأخضر</strong> "📢 إبلاغ عن هدر المياه"</div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">2</div>
+                <div class="step-content"><strong>ستظهر لك قائمة بـ 9 أزرار</strong> لكل منطقة من مناطق طرطوس</div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">3</div>
+                <div class="step-content"><strong>اختر منطقتك</strong> (مدينة طرطوس، ريف طرطوس، بانياس، صافيتا، ...)</div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">4</div>
+                <div class="step-content"><strong>سيفتح رابط الإبلاغ</strong> في متصفح هاتفك، املأ البيانات وأرسل البلاغ</div>
+            </div>
+
+            <div class="buttons-grid" style="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));">
+                <div class="button-card"><div class="button-icon" style="background:#2196F3;"><i class="fas fa-city"></i></div><div class="button-info"><h4>مدينة طرطوس</h4></div></div>
+                <div class="button-card"><div class="button-icon" style="background:#4CAF50;"><i class="fas fa-tree"></i></div><div class="button-info"><h4>ريف طرطوس</h4></div></div>
+                <div class="button-card"><div class="button-icon" style="background:#9C27B0;"><i class="fas fa-anchor"></i></div><div class="button-info"><h4>بانياس</h4></div></div>
+                <div class="button-card"><div class="button-icon" style="background:#E91E63;"><i class="fas fa-mountain"></i></div><div class="button-info"><h4>مشتى الحلو</h4></div></div>
+                <div class="button-card"><div class="button-icon" style="background:#3F51B5;"><i class="fas fa-church"></i></div><div class="button-info"><h4>صافيتا</h4></div></div>
+                <div class="button-card"><div class="button-icon" style="background:#009688;"><i class="fas fa-leaf"></i></div><div class="button-info"><h4>الدريكيش</h4></div></div>
+            </div>
+        </div>
+
+        <!-- ==================== Section 6: Favorites Summary ==================== -->
+        <div class="section" id="fav">
+            <h2 class="section-title"><i class="fas fa-star"></i> سادساً: ملخص أزرار المفضلة</h2>
+            
+            <table class="info-table">
+                <thead>
+                    <tr><th>الزر</th><th>اللون</th><th>مكانه في التطبيق</th><th>الوظيفة</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="text-align:center"><span class="fav-demo green" style="width:35px;height:35px;font-size:0.9rem;"><i class="fas fa-plus"></i></span></td>
+                        <td>🟢 أخضر</td>
+                        <td>صفحة خطة المياه (بجانب "مشروع الضخ")</td>
+                        <td><strong>أضف لقائمتي:</strong> يضيف مشروع الضخ للقائمة</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:center"><span class="fav-demo gold" style="width:35px;height:35px;font-size:0.9rem;"><i class="fas fa-check"></i></span></td>
+                        <td>🟡 ذهبي</td>
+                        <td>صفحة خطة المياه / صفحة الفاتورة</td>
+                        <td><strong>✓ في قائمتي:</strong> يعني أن العنصر محفوظ مسبقاً</td>
+                    </tr>
+                    <tr>
+                        <td style="text-align:center"><span class="fav-demo green" style="width:35px;height:35px;font-size:0.9rem;"><i class="fas fa-plus"></i></span></td>
+                        <td>🟢 أخضر</td>
+                        <td>صفحة الفاتورة (داخل بطاقة النتيجة)</td>
+                        <td><strong>أضف لقائمتي:</strong> يضيف الاشتراك للقائمة</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="alert-box">
+                <i class="fas fa-lightbulb"></i>
+                <div><strong>تذكير مهم:</strong> يمكنك حفظ <strong>5 مشاريع ضخ</strong> كحد أقصى، و <strong>5 اشتراكات فواتير</strong> كحد أقصى.</div>
+            </div>
+        </div>
+
+        <!-- ==================== Section 7: Notifications ==================== -->
+        <div class="section" id="notify">
+            <h2 class="section-title"><i class="fas fa-bell"></i> سابعاً: الإشعارات والتنبيهات</h2>
+            
+            <div class="step-box">
+                <div class="step-number">🔔</div>
+                <div class="step-content"><strong>متى تظهر؟</strong> - فقط عندما تكون في <strong>الصفحة الرئيسية</strong></div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">📢</div>
+                <div class="step-content"><strong>ماذا تحتوي؟</strong> - أخبار وتنبيهات مهمة من المؤسسة</div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">⏱️</div>
+                <div class="step-content"><strong>كم تبقى؟</strong> - تختفي تلقائياً بعد 7 ثوانٍ</div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">👆</div>
+                <div class="step-content"><strong>كيف تخفيها؟</strong> - اسحب الإشعار إلى <strong>اليسار</strong> لإخفائه فوراً</div>
+            </div>
+            <div class="step-box">
+                <div class="step-number">🔊</div>
+                <div class="step-content"><strong>صوت الإشعار</strong> - يصدر صوت قطرات ماء مع كل إشعار جديد</div>
+            </div>
+        </div>
+
+        <!-- ==================== Section 8: Tips ==================== -->
+        <div class="section" id="tips">
+            <h2 class="section-title"><i class="fas fa-lightbulb"></i> ثامناً: نصائح سريعة وحلول للمشاكل</h2>
+            
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <i class="fas fa-sync-alt"></i>
+                    <h4>التطبيق لا يستجيب؟</h4>
+                    <p>اسحب الشاشة من أعلى إلى أسفل للتحديث</p>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-star"></i>
+                    <h4>نسيت مشروعي المفضل؟</h4>
+                    <p>افتح قائمة "قائمتي" في صفحة الخطة</p>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-share-alt"></i>
+                    <h4>أريد مشاركة التطبيق مع صديق</h4>
+                    <p>استخدم زر "📲 حمل التطبيق الآن"</p>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-bell-slash"></i>
+                    <h4>لا أرى الإشعارات</h4>
+                    <p>تأكد أنك في الصفحة الرئيسية</p>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-trash-alt"></i>
+                    <h4>حذف مشروع من المفضلة</h4>
+                    <p>اضغط على علامة (X) بجانبه في القائمة</p>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-moon"></i>
+                    <h4>تفعيل الوضع الليلي</h4>
+                    <p>اضغط على زر القمر/الشمس في أعلى اليمين</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== Section 9: Coming Soon ==================== -->
+        <div class="section">
+            <h2 class="section-title"><i class="fas fa-clock"></i> التحديثات القادمة</h2>
+            <div class="tips-grid">
+                <div class="tip-card" style="background:#e0f0ff;">
+                    <i class="fas fa-search" style="color:#007BFF"></i>
+                    <h4 style="color:#004999">استعلام عن الفواتير</h4>
+                    <p>تتيح لك معرفة قيمة فواتيرك بكل سهولة</p>
+                </div>
+                <div class="tip-card" style="background:#e0f0ff;">
+                    <i class="fas fa-brain" style="color:#007BFF"></i>
+                    <h4 style="color:#004999">إشعارات أكثر ذكاء</h4>
+                    <p>تنبيهات مخصصة حسب استهلاكك واحتياجاتك</p>
+                </div>
+                <div class="tip-card" style="background:#e0f0ff;">
+                    <i class="fas fa-chart-line" style="color:#007BFF"></i>
+                    <h4 style="color:#004999">سجل الاستهلاك</h4>
+                    <p>لمتابعة كمية المياه المستهلكة بشكل دوري</p>
+                </div>
+                <div class="tip-card" style="background:#e0f0ff;">
+                    <i class="fas fa-money-bill-wave" style="color:#007BFF"></i>
+                    <h4 style="color:#004999">دفع الفواتير عبر ShamCash</h4>
+                    <p>دفع آمن وسريع عبر تطبيق ShamCash</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="guide-footer">
+            <i class="fas fa-tint"></i> شركة مياه طرطوس - المكتب الإعلامي<br>
+            <small>محمد حاج معلا</small>
+        </div>
+    </div>
+</body>
+</html>
