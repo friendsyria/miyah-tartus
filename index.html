@@ -17,12 +17,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
-    <!-- فقط html2pdf للتصدير، لم نعد بحاجة لـ XLSX للفواتير -->
+    <!-- مكتبة XLSX مطلوبة فقط لخطة توزيع المياه (toze3.xlsx) -->
     <script async src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-    <script async src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script async src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <style>
-        /* جميع الأنماط الأصلية محفوظة كما هي */
         html, body {
             overscroll-behavior-y: contain;
             -webkit-tap-highlight-color: transparent;
@@ -394,10 +393,7 @@
         }
 
         .btn-pdf-inv { background: linear-gradient(135deg, #dc3545, #b02a37); }
-        
-        .btn-help {
-            background: linear-gradient(135deg, #17a2b8, #0f6b7a);
-        }
+        .btn-help { background: linear-gradient(135deg, #17a2b8, #0f6b7a); }
 
         .actions-row {
             display: flex;
@@ -932,6 +928,25 @@
         
         .header-texts { flex: 1; }
 
+        /* شريط تقدم التحميل */
+        .load-progress {
+            width: 100%;
+            height: 3px;
+            background: var(--border-color);
+            border-radius: 3px;
+            margin-top: 8px;
+            overflow: hidden;
+            display: none;
+        }
+        .load-progress.active { display: block; }
+        .load-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #84cc16, #65a30d);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
         @media (max-width: 600px) { 
             #notification-center { width: 280px; right: 8px; top: 85px; } 
             .btn, .btn-action { padding: 10px 12px; font-size: 0.8rem; gap: 8px; } 
@@ -969,7 +984,7 @@
             .dark-mode-toggle, .invoice-search-box, .disclaimer-box, 
             .news-bar, #notification-center, #toast-container,
             .results-count-label, #pull-to-refresh, .empty-state, 
-            .favorites-list {
+            .favorites-list, .load-progress {
                 display: none !important;
             }
             .page { 
@@ -1000,670 +1015,1169 @@
             .detail-item { background: #f5f5f5 !important; }
             .result-cards { gap: 0; }
         }
-        
-        /* شريط التقدم */
-        .progress-container {
-            width: 80%;
-            max-width: 300px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 10px;
-            margin-top: 20px;
-            display: none;
-        }
-        .progress-bar {
-            width: 0%;
-            height: 8px;
-            background: white;
-            border-radius: 10px;
-            transition: width 0.3s;
-        }
-        .progress-text {
-            margin-top: 8px;
-            font-size: 0.8rem;
-        }
     </style>
 </head>
 <body>
-<div class="app-container">
-    <div class="fixed-top">
-        <header>
-            <div class="header-content">
-                <img src="logo.png?v=2" alt="شعار المؤسسة" id="header-logo">
-                <div class="header-text">
-                    <h1 id="dynamic-title">شركة مياه طرطوس</h1>
-                    <div class="subtitle" id="dynamic-subtitle">التطبيق الرسمي</div>
+    <div class="app-container">
+        <div class="fixed-top">
+            <header>
+                <div class="header-content">
+                    <img src="logo.png?v=2" alt="شعار المؤسسة" id="header-logo">
+                    <div class="header-text">
+                        <h1 id="dynamic-title">شركة مياه طرطوس</h1>
+                        <div class="subtitle" id="dynamic-subtitle">التطبيق الرسمي</div>
+                    </div>
+                </div>
+                <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+                    <i class="fas fa-moon" id="dark-mode-icon"></i>
+                </button>
+            </header>
+            <div class="news-bar">
+                <div class="news-bar-inner skeleton" id="scrolling-news" style="width: 60%;">&nbsp;</div>
+            </div>
+        </div>
+
+        <div class="scrollable-content" id="scrollableContent">
+            <!-- ==================== الصفحة الرئيسية ==================== -->
+            <div id="page-home" class="page active">
+                <div class="main-buttons">
+                    <button onclick="navigateTo('report')" class="btn btn-complaint">
+                        <i class="fas fa-exclamation-triangle btn-icon"></i>
+                        <span class="btn-text">📢 إبلاغ عن هدر المياه وأعطال الشبكات</span>
+                    </button>
+                    <button onclick="navigateTo('plan')" class="btn btn-water-plan">
+                        <i class="fas fa-tint btn-icon"></i>
+                        <span class="btn-text">🗓️ خطة توزيع المياه</span>
+                    </button>
+                    <button onclick="navigateTo('invoice')" class="btn btn-invoice">
+                        <i class="fas fa-file-invoice-dollar btn-icon"></i>
+                        <span class="btn-text">🧾 استعلام عن فاتورة</span>
+                    </button>
+                    <a href="https://ee.kobotoolbox.org/x/VcxqvTkO" class="btn btn-sanitation" target="_blank">
+                        <i class="fas fa-wrench btn-icon"></i>
+                        <span class="btn-text">🔧 خدمات الصرف الصحي</span>
+                    </a>
+                    <a href="https://www.facebook.com/tawsse.com.sy" class="btn btn-facebook" target="_blank">
+                        <i class="fab fa-facebook-f btn-icon"></i>
+                        <span class="btn-text">📘 تابعونا على فيسبوك</span>
+                    </a>
+                    <button onclick="window.open('https://twc.ct.ws/app/miyah-tartus.apk', '_blank')" class="btn btn-install">
+                        <i class="fas fa-download btn-icon"></i>
+                        <span class="btn-text">📲 حمل التطبيق الآن</span>
+                    </button>
+                    <button onclick="clearAppMemory()" class="btn btn-clear">
+                        <i class="fas fa-broom btn-icon"></i>
+                        <span class="btn-text">🧹 افراغ الذاكرة المؤقتة</span>
+                    </button>
+                    <button onclick="openHelpPage()" class="btn btn-help">
+                        <i class="fas fa-question-circle btn-icon"></i>
+                        <span class="btn-text">📖 التعليمات والدعم الفني</span>
+                    </button>
                 </div>
             </div>
-            <button class="dark-mode-toggle" onclick="toggleDarkMode()"><i class="fas fa-moon" id="dark-mode-icon"></i></button>
-        </header>
-        <div class="news-bar"><div class="news-bar-inner skeleton" id="scrolling-news" style="width:60%">&nbsp;</div></div>
-    </div>
-    <div class="scrollable-content" id="scrollableContent">
-        <div id="page-home" class="page active">
-            <div class="main-buttons">
-                <button onclick="navigateTo('report')" class="btn btn-complaint"><i class="fas fa-exclamation-triangle btn-icon"></i><span class="btn-text">📢 إبلاغ عن هدر المياه وأعطال الشبكات</span></button>
-                <button onclick="navigateTo('plan')" class="btn btn-water-plan"><i class="fas fa-tint btn-icon"></i><span class="btn-text">🗓️ خطة توزيع المياه</span></button>
-                <button onclick="navigateTo('invoice')" class="btn btn-invoice"><i class="fas fa-file-invoice-dollar btn-icon"></i><span class="btn-text">🧾 استعلام عن فاتورة</span></button>
-                <a href="https://ee.kobotoolbox.org/x/VcxqvTkO" class="btn btn-sanitation" target="_blank"><i class="fas fa-wrench btn-icon"></i><span class="btn-text">🔧 خدمات الصرف الصحي</span></a>
-                <a href="https://www.facebook.com/tawsse.com.sy" class="btn btn-facebook" target="_blank"><i class="fab fa-facebook-f btn-icon"></i><span class="btn-text">📘 تابعونا على فيسبوك</span></a>
-                <button onclick="window.open('https://twc.ct.ws/app/miyah-tartus.apk', '_blank')" class="btn btn-install"><i class="fas fa-download btn-icon"></i><span class="btn-text">📲 حمل التطبيق الآن</span></button>
-                <button onclick="clearAppMemory()" class="btn btn-clear"><i class="fas fa-broom btn-icon"></i><span class="btn-text">🧹 افراغ الذاكرة المؤقتة</span></button>
-                <button onclick="openHelpPage()" class="btn btn-help"><i class="fas fa-question-circle btn-icon"></i><span class="btn-text">📖 التعليمات والدعم الفني</span></button>
+
+            <!-- ==================== صفحة خطة المياه ==================== -->
+            <div id="page-plan" class="page">
+                <div class="plan-header">
+                    <span class="plan-main-title">📅 خطة توزيع المياه</span>
+                    <span class="plan-month-title" id="planMonthDisplay">--</span>
+                    <span class="plan-subtitle">اختر الوحدة والمشروع الخاص بك</span>
+                </div>
+
+                <div class="favorites-list" id="planFavoritesList" style="display:none;">
+                    <div class="favorites-header" onclick="togglePlanFavoritesCollapse()">
+                        <span><i class="fas fa-star" style="color:#ffc107;"></i> مشاريعي المفضلة</span>
+                        <i class="fas fa-chevron-down" id="planFavToggleIcon"></i>
+                    </div>
+                    <div class="favorites-items" id="planFavItems"></div>
+                </div>
+
+                <div class="form-controls">
+                    <div class="input-group">
+                        <label><i class="fas fa-city"></i> الوحدة الإدارية:</label>
+                        <select id="unitSelect"><option value="">-- اختر الوحدة --</option></select>
+                    </div>
+                    <div class="input-group">
+                        <label>
+                            <span><i class="fas fa-tachometer-alt"></i> مشروع الضخ:</span>
+                            <button class="fav-btn" id="btn-fav-plan" onclick="togglePlanFavorite()" title="إضافة هذا المشروع إلى قائمتي">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </label>
+                        <select id="projectSelect"><option value="">-- اختر المشروع أولاً --</option></select>
+                    </div>
+                </div>
+
+                <div class="table-container" id="tableWrapper">
+                    <table id="resultTable">
+                        <thead>
+                            <tr><th>📅 اليوم</th><th>🗓️ التاريخ</th><th>⚙️ المشروع</th><th>👥 المستفيدين</th><th>⏱️ الساعات</th></tr>
+                        </thead>
+                        <tbody id="scheduleBody"></tbody>
+                    </table>
+                </div>
+
+                <div class="actions-row">
+                    <button onclick="shareWhatsApp()" class="btn-action btn-whatsapp"><i class="fab fa-whatsapp"></i> مشاركة الخطة</button>
+                    <button onclick="exportToPDF()" class="btn-action btn-pdf"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
+                </div>
+                <div class="btn-back-full">
+                    <button onclick="navigateTo('home')" class="btn btn-back"><i class="fas fa-home"></i> العودة للرئيسية</button>
+                </div>
+            </div>
+
+            <!-- ==================== صفحة الفواتير ==================== -->
+            <div id="page-invoice" class="page">
+                <div class="plan-header">
+                    <span class="plan-main-title" style="color: #65a30d;">🧾 استعلام عن فاتورة</span>
+                    <span class="plan-subtitle">ابحث عن اشتراكك بأي من الطرق التالية</span>
+                </div>
+
+                <div class="favorites-list" id="invoiceFavoritesList" style="display:none;">
+                    <div class="favorites-header" onclick="toggleInvoiceFavoritesCollapse()">
+                        <span><i class="fas fa-star" style="color:#ffc107;"></i> اشتراكاتي المفضلة</span>
+                        <i class="fas fa-chevron-down" id="invoiceFavToggleIcon"></i>
+                    </div>
+                    <div class="favorites-items" id="invoiceFavItems"></div>
+                </div>
+
+                <div class="invoice-search-box">
+                    <div class="input-group">
+                        <label><i class="fas fa-search"></i> نوع البحث:</label>
+                        <select id="searchType" onchange="updateSearchPlaceholder()">
+                            <option value="">-- اختر نوع البحث --</option>
+                            <option value="nationalId">الرقم الوطني</option>
+                            <option value="name">اسم المشترك</option>
+                            <option value="barcode">الباركود</option>
+                            <option value="phone">رقم الجوال</option>
+                            <option value="subNumber">رقم الاشتراك</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label><i class="fas fa-keyboard"></i> قيمة البحث:</label>
+                        <input type="text" id="searchInput" placeholder="أدخل قيمة البحث هنا..." autocomplete="off" maxlength="100" onkeydown="if(event.key==='Enter')searchInvoice()">
+                    </div>
+                    <div class="load-progress" id="invoiceLoadProgress">
+                        <div class="load-progress-bar" id="invoiceLoadBar"></div>
+                    </div>
+                    <button class="btn-search" id="btnSearchInvoice" onclick="searchInvoice()"><i class="fas fa-search"></i> بحث</button>
+                </div>
+
+                <div id="invoiceResults"></div>
+
+                <div class="invoice-footer-actions">
+                    <button onclick="exportInvoicePDF()" class="btn-action btn-pdf-inv"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
+                    <button onclick="navigateTo('home')" class="btn-action btn-back"><i class="fas fa-home"></i> العودة للرئيسية</button>
+                </div>
+            </div>
+
+            <!-- ==================== صفحة الإبلاغ ==================== -->
+            <div id="page-report" class="page">
+                <p class="instruction-text"><i class="fas fa-water"></i> يرجى اختيار المنطقة لإرسال البلاغ</p>
+                <div class="main-buttons">
+                    <a href="https://ee.kobotoolbox.org/x/IvxRabyB" class="btn btn-tartus-city" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في مدينة طرطوس</span></a>
+                    <a href="https://ee.kobotoolbox.org/x/E6bhMyLd" class="btn btn-rural-tartus" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في ريف طرطوس</span></a>
+                    <a href="https://ee.kobotoolbox.org/x/bGeIkAp0" class="btn btn-safsafah" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في الصفصافة</span></a>
+                    <a href="https://ee.kobotoolbox.org/x/CBYvamiG" class="btn btn-baniyas" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في بانياس</span></a>
+                    <a href="https://ee.kobotoolbox.org/x/2wIn8g87" class="btn btn-mashta" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في مشتى الحلو</span></a>
+                    <a href="https://ee.kobotoolbox.org/x/MF0ii7eN" class="btn btn-sheikh-badr" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في الشيخ بدر</span></a>
+                    <a href="https://ee.kobotoolbox.org/x/NJkbEbZT" class="btn btn-qadmus" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في القدموس</span></a>
+                    <a href="https://ee.kobotoolbox.org/x/On9oIBqp" class="btn btn-safita" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في صافيتا</span></a>
+                    <a href="https://ee.kobotoolbox.org/x/rzcL7DMH" class="btn btn-dreikish" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في الدريكيش</span></a>
+                    <button onclick="navigateTo('home')" class="btn btn-back"><i class="fas fa-arrow-right btn-icon"></i><span class="btn-text">العودة للرئيسية</span></button>
+                </div>
             </div>
         </div>
-        <div id="page-plan" class="page">
-            <div class="plan-header"><span class="plan-main-title">📅 خطة توزيع المياه</span><span class="plan-month-title" id="planMonthDisplay">--</span><span class="plan-subtitle">اختر الوحدة والمشروع الخاص بك</span></div>
-            <div class="favorites-list" id="planFavoritesList" style="display:none;"><div class="favorites-header" onclick="togglePlanFavoritesCollapse()"><span><i class="fas fa-star" style="color:#ffc107;"></i> مشاريعي المفضلة</span><i class="fas fa-chevron-down" id="planFavToggleIcon"></i></div><div class="favorites-items" id="planFavItems"></div></div>
-            <div class="form-controls"><div class="input-group"><label><i class="fas fa-city"></i> الوحدة الإدارية:</label><select id="unitSelect"><option value="">-- اختر الوحدة --</option></select></div><div class="input-group"><label><span><i class="fas fa-tachometer-alt"></i> مشروع الضخ:</span><button class="fav-btn" id="btn-fav-plan" onclick="togglePlanFavorite()" title="إضافة هذا المشروع إلى قائمتي"><i class="fas fa-plus"></i></button></label><select id="projectSelect"><option value="">-- اختر المشروع أولاً --</option></select></div></div>
-            <div class="table-container" id="tableWrapper"><table id="resultTable"><thead><tr><th>📅 اليوم</th><th>🗓️ التاريخ</th><th>⚙️ المشروع</th><th>👥 المستفيدين</th><th>⏱️ الساعات</th></tr></thead><tbody id="scheduleBody"></tbody></table></div>
-            <div class="actions-row"><button onclick="shareWhatsApp()" class="btn-action btn-whatsapp"><i class="fab fa-whatsapp"></i> مشاركة الخطة</button><button onclick="exportToPDF()" class="btn-action btn-pdf"><i class="fas fa-file-pdf"></i> تصدير PDF</button></div>
-            <div class="btn-back-full"><button onclick="navigateTo('home')" class="btn btn-back"><i class="fas fa-home"></i> العودة للرئيسية</button></div>
-        </div>
-        <div id="page-invoice" class="page">
-            <div class="plan-header"><span class="plan-main-title" style="color:#65a30d">🧾 استعلام عن فاتورة</span><span class="plan-subtitle">ابحث عن اشتراكك بأي من الطرق التالية</span></div>
-            <div class="favorites-list" id="invoiceFavoritesList" style="display:none;"><div class="favorites-header" onclick="toggleInvoiceFavoritesCollapse()"><span><i class="fas fa-star" style="color:#ffc107;"></i> اشتراكاتي المفضلة</span><i class="fas fa-chevron-down" id="invoiceFavToggleIcon"></i></div><div class="favorites-items" id="invoiceFavItems"></div></div>
-            <div class="invoice-search-box"><div class="input-group"><label><i class="fas fa-search"></i> نوع البحث:</label><select id="searchType" onchange="updateSearchPlaceholder()"><option value="">-- اختر نوع البحث --</option><option value="nationalId">الرقم الوطني</option><option value="name">اسم المشترك</option><option value="barcode">الباركود</option><option value="phone">رقم الجوال</option><option value="subNumber">رقم الاشتراك</option></select></div><div class="input-group"><label><i class="fas fa-keyboard"></i> قيمة البحث:</label><input type="text" id="searchInput" placeholder="أدخل قيمة البحث هنا..." autocomplete="off" onkeydown="if(event.key==='Enter')searchInvoice()"></div><button class="btn-search" onclick="searchInvoice()"><i class="fas fa-search"></i> بحث</button></div>
-            <div id="invoiceResults"></div>
-            <div class="invoice-footer-actions"><button onclick="exportInvoicePDF()" class="btn-action btn-pdf-inv"><i class="fas fa-file-pdf"></i> تصدير PDF</button><button onclick="navigateTo('home')" class="btn-action btn-back"><i class="fas fa-home"></i> العودة للرئيسية</button></div>
-        </div>
-        <div id="page-report" class="page">
-            <p class="instruction-text"><i class="fas fa-water"></i> يرجى اختيار المنطقة لإرسال البلاغ</p>
-            <div class="main-buttons">
-                <a href="https://ee.kobotoolbox.org/x/IvxRabyB" class="btn btn-tartus-city" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في مدينة طرطوس</span></a>
-                <a href="https://ee.kobotoolbox.org/x/E6bhMyLd" class="btn btn-rural-tartus" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في ريف طرطوس</span></a>
-                <a href="https://ee.kobotoolbox.org/x/bGeIkAp0" class="btn btn-safsafah" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في الصفصافة</span></a>
-                <a href="https://ee.kobotoolbox.org/x/CBYvamiG" class="btn btn-baniyas" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في بانياس</span></a>
-                <a href="https://ee.kobotoolbox.org/x/2wIn8g87" class="btn btn-mashta" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في مشتى الحلو</span></a>
-                <a href="https://ee.kobotoolbox.org/x/MF0ii7eN" class="btn btn-sheikh-badr" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في الشيخ بدر</span></a>
-                <a href="https://ee.kobotoolbox.org/x/NJkbEbZT" class="btn btn-qadmus" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في القدموس</span></a>
-                <a href="https://ee.kobotoolbox.org/x/On9oIBqp" class="btn btn-safita" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في صافيتا</span></a>
-                <a href="https://ee.kobotoolbox.org/x/rzcL7DMH" class="btn btn-dreikish" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في الدريكيش</span></a>
-                <button onclick="navigateTo('home')" class="btn btn-back"><i class="fas fa-arrow-right btn-icon"></i><span class="btn-text">العودة للرئيسية</span></button>
-            </div>
+
+        <footer>
+            <span class="footer-text"><i class="fas fa-chalkboard-user"></i> المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا</span>
+        </footer>
+    </div>
+
+    <div id="splash-screen">
+        <div class="splash-content">
+            <img src="logo.png?v=2" alt="شعار المؤسسة" id="splash-logo">
+            <h1>💧 شركة مياه طرطوس</h1>
+            <p>خدمات مائية موثوقة</p>
+            <div class="audio-btn" onclick="grantAudioPermission()"><i class="fas fa-volume-up"></i> <span>اضغط لتفعيل الصوت والدخول</span></div>
         </div>
     </div>
-    <footer><span class="footer-text"><i class="fas fa-chalkboard-user"></i> المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا</span></footer>
-</div>
-<div id="splash-screen"><div class="splash-content"><img src="logo.png?v=2" id="splash-logo"><h1>💧 شركة مياه طرطوس</h1><p>خدمات مائية موثوقة</p><div class="audio-btn" onclick="grantAudioPermission()"><i class="fas fa-volume-up"></i> <span>اضغط لتفعيل الصوت والدخول</span></div><div class="progress-container" id="splash-progress"><div class="progress-bar" id="splash-progress-bar"></div><div class="progress-text" id="splash-progress-text">جاري تحميل البيانات...</div></div></div></div>
-<div id="offline-screen"><i class="fas fa-wifi"></i><h2>لا يوجد اتصال بالإنترنت</h2><p>يرجى التحقق من اتصالك بالشبكة والمحاولة مرة أخرى</p><button onclick="location.reload()"><i class="fas fa-redo"></i> إعادة المحاولة</button></div>
-<div id="pull-to-refresh"><i class="fas fa-sync-alt"></i></div>
-<div id="notification-center"></div>
-<div id="toast-container"></div>
 
-<script>
-// ========== المتغيرات العامة ==========
-let notificationSound = null;
-let audioAllowed = false;
-let notificationQueue = [];
-let isShowingNotification = false;
-let waterPlanData = [];
-let invoiceData = [];
-let invoiceDataLoaded = false;
-let pendingPeriodicNotification = false;
-let cachedNotificationMessages = [];
+    <div id="offline-screen">
+        <i class="fas fa-wifi"></i>
+        <h2>لا يوجد اتصال بالإنترنت</h2>
+        <p>يرجى التحقق من اتصالك بالشبكة والمحاولة مرة أخرى</p>
+        <button onclick="location.reload()"><i class="fas fa-redo"></i> إعادة المحاولة</button>
+    </div>
 
-// فهارس البحث السريعة
-let nationalIdMap = new Map();
-let subNumberMap = new Map();
-let barcodeMap = new Map();
-let phoneMap = new Map();
-let nameMap = new Map();
+    <div id="pull-to-refresh"><i class="fas fa-sync-alt"></i></div>
+    <div id="notification-center"></div>
+    <div id="toast-container"></div>
 
-// IndexedDB
-const DB_NAME = 'InvoiceDB';
-const STORE_NAME = 'invoiceStore';
-const DB_VERSION = 1;
+    <script>
+        // ========== المتغيرات العامة ==========
+        let notificationSound = null;
+        let audioAllowed = false;
+        let notificationQueue = [];
+        let isShowingNotification = false;
+        let waterPlanData = [];
+        let invoiceData = [];
+        let invoiceDataLoaded = false;
+        let invoiceDataLoading = false;
+        let pendingPeriodicNotification = false;
+        let cachedNotificationMessages = [];
 
-// ========== دوال مساعدة ==========
-function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
-function showToast(msg) {
-    const c = document.getElementById('toast-container');
-    const t = document.createElement('div');
-    t.className = 'toast';
-    t.textContent = msg;
-    c.appendChild(t);
-    setTimeout(() => t.classList.add('show'), 10);
-    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 2500);
-}
-
-// IndexedDB دوال
-function openDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
-        request.onerror = () => reject(request.error);
-        request.onsuccess = () => resolve(request.result);
-        request.onupgradeneeded = (event) => {
-            const db = event.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME);
-            }
+        // ========================================================
+        //  خريطة أسماء الحقول في ملف data_compact.json
+        //  عدّل هذه الأسماء فقط إذا كانت أسماء الحقول في JSON مختلفة
+        // ========================================================
+        const INVOICE_FIELDS = {
+            nationalId:   ['الرقم الوطني'],
+            name:         ['الاسم'],
+            barcode:      ['باركود'],
+            phone:        ['رقم الجوال'],
+            subNumber:    ['رقم الاشتراك'],
+            meterStatus:  ['حالة العداد'],
+            calcType:     ['رمز الاحتساب'],
+            totalUnpaid:  ['إجمالي الفواتير الغير مدفوعة', 'إجمالي الفواتير غير المدفوعة'],
+            countUnpaid:  ['عدد الفواتير الغير مدفوعة', 'عدد الفواتير غير المدفوعة'],
+            address:      ['العنوان'],
+            meterNumber:  ['رقم العداد']
         };
-    });
-}
 
-async function saveInvoiceDataToIndexedDB(data) {
-    try {
-        const db = await openDB();
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        store.put(data, 'invoiceData');
-        await new Promise((resolve, reject) => {
-            tx.oncomplete = resolve;
-            tx.onerror = reject;
-        });
-        db.close();
-    } catch(e) { console.warn('IndexedDB save error:', e); }
-}
+        // ========== الفهارس الذكية للبحث السريع O(1) ==========
+        const invoiceIndexes = {
+            nationalId: new Map(),   // قيمة ← [فهرس، فهرس، ...]
+            name:       new Map(),   // بادئة 3 حروف ← [فهرس، ...]
+            barcode:    new Map(),   // قيمة ← [فهرس، ...]
+            phone:      new Map(),   // قيمة ← [فهرس، ...]
+            subNumber:  new Map()    // قيمة ← [فهرس، ...]
+        };
 
-async function loadInvoiceDataFromIndexedDB() {
-    try {
-        const db = await openDB();
-        const tx = db.transaction(STORE_NAME, 'readonly');
-        const store = tx.objectStore(STORE_NAME);
-        const data = await new Promise((resolve, reject) => {
-            const req = store.get('invoiceData');
-            req.onsuccess = () => resolve(req.result);
-            req.onerror = reject;
-        });
-        db.close();
-        return data;
-    } catch(e) { return null; }
-}
-
-// بناء الفهارس
-function buildSearchIndexes() {
-    nationalIdMap.clear();
-    subNumberMap.clear();
-    barcodeMap.clear();
-    phoneMap.clear();
-    nameMap.clear();
-    
-    console.log('جاري بناء فهارس البحث لـ', invoiceData.length, 'سجل...');
-    
-    for (const row of invoiceData) {
-        const natId = String(findColumnValue(row, ['الرقم الوطني']) || '').trim();
-        const subNum = String(findColumnValue(row, ['رقم الاشتراك']) || '').trim();
-        const barcode = String(findColumnValue(row, ['باركود']) || '').trim();
-        const phone = String(findColumnValue(row, ['رقم الجوال']) || '').trim();
-        const name = String(findColumnValue(row, ['الاسم']) || '').toLowerCase().trim();
+        // ========== أدوات مساعدة آمنة ==========
         
-        if (natId) nationalIdMap.set(natId, row);
-        if (subNum) subNumberMap.set(subNum, row);
-        if (barcode) barcodeMap.set(barcode, row);
-        if (phone) {
-            if (!phoneMap.has(phone)) phoneMap.set(phone, []);
-            phoneMap.get(phone).push(row);
+        /** تطبيع نص للبحث: trim + lowercase + إزالة المسافات الزائدة */
+        function normalizeStr(val) {
+            if (val === null || val === undefined) return '';
+            return String(val).trim().replace(/\s+/g, ' ').toLowerCase();
         }
-        if (name && name !== '—' && name !== '') {
-            if (!nameMap.has(name)) nameMap.set(name, []);
-            nameMap.get(name).push(row);
+
+        /** تعقيم نص لمنع XSS عند إدخاله في innerHTML */
+        function sanitize(str) {
+            if (str === null || str === undefined) return '';
+            const div = document.createElement('div');
+            div.textContent = String(str);
+            return div.innerHTML;
         }
-    }
-    console.log('تم بناء الفهارس بنجاح');
-}
 
-// ========== فتح صفحة التعليمات ==========
-function openHelpPage() {
-    try {
-        window.open('Help.html', '_blank');
-    } catch(e) {
-        showToast('⚠️ حدث خطأ في فتح صفحة التعليمات');
-    }
-}
-
-// ========== إدارة المفضلات - خطة المياه ==========
-function getPlanFavorites() { return JSON.parse(localStorage.getItem('planFavorites') || '[]'); }
-function savePlanFavorites(favorites) { localStorage.setItem('planFavorites', JSON.stringify(favorites.slice(0,5))); }
-function togglePlanFavorite() {
-    const unit = document.getElementById('unitSelect').value;
-    const project = document.getElementById('projectSelect').value;
-    const btn = document.getElementById('btn-fav-plan');
-    if (!unit || !project) { showToast('الرجاء اختيار الوحدة والمشروع أولاً'); return; }
-    let favorites = getPlanFavorites();
-    const existingIndex = favorites.findIndex(f => f.unit === unit && f.project === project);
-    if (existingIndex !== -1) {
-        favorites.splice(existingIndex,1);
-        btn.innerHTML = '<i class="fas fa-plus"></i>';
-        btn.classList.remove('active');
-        showToast('✓ تم إزالة المشروع من قائمتي');
-    } else {
-        if (favorites.length >= 5) { showToast('⚠️ لا يمكن إضافة أكثر من 5 مشاريع مفضلة'); return; }
-        favorites.push({ unit, project, name: project });
-        btn.innerHTML = '<i class="fas fa-check"></i>';
-        btn.classList.add('active');
-        showToast('✓ تم إضافة المشروع إلى قائمتي');
-    }
-    savePlanFavorites(favorites);
-    renderPlanFavorites();
-}
-function renderPlanFavorites() {
-    const favorites = getPlanFavorites();
-    const container = document.getElementById('planFavItems');
-    const listContainer = document.getElementById('planFavoritesList');
-    if (favorites.length === 0) { listContainer.style.display = 'none'; return; }
-    listContainer.style.display = 'block';
-    container.innerHTML = '';
-    favorites.forEach((fav, idx) => {
-        const div = document.createElement('div');
-        div.className = 'fav-item';
-        div.innerHTML = `<div class="fav-item-info" onclick="loadPlanFavorite('${escapeHtml(fav.unit).replace(/'/g,"\\'")}', '${escapeHtml(fav.project).replace(/'/g,"\\'")}')"><div class="fav-item-title">${escapeHtml(fav.project)}</div><div class="fav-item-sub">${escapeHtml(fav.unit)}</div></div><button class="fav-item-delete" onclick="deletePlanFavorite(${idx})"><i class="fas fa-trash-alt"></i></button>`;
-        container.appendChild(div);
-    });
-}
-function loadPlanFavorite(unit, project) {
-    const unitSelect = document.getElementById('unitSelect');
-    const projSelect = document.getElementById('projectSelect');
-    unitSelect.value = unit;
-    filterProjects();
-    setTimeout(() => { projSelect.value = project; renderTable(); showToast(`✓ تم تحميل المخطط: ${project}`); }, 200);
-}
-function deletePlanFavorite(index) {
-    let favorites = getPlanFavorites();
-    favorites.splice(index,1);
-    savePlanFavorites(favorites);
-    renderPlanFavorites();
-    const currentUnit = document.getElementById('unitSelect').value;
-    const currentProject = document.getElementById('projectSelect').value;
-    const btn = document.getElementById('btn-fav-plan');
-    const isFav = favorites.some(f => f.unit === currentUnit && f.project === currentProject);
-    if (isFav) { btn.innerHTML = '<i class="fas fa-check"></i>'; btn.classList.add('active'); } else { btn.innerHTML = '<i class="fas fa-plus"></i>'; btn.classList.remove('active'); }
-    showToast('✓ تم حذف المشروع من قائمتي');
-}
-let planFavCollapsed = false;
-function togglePlanFavoritesCollapse() {
-    planFavCollapsed = !planFavCollapsed;
-    const items = document.getElementById('planFavItems');
-    const icon = document.getElementById('planFavToggleIcon');
-    if (planFavCollapsed) { items.parentElement.classList.add('fav-collapsed'); icon.className = 'fas fa-chevron-left'; } else { items.parentElement.classList.remove('fav-collapsed'); icon.className = 'fas fa-chevron-down'; }
-}
-
-// ========== إدارة المفضلات - الفواتير ==========
-function getInvoiceFavorites() { return JSON.parse(localStorage.getItem('invoiceFavorites') || '[]'); }
-function saveInvoiceFavorites(favorites) { localStorage.setItem('invoiceFavorites', JSON.stringify(favorites.slice(0,5))); }
-function toggleInvoiceFavorite(subNumber, subName) {
-    let favorites = getInvoiceFavorites();
-    const existingIndex = favorites.findIndex(f => f.subNumber === subNumber);
-    if (existingIndex !== -1) { favorites.splice(existingIndex,1); showToast(`✓ تم إزالة "${subName.substring(0,20)}" من قائمتي`); } else {
-        if (favorites.length >= 5) { showToast('⚠️ لا يمكن إضافة أكثر من 5 اشتراكات مفضلة'); return; }
-        favorites.push({ subNumber, subName }); showToast(`✓ تم إضافة "${subName.substring(0,20)}" إلى قائمتي`);
-    }
-    saveInvoiceFavorites(favorites);
-    renderInvoiceFavorites();
-    document.querySelectorAll('.fav-btn-invoice').forEach(btn => { const btnSubNum = btn.getAttribute('data-subnum'); if (btnSubNum === subNumber) { const isFav = favorites.some(f => f.subNumber === subNumber); if (isFav) { btn.innerHTML = '<i class="fas fa-check"></i>'; btn.classList.add('active'); } else { btn.innerHTML = '<i class="fas fa-plus"></i>'; btn.classList.remove('active'); } } });
-}
-function renderInvoiceFavorites() {
-    const favorites = getInvoiceFavorites();
-    const container = document.getElementById('invoiceFavItems');
-    const listContainer = document.getElementById('invoiceFavoritesList');
-    if (favorites.length === 0) { listContainer.style.display = 'none'; return; }
-    listContainer.style.display = 'block';
-    container.innerHTML = '';
-    favorites.forEach((fav, idx) => {
-        const div = document.createElement('div');
-        div.className = 'fav-item';
-        div.innerHTML = `<div class="fav-item-info" onclick="loadInvoiceFavorite('${escapeHtml(fav.subNumber).replace(/'/g,"\\'")}')"><div class="fav-item-title">${escapeHtml(fav.subName.substring(0,30))}</div><div class="fav-item-sub">رقم: ${escapeHtml(fav.subNumber)}</div></div><button class="fav-item-delete" onclick="deleteInvoiceFavorite(${idx})"><i class="fas fa-trash-alt"></i></button>`;
-        container.appendChild(div);
-    });
-}
-async function loadInvoiceFavorite(subNumber) {
-    document.getElementById('searchType').value = 'subNumber';
-    updateSearchPlaceholder();
-    document.getElementById('searchInput').value = subNumber;
-    await searchInvoice();
-}
-function deleteInvoiceFavorite(index) {
-    let favorites = getInvoiceFavorites();
-    favorites.splice(index,1);
-    saveInvoiceFavorites(favorites);
-    renderInvoiceFavorites();
-    showToast('✓ تم حذف الاشتراك من قائمتي');
-}
-let invoiceFavCollapsed = false;
-function toggleInvoiceFavoritesCollapse() {
-    invoiceFavCollapsed = !invoiceFavCollapsed;
-    const items = document.getElementById('invoiceFavItems');
-    const icon = document.getElementById('invoiceFavToggleIcon');
-    if (invoiceFavCollapsed) { items.parentElement.classList.add('fav-collapsed'); icon.className = 'fas fa-chevron-left'; } else { items.parentElement.classList.remove('fav-collapsed'); icon.className = 'fas fa-chevron-down'; }
-}
-
-// ========== الثيم والصوت والإشعارات ==========
-function toggleDarkMode() {
-    const body = document.body;
-    const icon = document.getElementById('dark-mode-icon');
-    if (body.getAttribute('data-theme') === 'dark') { body.removeAttribute('data-theme'); icon.className = 'fas fa-moon'; localStorage.setItem('theme','light'); } else { body.setAttribute('data-theme','dark'); icon.className = 'fas fa-sun'; localStorage.setItem('theme','dark'); }
-}
-function loadTheme() { if (localStorage.getItem('theme') === 'dark') { document.body.setAttribute('data-theme','dark'); document.getElementById('dark-mode-icon').className = 'fas fa-sun'; } }
-function initAudio() { try { notificationSound = new Audio('water_drops.mp3'); notificationSound.volume = 0.5; } catch(e) {} }
-function playSound() { if(audioAllowed && notificationSound) { notificationSound.currentTime = 0; notificationSound.play().catch(()=>{}); } }
-function hideSplash() { const splash = document.getElementById('splash-screen'); splash.style.opacity = '0'; setTimeout(() => splash.style.display = 'none', 800); }
-function grantAudioPermission() {
-    if(audioAllowed) return;
-    audioAllowed = true;
-    initAudio();
-    playSound();
-    localStorage.setItem('audioPermissionGranted','true');
-    hideSplash();
-    loadExcelData();
-    loadInvoiceData();
-}
-function checkAppStartup() {
-    const hasPermission = localStorage.getItem('audioPermissionGranted') === 'true';
-    const splash = document.getElementById('splash-screen');
-    loadTheme();
-    if (hasPermission) {
-        audioAllowed = true;
-        initAudio();
-        splash.classList.add('auto-mode');
-        splash.style.display = 'flex';
-        document.querySelector('.progress-container').style.display = 'block';
-        document.querySelector('.audio-btn').style.display = 'none';
-        loadExcelData();
-        loadInvoiceData();
-        setTimeout(() => { if(splash.style.display === 'flex') hideSplash(); }, 2000);
-    } else {
-        splash.style.display = 'flex';
-    }
-}
-function handleOfflineStatus() {
-    if (!navigator.onLine) document.getElementById('offline-screen').style.display = 'flex';
-    window.addEventListener('offline', () => { document.getElementById('offline-screen').style.display = 'flex'; });
-    window.addEventListener('online', () => { document.getElementById('offline-screen').style.display = 'none'; loadExcelData(); loadInvoiceData(true); });
-}
-let pullStartY = 0, isPulling = false;
-const scrollableDiv = document.getElementById('scrollableContent');
-scrollableDiv.addEventListener('touchstart', (e) => { if (scrollableDiv.scrollTop === 0) pullStartY = e.touches[0].clientY; });
-scrollableDiv.addEventListener('touchmove', (e) => { if (pullStartY > 0 && scrollableDiv.scrollTop === 0) { if (e.touches[0].clientY - pullStartY > 70) { document.getElementById('pull-to-refresh').classList.add('show'); isPulling = true; } } });
-scrollableDiv.addEventListener('touchend', () => { if (isPulling) { setTimeout(() => document.getElementById('pull-to-refresh').classList.remove('show'), 1000); loadExcelData(); loadInvoiceData(true); showToast('جاري تحديث البيانات...'); } pullStartY = 0; isPulling = false; });
-document.addEventListener('click', (e) => {
-    const target = e.target.closest('.btn, .btn-action, .fav-btn, .fav-btn-invoice');
-    if (target && !target.classList.contains('fav-item-delete')) {
-        const circle = document.createElement('span'); circle.className = 'ripple-effect';
-        const d = Math.max(target.clientWidth, target.clientHeight), r = d/2;
-        circle.style.width = circle.style.height = `${d}px`;
-        circle.style.left = `${e.clientX - target.getBoundingClientRect().left - r}px`;
-        circle.style.top = `${e.clientY - target.getBoundingClientRect().top - r}px`;
-        target.appendChild(circle); setTimeout(() => circle.remove(), 600);
-    }
-});
-function navigateTo(pageName) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById('page-'+pageName).classList.add('active');
-    const mainTitle = document.getElementById('dynamic-title');
-    const subTitle = document.getElementById('dynamic-subtitle');
-    const m = document.getElementById('theme-color-meta');
-    if(pageName === 'home') { mainTitle.innerHTML = 'شركة مياه طرطوس'; subTitle.innerHTML = 'التطبيق الرسمي'; m.content = '#004999'; if (cachedNotificationMessages.length > 0 && notificationQueue.length === 0) cachedNotificationMessages.forEach(n => showNotification(n)); }
-    else if(pageName === 'plan') { mainTitle.innerHTML = '📅 خطة توزيع المياه'; subTitle.innerHTML = 'اختر الوحدة والمشروع'; m.content = '#0056b3'; const savedMonth = localStorage.getItem('currentPlanMonth'); if(savedMonth && savedMonth !== '--') document.getElementById('planMonthDisplay').innerHTML = `لشهر ${savedMonth}`; renderPlanFavorites(); checkPlanFavoriteStatus(); }
-    else if(pageName === 'invoice') { mainTitle.innerHTML = '🧾 استعلام عن فاتورة'; subTitle.innerHTML = 'ابحث عن اشتراكك'; m.content = '#65a30d'; renderInvoiceFavorites(); showInvoiceEmptyState(); }
-    else if(pageName === 'report') { mainTitle.innerHTML = 'الإبلاغ عن أعطال<br>الشبكات وهدر المياه'; subTitle.innerHTML = 'محافظة طرطوس - اختر المنطقة'; m.content = '#1e7e34'; }
-    scrollableDiv.scrollTo({ top: 0, behavior: 'smooth' });
-}
-function checkPlanFavoriteStatus() {
-    const unit = document.getElementById('unitSelect').value;
-    const project = document.getElementById('projectSelect').value;
-    const btn = document.getElementById('btn-fav-plan');
-    const favorites = getPlanFavorites();
-    const isFav = favorites.some(f => f.unit === unit && f.project === project);
-    if (isFav) { btn.innerHTML = '<i class="fas fa-check"></i>'; btn.classList.add('active'); } else { btn.innerHTML = '<i class="fas fa-plus"></i>'; btn.classList.remove('active'); }
-}
-function showNotification(msg) { const isHomePage = document.getElementById('page-home').classList.contains('active'); if(msg && isHomePage) { notificationQueue.push(msg); processQueue(); } }
-function createSwipeableNotification(msg) {
-    const c = document.getElementById('notification-center');
-    const el = document.createElement('div'); el.className = 'android-notification';
-    el.innerHTML = `<i class="fas fa-bell" style="color:#ff9900;font-size:1.2rem;"></i><div style="flex:1"><strong>📢 تنبيه</strong><br>${escapeHtml(msg)}</div><i class="fas fa-times notification-dismiss"></i>`;
-    el.querySelector('.notification-dismiss').addEventListener('click', (e) => { e.stopPropagation(); removeNotification(el); });
-    let sx = 0, cx = 0, isD = false;
-    el.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; cx = sx; isD = true; el.style.transition = 'none'; });
-    el.addEventListener('touchmove', (e) => { if (!isD) return; cx = e.touches[0].clientX; let d = cx - sx; el.style.transform = `translateX(${d}px)`; el.style.opacity = 1 - Math.abs(d) / 200; });
-    el.addEventListener('touchend', () => { isD = false; if (Math.abs(cx - sx) > 80) removeNotification(el); else { el.style.transition = 'transform 0.3s ease, opacity 0.3s ease'; el.style.transform = ''; el.style.opacity = ''; } });
-    c.appendChild(el);
-}
-function removeNotification(el) { el.style.transform = 'translateX(-120%)'; el.style.opacity = '0'; setTimeout(() => { if(el.parentNode) el.remove(); isShowingNotification = false; setTimeout(processQueue, 500); }, 300); }
-async function processQueue() { if(isShowingNotification || notificationQueue.length === 0) return; isShowingNotification = true; createSwipeableNotification(notificationQueue.shift()); playSound(); setTimeout(() => { const n = document.querySelectorAll('.android-notification'); if(n.length) removeNotification(n[n.length-1]); }, 7000); }
-function sendSystemNotifications(messages) { if (!window.median || !window.median.localNotification) return; messages.forEach((msg, i) => { setTimeout(() => { median.localNotification.schedule({ title: "💧 مياه طرطوس", body: msg, delay: 0, id: 100 + i }); }, i * 5000); }); }
-
-// ========== تحميل بيانات خطة المياه والأخبار ==========
-async function loadExcelData() {
-    const newsEl = document.getElementById('scrolling-news');
-    newsEl.className = 'news-bar-inner skeleton'; newsEl.style.width = '60%'; newsEl.innerHTML = '&nbsp;';
-    if (typeof XLSX === 'undefined') {
-        newsEl.className = 'news-bar-inner'; newsEl.style.width=''; newsEl.innerHTML = "🚰 مياه طرطوس - جاري تحميل المكتبة...";
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        if (typeof XLSX === 'undefined') { newsEl.innerHTML = "🚰 مياه طرطوس - لا يوجد اتصال"; showToast('⚠️ مكتبة الجداول غير محملة، تحقق من الإنترنت'); return; }
-    }
-    try {
-        const res = await fetch('toze3.xlsx?v=' + Date.now());
-        if(!res.ok) throw new Error('Network error');
-        const buf = await res.arrayBuffer();
-        await new Promise(r => setTimeout(r, 10));
-        const wb = XLSX.read(new Uint8Array(buf), { type: 'array' }), sheet = wb.Sheets[wb.SheetNames[0]];
-        const news = []; for(let i=1; i<=6; i++) { if(sheet['I'+i]?.v) news.push(sheet['I'+i].v); }
-        if(news.length) { newsEl.className = 'news-bar-inner'; newsEl.style.width = ''; newsEl.innerHTML = "🌀 " + news.join("  •  "); newsEl.style.animation = 'none'; setTimeout(() => newsEl.style.animation = 'scroll-news-right 40s linear infinite', 10); } else { newsEl.className = 'news-bar-inner'; newsEl.innerHTML = "🚰 مياه طرطوس"; newsEl.style.width=''; }
-        const notifs = []; for(let i=2; i<=5; i++) { if(sheet['H'+i]?.v) notifs.push(sheet['H'+i].v); }
-        cachedNotificationMessages = notifs; localStorage.setItem('cached_notifications', JSON.stringify(notifs));
-        if (document.getElementById('page-home').classList.contains('active')) { notificationQueue = []; notifs.forEach(n => showNotification(n)); }
-        const sysAlerts = []; for(let i=2; i<=10; i++) { if(sheet['J'+i] && sheet['J'+i].v && String(sheet['J'+i].v).trim() !== "") sysAlerts.push(String(sheet['J'+i].v)); } if(sysAlerts.length > 0) sendSystemNotifications(sysAlerts);
-        waterPlanData = XLSX.utils.sheet_to_json(sheet);
-        let monthDisplay = ""; if(sheet['H1'] && sheet['H1'].v) { const rawMonthValue = sheet['H1'].v; const dateObj = convertToDate(rawMonthValue); if(dateObj) monthDisplay = `${dateObj.getMonth()+1}-${dateObj.getFullYear()}`; else monthDisplay = String(rawMonthValue); } else { const now = new Date(); monthDisplay = `${now.getMonth()+1}-${now.getFullYear()}`; }
-        localStorage.setItem('currentPlanMonth', monthDisplay);
-        const currentActivePage = document.querySelector('.page.active')?.id;
-        if(currentActivePage === 'page-plan') document.getElementById('planMonthDisplay').innerHTML = `لشهر ${monthDisplay}`;
-        else { const monthSpan = document.getElementById('planMonthDisplay'); if(monthSpan) monthSpan.innerHTML = `لشهر ${monthDisplay}`; }
-        populateUnits(); renderPlanFavorites(); localStorage.setItem('cached_news', JSON.stringify(news));
-    } catch(e) { newsEl.className = 'news-bar-inner'; newsEl.style.width=''; const c = localStorage.getItem('cached_news'); if(c && JSON.parse(c).length) newsEl.innerHTML = "🌀 " + JSON.parse(c).join("  •  "); else newsEl.innerHTML = "🚰 مياه طرطوس - لا يوجد اتصال"; const savedMonth = localStorage.getItem('currentPlanMonth'); if(savedMonth) document.getElementById('planMonthDisplay').innerHTML = `لشهر ${savedMonth}`; }
-}
-function convertToDate(v) { if (!v) return null; if (v instanceof Date && !isNaN(v)) return new Date(v.getFullYear(), v.getMonth(), v.getDate()); if (typeof v === 'number' && v > 0) { let d = new Date(new Date(1899,11,30).getTime() + (v*86400000)); if (!isNaN(d.getTime())) return new Date(d.getFullYear(), d.getMonth(), d.getDate()); } if (typeof v === 'string') { let p = new Date(v); if (!isNaN(p.getTime())) return new Date(p.getFullYear(), p.getMonth(), p.getDate()); let parts = v.split('/'); if (parts.length === 3) return new Date(parseInt(parts[2]), parseInt(parts[1])-1, parseInt(parts[0])); } return null; }
-function formatDate(v) { const d = convertToDate(v); return d ? `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}` : '—'; }
-function isToday(v) { const d = convertToDate(v); if (!d) return false; const t = new Date(); return d.getDate()===t.getDate() && d.getMonth()===t.getMonth() && d.getFullYear()===t.getFullYear(); }
-function populateUnits() { const s = document.getElementById('unitSelect'); s.innerHTML = '<option value="">-- اختر الوحدة --</option>'; [...new Set(waterPlanData.map(r=>r['المحافظة']).filter(Boolean))].forEach(u=>s.innerHTML+=`<option value="${escapeHtml(u)}">${escapeHtml(u)}</option>`); s.onchange=null; s.onchange=filterProjects; }
-function filterProjects() { const u = document.getElementById('unitSelect').value; const p = document.getElementById('projectSelect'); p.innerHTML = '<option value="">-- اختر المشروع --</option>'; document.getElementById('tableWrapper').style.display='none'; checkPlanFavoriteStatus(); if(!u) return; [...new Set(waterPlanData.filter(r=>r['المحافظة']===u).map(r=>r['محور الضخ']).filter(Boolean))].forEach(pr=>p.innerHTML+=`<option value="${escapeHtml(pr)}">${escapeHtml(pr)}</option>`); p.onchange=null; p.onchange=renderTable; renderTable(); }
-function renderTable() { const u = document.getElementById('unitSelect').value; const p = document.getElementById('projectSelect').value; const tbody = document.getElementById('scheduleBody'); const wrapper = document.getElementById('tableWrapper'); checkPlanFavoriteStatus(); if(!u||!p) { wrapper.style.display='none'; return; } const f = waterPlanData.filter(r=>r['المحافظة']===u && r['محور الضخ']===p); tbody.innerHTML=''; if(!f.length) { wrapper.style.display='none'; showToast('لا توجد بيانات لهذا المشروع'); return; } f.forEach(r=>{ const isT=isToday(r['التاريخ']); const tr=document.createElement('tr'); if(isT) tr.classList.add('highlight-today'); let dt=formatDate(r['التاريخ']); if(isT) dt=`<span class="today-badge">اليوم 🌟</span><br>${dt}`; tr.innerHTML=`<td>${escapeHtml(r['اليوم']||'—')}</td><td>${dt}</td><td>${escapeHtml(r['محور الضخ']||'—')}</td><td style="white-space:normal; font-size:0.7rem; text-align:right;">${escapeHtml(r['المجمعات المستفيدة']||'—')}</td><td>${escapeHtml(r['عدد ساعات الضخ']||'—')}</td>`; tbody.appendChild(tr); }); wrapper.style.display='block'; }
-function shareWhatsApp() { const u = document.getElementById('unitSelect').value; const p = document.getElementById('projectSelect').value; if(!u||!p) { showToast('الرجاء اختيار الوحدة والمشروع أولاً'); return; } let t = `💧 *مؤسسة مياه طرطوس - خطة التوزيع* 💧%0A📍 *الوحدة:* ${u}%0A⚙️ *المشروع:* ${p}%0A%0A`; const f = waterPlanData.filter(r=>r['المحافظة']===u && r['محور الضخ']===p); const td = f.find(r=>isToday(r['التاريخ'])); if(td) t+=`✅ *توزيع اليوم:* ${td['المجمعات المستفيدة']}%0A⏰ *الساعات:* ${td['عدد ساعات الضخ']}%0A%0A`; t+=`📲 حمل تطبيق مياه طرطوس الآن:%0Ahttps://twc.ct.ws/app/miyah-tartus.apk`; window.open(`https://api.whatsapp.com/send?text=${t}`, '_blank'); }
-function exportToPDF() { if (typeof html2pdf === 'undefined') { showToast('⚠️ مكتبة التصدير غير محملة، تحقق من اتصالك بالإنترنت'); return; } const tableWrapper = document.getElementById('tableWrapper'); if (!tableWrapper || tableWrapper.style.display !== 'block') { showToast('الرجاء اختيار الوحدة والمشروع أولاً'); return; } const unit = document.getElementById('unitSelect').value; const project = document.getElementById('projectSelect').value; const monthText = document.getElementById('planMonthDisplay').innerHTML; const safeMonthText = escapeHtml(monthText); const printContent = document.createElement('div'); printContent.style.direction='rtl'; printContent.style.fontFamily='Tajawal, sans-serif'; printContent.style.padding='20px'; printContent.style.background='white'; const header = document.createElement('div'); header.style.textAlign='center'; header.style.marginBottom='20px'; header.style.borderBottom='2px solid #007BFF'; header.style.paddingBottom='10px'; header.innerHTML=`<h1 style="color:#007BFF;margin:0;">📅 خطة توزيع المياه</h1><h2 style="color:#ff9800;margin:5px 0;">${safeMonthText}</h2><p style="color:#666;margin:5px 0;">الوحدة: ${escapeHtml(unit)} | مشروع الضخ: ${escapeHtml(project)}</p><p style="color:#999;font-size:12px;">تم التصدير بتاريخ: ${new Date().toLocaleDateString('ar-EG')}</p>`; printContent.appendChild(header); const originalTable = document.getElementById('resultTable'); const tableClone = originalTable.cloneNode(true); tableClone.style.width='100%'; tableClone.style.borderCollapse='collapse'; tableClone.style.fontSize='12px'; const style = document.createElement('style'); style.textContent = `th, td { border: 1px solid #ddd; padding: 8px; text-align: center; } th { background: #f0f0f0; color: #0056a7; } .highlight-today { background: #d4f5d0; } .today-badge { background: #2b7d1e; color: white; border-radius: 20px; padding: 2px 8px; font-size: 10px; display: inline-block; margin-bottom: 4px; }`; printContent.appendChild(style); printContent.appendChild(tableClone); const footerDiv = document.createElement('div'); footerDiv.style.textAlign='center'; footerDiv.style.marginTop='20px'; footerDiv.style.paddingTop='10px'; footerDiv.style.borderTop='1px solid #ccc'; footerDiv.style.fontSize='10px'; footerDiv.style.color='#999'; footerDiv.innerHTML='المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا'; printContent.appendChild(footerDiv); const opt = { margin:[0.5,0.5,0.5,0.5], filename:`خطة_توزيع_المياه_${unit}_${project}.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true,letterRendering:true}, jsPDF:{unit:'in',format:'a4',orientation:'portrait'} }; showToast('جاري تجهيز ملف PDF...'); html2pdf().set(opt).from(printContent).save().then(()=>showToast('تم حفظ ملف PDF بنجاح')).catch(err=>{console.error(err); showToast('حدث خطأ أثناء تصدير PDF');}); }
-
-// ========== دوال الفواتير - تحميل JSON مباشر ==========
-function updateSearchPlaceholder() {
-    const input = document.getElementById('searchInput');
-    const type = document.getElementById('searchType').value;
-    const placeholders = { nationalId: 'أدخل الرقم الوطني...', name: 'أدخل اسم المشترك...', barcode: 'أدخل رقم الباركود...', phone: 'أدخل رقم الجوال...', subNumber: 'أدخل رقم الاشتراك...' };
-    input.placeholder = placeholders[type] || 'أدخل قيمة البحث هنا...';
-}
-function showInvoiceEmptyState() {
-    const container = document.getElementById('invoiceResults');
-    if (invoiceDataLoaded && invoiceData.length > 0) {
-        container.innerHTML = `<div class="empty-state"><i class="fas fa-check-circle" style="color:#28a745;"></i><p>البيانات جاهزة</p><span>يمكنك البدء بالبحث</span></div>`;
-    } else {
-        container.innerHTML = `<div class="empty-state"><i class="fas fa-file-invoice-dollar"></i><p>ابحث عن فاتورتك</p><span>اختر نوع البحث وأدخل القيمة للبحث في بيانات المشتركين</span></div>`;
-    }
-}
-
-// تحميل البيانات من JSON
-async function loadInvoiceData(forceRefresh = false) {
-    if (invoiceDataLoaded && !forceRefresh) return;
-    
-    const container = document.getElementById('invoiceResults');
-    const isInvoicePage = document.getElementById('page-invoice').classList.contains('active');
-    
-    // محاولة من IndexedDB
-    try {
-        const cached = await loadInvoiceDataFromIndexedDB();
-        if (cached && cached.length > 0 && !forceRefresh) {
-            invoiceData = cached;
-            buildSearchIndexes();
-            invoiceDataLoaded = true;
-            showToast(`✓ تم تحميل ${invoiceData.length} سجل من الذاكرة المحلية`);
-            if (isInvoicePage) showInvoiceEmptyState();
-            return;
-        }
-    } catch(e) { console.log('IndexedDB read error:', e); }
-    
-    // إظهار مؤشر التحميل
-    if (isInvoicePage) {
-        container.innerHTML = '<div class="invoice-loading"><div class="spinner"></div><p>جاري تحميل قاعدة بيانات الفواتير...</p><span style="font-size:0.7rem;">المرة الأولى قد تستغرق 10-30 ثانية حسب سرعة الإنترنت</span></div>';
-    }
-    
-    // محاولة التحميل مع إعادة المحاولة
-    let retryCount = 0;
-    const maxRetries = 2;
-    
-    async function attemptLoad() {
-        try {
-            // الرابط المباشر من GitHub
-            const url = 'https://raw.githubusercontent.com/friendsyria/miyah-tartus/main/data_compact.json?v=' + Date.now();
-            console.log('جاري تحميل:', url);
-            
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 ثانية مهلة
-            
-            const response = await fetch(url, { signal: controller.signal });
-            clearTimeout(timeoutId);
-            
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            
-            if (isInvoicePage) {
-                container.innerHTML = '<div class="invoice-loading"><div class="spinner"></div><p>جاري معالجة البيانات...</p></div>';
-            }
-            
-            const text = await response.text();
-            invoiceData = JSON.parse(text);
-            
-            // تخزين في IndexedDB
-            await saveInvoiceDataToIndexedDB(invoiceData);
-            
-            // بناء الفهارس
-            buildSearchIndexes();
-            invoiceDataLoaded = true;
-            
-            showToast(`✓ تم تحميل ${invoiceData.length} سجل بنجاح`);
-            if (isInvoicePage) showInvoiceEmptyState();
-            
-        } catch(e) {
-            console.error('Load attempt', retryCount, 'failed:', e);
-            retryCount++;
-            
-            if (retryCount <= maxRetries) {
-                showToast(`⚠️ محاولة ${retryCount}/${maxRetries}... إعادة المحاولة بعد 2 ثانية`);
-                setTimeout(attemptLoad, 2000);
-            } else {
-                invoiceDataLoaded = false;
-                if (isInvoicePage) {
-                    container.innerHTML = `
-                        <div class="no-results">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <p>فشل تحميل البيانات</p>
-                            <p style="font-size:0.8rem;">يرجى التحقق من اتصال الإنترنت</p>
-                            <button onclick="retryLoadInvoiceData()" style="margin-top:15px;padding:10px 25px;background:#007BFF;color:white;border:none;border-radius:30px;cursor:pointer;">🔄 إعادة المحاولة</button>
-                        </div>
-                    `;
+        /** استخراج قيمة حقل من سجل JSON حسب مفتاح INVOICE_FIELDS */
+        function getField(row, fieldKey) {
+            const names = INVOICE_FIELDS[fieldKey];
+            if (!names || !row) return null;
+            // محاولة مطابقة مباشرة
+            for (const name of names) {
+                if (Object.prototype.hasOwnProperty.call(row, name) && row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== '') {
+                    return row[name];
                 }
-                showToast('⚠️ فشل تحميل البيانات، يرجى المحاولة لاحقاً');
+            }
+            // مطابقة مرنة: إزالة المسافات والشرطات ومقارنة
+            const rowKeys = Object.keys(row);
+            const normRowKeys = rowKeys.map(k => ({ orig: k, norm: k.replace(/[\s\-–—_]/g, '').toLowerCase() }));
+            for (const name of names) {
+                const normName = name.replace(/[\s\-–—_]/g, '').toLowerCase();
+                for (const nk of normRowKeys) {
+                    if (nk.norm === normName) {
+                        const val = row[nk.orig];
+                        if (val !== undefined && val !== null && String(val).trim() !== '') return val;
+                    }
+                }
+            }
+            // مطابقة جزئية بالكلمات المفتاحية (للاحتياط)
+            const keywords = names.filter(n => n.length > 3).map(n => n.replace(/[\s\-–—_]/g, ''));
+            for (const nk of normRowKeys) {
+                for (const kw of keywords) {
+                    if (nk.norm.includes(kw) || kw.includes(nk.norm)) {
+                        const val = row[nk.orig];
+                        if (val !== undefined && val !== null && String(val).trim() !== '') return val;
+                    }
+                }
+            }
+            return null;
+        }
+
+        // ========== بناء الفهارس بعد تحميل البيانات ==========
+        function buildInvoiceIndexes() {
+            // مسح الفهارس القديمة
+            for (const key of Object.keys(invoiceIndexes)) {
+                invoiceIndexes[key].clear();
+            }
+
+            invoiceData.forEach((row, idx) => {
+                // فهرس الرقم الوطني
+                const natId = normalizeStr(getField(row, 'nationalId'));
+                if (natId) addToIndex(invoiceIndexes.nationalId, natId, idx);
+
+                // فهرس الاسم (بالبادئة لتحسين البحث الجزئي)
+                const name = normalizeStr(getField(row, 'name'));
+                if (name) {
+                    // فهرسة بالبادئات: أول 3 أحرف على الأقل
+                    const prefixLen = Math.min(Math.max(name.length, 3), 10);
+                    const prefix = name.substring(0, prefixLen);
+                    addToIndex(invoiceIndexes.name, prefix, idx);
+                    // فهرسة كاملة أيضاً
+                    addToIndex(invoiceIndexes.name, name, idx);
+                }
+
+                // فهرس الباركود (مع وإ بدون أصفار بادئة)
+                const barcode = normalizeStr(getField(row, 'barcode'));
+                if (barcode) {
+                    addToIndex(invoiceIndexes.barcode, barcode, idx);
+                    const cleanBc = barcode.replace(/^0+/, '');
+                    if (cleanBc && cleanBc !== barcode) {
+                        addToIndex(invoiceIndexes.barcode, cleanBc, idx);
+                    }
+                }
+
+                // فهرس الجوال (مع وإ بدون الصفر البادئ)
+                const phone = normalizeStr(getField(row, 'phone'));
+                if (phone && phone !== '*') {
+                    addToIndex(invoiceIndexes.phone, phone, idx);
+                    const cleanPh = phone.replace(/^0/, '');
+                    if (cleanPh && cleanPh !== phone) {
+                        addToIndex(invoiceIndexes.phone, cleanPh, idx);
+                    }
+                }
+
+                // فهرس رقم الاشتراك
+                const subNum = normalizeStr(getField(row, 'subNumber'));
+                if (subNum) addToIndex(invoiceIndexes.subNumber, subNum, idx);
+            });
+        }
+
+        /** إضافة فهرس لخريطة مع تجنب التكرار */
+        function addToIndex(map, key, idx) {
+            if (!map.has(key)) map.set(key, []);
+            const arr = map.get(key);
+            if (arr[arr.length - 1] !== idx) arr.push(idx);
+        }
+
+        // ========== تحميل بيانات الفواتير من JSON ==========
+        async function loadInvoiceData() {
+            if (invoiceDataLoaded || invoiceDataLoading) return;
+            invoiceDataLoading = true;
+
+            const progressEl = document.getElementById('invoiceLoadProgress');
+            const barEl = document.getElementById('invoiceLoadBar');
+
+            try {
+                // إظهار شريط التقدم
+                if (progressEl) { progressEl.classList.add('active'); barEl.style.width = '20%'; }
+
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000); // مهلة 15 ثانية
+
+                const res = await fetch('data_compact.json?v=' + Date.now(), {
+                    signal: controller.signal,
+                    cache: 'no-cache'
+                });
+                clearTimeout(timeoutId);
+
+                if (progressEl) barEl.style.width = '60%';
+
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+                const data = await res.json();
+
+                if (progressEl) barEl.style.width = '85%';
+
+                // التحقق من أن البيانات مصفوفة
+                if (!Array.isArray(data)) {
+                    // إذا كان كائناً يحتوي على مصفوفة بداخله، نحاول استخراجها
+                    const arrayKey = Object.keys(data).find(k => Array.isArray(data[k]));
+                    if (arrayKey) {
+                        invoiceData = data[arrayKey];
+                    } else {
+                        throw new Error('البيانات ليست مصفوفة صالحة');
+                    }
+                } else {
+                    invoiceData = data;
+                }
+
+                if (progressEl) barEl.style.width = '95%';
+
+                // بناء الفهارس الذكية
+                buildInvoiceIndexes();
+
+                invoiceDataLoaded = true;
+
+                if (progressEl) {
+                    barEl.style.width = '100%';
+                    setTimeout(() => { progressEl.classList.remove('active'); barEl.style.width = '0%'; }, 500);
+                }
+
+                console.log(`✅ تم تحميل ${invoiceData.length} سجل فاتورة وبناء الفهارس بنجاح`);
+
+            } catch (e) {
+                if (progressEl) { progressEl.classList.remove('active'); barEl.style.width = '0%'; }
+                invoiceData = [];
+                invoiceDataLoaded = false;
+
+                if (e.name === 'AbortError') {
+                    console.error('⏱️ انتهت مهلة تحميل بيانات الفواتير');
+                } else {
+                    console.error('❌ خطأ في تحميل بيانات الفواتير:', e.message);
+                }
+            } finally {
+                invoiceDataLoading = false;
             }
         }
-    }
-    
-    await attemptLoad();
-}
 
-// دالة إعادة المحاولة
-function retryLoadInvoiceData() {
-    invoiceDataLoaded = false;
-    loadInvoiceData(true);
-}
-
-// دوال البحث والمساعدة
-function findColumnValue(row, possibleNames) {
-    for (const name of possibleNames) { if (row.hasOwnProperty(name) && row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== '') return row[name]; }
-    const normalizedKeys = Object.keys(row).map(k => ({ original: k, normalized: k.replace(/[\s\-–—_]/g, '') }));
-    for (const name of possibleNames) { const normName = name.replace(/[\s\-–—_]/g, ''); for (const nk of normalizedKeys) { if (nk.normalized === normName && row[nk.original] !== undefined && row[nk.original] !== null && String(row[nk.original]).trim() !== '') return row[nk.original]; } }
-    const keywords = possibleNames.filter(n => n.length > 3).map(n => n.replace(/[\s\-–—_]/g, '')); for (const nk of normalizedKeys) { for (const kw of keywords) { if (nk.normalized.includes(kw) || kw.includes(nk.normalized)) { const val = row[nk.original]; if (val !== undefined && val !== null && String(val).trim() !== '') return val; } } }
-    return null;
-}
-function getStatusInfo(status) { const str = String(status || ''); if (str.includes('شغال')) return { text: 'شغال', cls: 'status-active' }; if (str.includes('معطل')) return { text: 'معطل', cls: 'status-disabled' }; if (str.includes('مغلق')) return { text: 'مغلق', cls: 'status-closed' }; if (str.includes('وصلة')) return { text: 'وصلة', cls: 'status-connection' }; return { text: str || '—', cls: '' }; }
-function getCalcType(code) { const str = String(code || ''); if (str.includes('منزلي')) return 'منزلي'; if (str.includes('تجاري')) return 'تجاري'; return str || '—'; }
-function formatNumber(num) { const n = Number(num); if (isNaN(n)) return '—'; return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","); }
-function toArabicWords(num) { if (!num && num !== 0) return '—'; num = parseInt(num); if (isNaN(num)) return '—'; if (num === 0) return 'صفر ليرة سورية فقط'; const units = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة']; const teens = ['عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر']; const tensArr = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون']; const hundredsArr = ['', 'مائة', 'مائتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة']; function convertBelow100(n) { if (n === 0) return ''; if (n >= 10 && n <= 19) return teens[n - 10]; if (n >= 20) { const rem = n % 10; return (rem > 0 ? units[rem] + ' و' : '') + tensArr[Math.floor(n / 10)]; } return units[n]; } function convertBelow1000(n) { if (n === 0) return ''; if (n >= 100) { const h = Math.floor(n / 100); const rem = n % 100; return hundredsArr[h] + (rem > 0 ? ' و' + convertBelow100(rem) : ''); } return convertBelow100(n); } function convertBelowMillion(n) { if (n === 0) return ''; if (n >= 1000) { const thousands = Math.floor(n / 1000); const rem = n % 1000; let r = ''; if (thousands === 1) r = 'ألف'; else if (thousands === 2) r = 'ألفان'; else if (thousands <= 10) r = convertBelow1000(thousands) + ' آلاف'; else r = convertBelow1000(thousands) + ' ألف'; if (rem > 0) r += ' و' + convertBelow1000(rem); return r; } return convertBelow1000(n); } let result = ''; if (num >= 1000000) { const millions = Math.floor(num / 1000000); const rem = num % 1000000; if (millions === 1) result = 'مليون'; else if (millions === 2) result = 'مليونان'; else if (millions <= 10) result = convertBelow1000(millions) + ' ملايين'; else result = convertBelow1000(millions) + ' مليون'; if (rem > 0) result += ' و' + convertBelowMillion(rem); } else { result = convertBelowMillion(num); } return result + ' ليرة سورية فقط'; }
-
-async function searchInvoice() {
-    const searchType = document.getElementById('searchType').value;
-    let searchValue = document.getElementById('searchInput').value.trim();
-    const container = document.getElementById('invoiceResults');
-    
-    if (!searchType || !searchValue) {
-        showToast('يرجى اختيار نوع البحث وإدخال القيمة');
-        return;
-    }
-    
-    if (!invoiceDataLoaded) {
-        container.innerHTML = '<div class="invoice-loading"><div class="spinner"></div><p>جاري تحميل بيانات الفواتير...</p></div>';
-        await loadInvoiceData();
-        if (!invoiceDataLoaded) {
-            container.innerHTML = `<div class="no-results"><i class="fas fa-exclamation-circle"></i><p>فشل تحميل البيانات، تأكد من اتصالك بالإنترنت</p><button onclick="retryLoadInvoiceData()" style="margin-top:15px;padding:8px 20px;background:#007BFF;color:white;border:none;border-radius:25px;">🔄 إعادة المحاولة</button></div>`;
-            return;
+        /** تحميل مسبق في الخلفية لسرعة أول بحث */
+        function preloadInvoiceData() {
+            if (!invoiceDataLoaded && !invoiceDataLoading && navigator.onLine) {
+                loadInvoiceData().catch(() => {});
+            }
         }
-    }
-    
-    let results = [];
-    switch(searchType) {
-        case 'nationalId': const row = nationalIdMap.get(searchValue); if (row) results = [row]; break;
-        case 'subNumber': const rowSub = subNumberMap.get(searchValue); if (rowSub) results = [rowSub]; break;
-        case 'barcode': let found = barcodeMap.get(searchValue); if (!found) { const cleanBarcode = searchValue.replace(/^0+/, ''); for (let [key, val] of barcodeMap.entries()) { if (key.replace(/^0+/, '') === cleanBarcode) { found = val; break; } } } if (found) results = [found]; break;
-        case 'phone': const cleanPhone = searchValue.replace(/^0/, ''); let phoneResults = phoneMap.get(searchValue); if (!phoneResults) phoneResults = phoneMap.get(cleanPhone); if (phoneResults) results = phoneResults; break;
-        case 'name': const lowerName = searchValue.toLowerCase(); results = nameMap.get(lowerName) || []; break;
-        default: results = [];
-    }
-    
-    const favorites = getInvoiceFavorites();
-    if (results.length === 0) {
-        container.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><p>لا توجد نتائج مطابقة لـ "${escapeHtml(searchValue)}"</p><p style="font-size:0.8rem;margin-top:5px;opacity:0.7;">تأكد من صحة البيانات المدخلة وحاول مرة أخرى</p></div>`;
-        return;
-    }
-    
-    let html = ''; if (results.length > 1) html += `<div class="results-count-label">تم العثور على ${results.length} نتيجة</div>`; html += '<div class="result-cards">';
-    results.forEach((r, idx) => {
-        const status = getStatusInfo(findColumnValue(r, ['حالة العداد'])); const calcType = getCalcType(findColumnValue(r, ['رمز الاحتساب'])); const total = Number(findColumnValue(r, ['إجمالي الفواتير الغير مدفوعة', 'إجمالي الفواتير غير المدفوعة']) || 0); const count = Number(findColumnValue(r, ['عدد الفواتير الغير مدفوعة', 'عدد الفواتير غير المدفوعة']) || 0); const phone = String(findColumnValue(r, ['رقم الجوال']) || ''); const address = String(findColumnValue(r, ['العنوان']) || '—'); const subNum = String(findColumnValue(r, ['رقم الاشتراك']) || '—'); const barcode = String(findColumnValue(r, ['باركود']) || '—'); const meterNum = String(findColumnValue(r, ['رقم العداد']) || ''); const meterDisplay = (meterNum === '' || meterNum === 'undefined' || meterNum === 'null') ? '—' : meterNum; const natId = String(findColumnValue(r, ['الرقم الوطني']) || '—'); const phoneDisplay = (phone === '*' || phone === 'undefined' || phone === 'null') ? '—' : phone; const subName = r['الاسم'] || '—'; const isFav = favorites.some(f => f.subNumber === subNum); const iconClass = isFav ? 'fa-check' : 'fa-plus'; const btnClass = isFav ? 'active' : '';
-        html += `<div class="invoice-result-card" style="animation-delay:${idx*0.1}s"><div class="result-header"><div class="result-header-flex"><div class="header-texts"><div class="subscriber-name">${escapeHtml(subName)}</div><div class="subscriber-meta"><span><i class="fas fa-id-card"></i> ${escapeHtml(natId)}</span><span><i class="fas fa-map-marker-alt"></i> ${escapeHtml(address)}</span><span class="status-badge ${status.cls}">${escapeHtml(status.text)}</span></div></div><button class="fav-btn fav-btn-invoice ${btnClass}" data-subnum="${escapeHtml(subNum)}" onclick="toggleInvoiceFavorite('${escapeHtml(subNum).replace(/'/g,"\\'")}', '${escapeHtml(subName).replace(/'/g,"\\'")}')" title="${isFav ? 'إزالة من قائمتي' : 'إضافة إلى قائمتي'}"><i class="fas ${iconClass}"></i></button></div></div><div class="result-body"><div class="detail-grid"><div class="detail-item"><span class="detail-label">رقم الاشتراك</span><span class="detail-value">${escapeHtml(subNum)}</span></div><div class="detail-item"><span class="detail-label">الباركود</span><span class="detail-value">${escapeHtml(barcode)}</span></div><div class="detail-item"><span class="detail-label">رقم العداد</span><span class="detail-value">${escapeHtml(meterDisplay)}</span></div><div class="detail-item"><span class="detail-label">نوع الاحتساب</span><span class="detail-value">${escapeHtml(calcType)}</span></div><div class="detail-item"><span class="detail-label">رقم الجوال</span><span class="detail-value">${escapeHtml(phoneDisplay)}</span></div><div class="detail-item"><span class="detail-label">التأشيرة الحالية</span><span class="detail-value">—</span></div></div><div class="amount-section"><div class="amount-value">${formatNumber(total)} ل.س</div><div class="arabic-amount">${toArabicWords(total)}</div><div class="warning-badge"><i class="fas fa-exclamation-circle"></i><span class="fees-disclaimer">غير متضمنة الرسوم</span></div><div class="invoices-count">📄 عدد الفواتير الغير مدفوعة: ${count}</div></div></div></div>`;
-    }); html += '</div><div class="disclaimer-box"><i class="fas fa-exclamation-triangle"></i><div><strong>تنبيه هام:</strong> القيمة الظاهرة أعلاه هي البيانات المتوفرة بشكل <strong>أوف لاين</strong> (غير متصلة بالخادم المباشر). من الممكن أن يكون المشترك قد قام بسداد فاتورته ولكنها ستظل ظاهرة هنا لحين تحديث الملف من قبل الإدارة. يرجى مراجعة قسم الحسابات في المؤسسة للتأكد من الرصيد الفعلي.</div></div>';
-    container.innerHTML = html;
-}
 
-async function exportInvoicePDF() {
-    if (typeof html2pdf === 'undefined') { showToast('⚠️ مكتبة التصدير غير محملة، تحقق من اتصالك بالإنترنت'); return; }
-    const cards = document.querySelectorAll('.invoice-result-card');
-    if (!cards.length) { showToast('لا توجد نتائج للتصدير'); return; }
-    showToast('جاري تجهيز ملف PDF...');
-    const printContent = document.createElement('div'); printContent.style.direction='rtl'; printContent.style.fontFamily='Tajawal, sans-serif'; printContent.style.padding='20px'; printContent.style.background='white';
-    const header = document.createElement('div'); header.style.textAlign='center'; header.style.marginBottom='20px'; header.style.borderBottom='3px solid #007BFF'; header.style.paddingBottom='12px'; header.innerHTML=`<h1 style="color:#007BFF;margin:0;">🧾 استعلام عن فاتورة</h1><p style="color:#666;font-size:12px;margin-top:6px;">شركة مياه طرطوس | تاريخ الاستعلام: ${new Date().toLocaleDateString('ar-EG')}</p>`; printContent.appendChild(header);
-    cards.forEach(card=>{ const cardClone=card.cloneNode(true); cardClone.style.boxShadow='none'; cardClone.style.border='1px solid #ddd'; cardClone.style.animation='none'; cardClone.style.marginBottom='20px'; const favBtn=cardClone.querySelector('.fav-btn'); if(favBtn) favBtn.style.display='none'; printContent.appendChild(cardClone); });
-    const disclaimer=document.querySelector('.disclaimer-box'); if(disclaimer){ const disclaimerClone=disclaimer.cloneNode(true); disclaimerClone.style.marginTop='15px'; disclaimerClone.style.padding='10px 15px'; printContent.appendChild(disclaimerClone); }
-    const footerDiv=document.createElement('div'); footerDiv.style.textAlign='center'; footerDiv.style.marginTop='15px'; footerDiv.style.paddingTop='10px'; footerDiv.style.borderTop='1px solid #ccc'; footerDiv.style.fontSize='10px'; footerDiv.style.color='#999'; footerDiv.innerHTML='المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا'; printContent.appendChild(footerDiv);
-    const style=document.createElement('style'); style.textContent=`.result-header{background:#007BFF!important;color:white!important;padding:12px 15px}.result-header *{color:white!important}.subscriber-name{font-size:14px;font-weight:800}.subscriber-meta{display:flex;gap:10px;font-size:11px;flex-wrap:wrap;margin-top:6px}.status-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;color:white}.status-active{background:#28a745}.status-disabled{background:#dc3545}.status-closed{background:#6c757d}.status-connection{background:#17a2b8}.result-body{padding:12px 15px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.detail-item{padding:8px;background:#f5f5f5;border-radius:10px}.detail-label{font-size:10px;color:#666}.detail-value{font-size:12px;font-weight:700;color:#333}.amount-section{margin-top:12px;padding:14px;background:#f0fff0;border-radius:12px;text-align:center;border:1px solid #c8e6c9}.amount-value{font-size:20px;font-weight:800;color:#1b5e20}.arabic-amount{font-size:12px;color:#2e7d32;margin-top:4px;font-weight:700}.warning-badge{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:rgba(211,47,47,.12);padding:8px 12px;border-radius:40px;margin-top:8px}.fees-disclaimer{color:#d32f2f;font-weight:bold;font-size:12px}.invoices-count{font-size:11px;color:#666;margin-top:6px}`; printContent.appendChild(style);
-    const opt={ margin:[0.4,0.4,0.4,0.4], filename:`فاتورة_${new Date().getTime()}.pdf`, image:{type:'jpeg',quality:0.98}, html2canvas:{scale:2,useCORS:true,letterRendering:true}, jsPDF:{unit:'in',format:'a4',orientation:'portrait'} };
-    html2pdf().set(opt).from(printContent).save().then(()=>showToast('تم حفظ ملف PDF بنجاح')).catch(err=>{console.error(err); showToast('حدث خطأ أثناء التصدير');});
-}
+        // ========== فتح صفحة التعليمات والدعم ==========
+        function openHelpPage() {
+            try { window.open('Help.html', '_blank'); }
+            catch(e) { showToast('⚠️ حدث خطأ في فتح صفحة التعليمات'); }
+        }
 
-function clearAppMemory() {
-    notificationQueue=[]; isShowingNotification=false; pendingPeriodicNotification=false; cachedNotificationMessages=[];
-    const notifCenter=document.getElementById('notification-center'); if(notifCenter) notifCenter.innerHTML='';
-    const planFavBackup=getPlanFavorites(); const invoiceFavBackup=getInvoiceFavorites(); const themeBackup=localStorage.getItem('theme'); const audioPermissionBackup=localStorage.getItem('audioPermissionGranted'); const lastNotificationBackup=localStorage.getItem('lastNotificationTime'); const cachedNewsBackup=localStorage.getItem('cached_news'); const cachedNotifsBackup=localStorage.getItem('cached_notifications'); const currentPlanMonthBackup=localStorage.getItem('currentPlanMonth');
-    localStorage.clear(); sessionStorage.clear();
-    savePlanFavorites(planFavBackup); saveInvoiceFavorites(invoiceFavBackup);
-    if(themeBackup) localStorage.setItem('theme',themeBackup); if(audioPermissionBackup) localStorage.setItem('audioPermissionGranted',audioPermissionBackup); if(lastNotificationBackup) localStorage.setItem('lastNotificationTime',lastNotificationBackup); if(cachedNewsBackup) localStorage.setItem('cached_news',cachedNewsBackup); if(cachedNotifsBackup) localStorage.setItem('cached_notifications',cachedNotifsBackup); if(currentPlanMonthBackup) localStorage.setItem('currentPlanMonth',currentPlanMonthBackup);
-    if('caches' in window) { caches.keys().then(names=>{ names.forEach(name=>caches.delete(name)); }).catch(()=>{}); }
-    if('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(registrations=>{ registrations.forEach(reg=>reg.unregister()); }).catch(()=>{}); }
-    invoiceDataLoaded=false; invoiceData=[]; indexedDB.deleteDatabase(DB_NAME);
-    showToast('✓ تم افراغ الذاكرة بنجاح، جاري إعادة التحميل...');
-    setTimeout(()=>{ window.location.reload(true); },1500);
-}
+        // ========== إدارة المفضلات - خطة المياه ==========
+        function getPlanFavorites() {
+            try { return JSON.parse(localStorage.getItem('planFavorites') || '[]'); }
+            catch(e) { return []; }
+        }
+        function savePlanFavorites(favorites) {
+            try { localStorage.setItem('planFavorites', JSON.stringify(favorites.slice(0, 5))); }
+            catch(e) { console.warn('خطأ في حفظ مفضلات الخطة:', e); }
+        }
+        function togglePlanFavorite() {
+            const unit = document.getElementById('unitSelect').value;
+            const project = document.getElementById('projectSelect').value;
+            const btn = document.getElementById('btn-fav-plan');
+            if (!unit || !project) { showToast('الرجاء اختيار الوحدة والمشروع أولاً'); return; }
+            let favorites = getPlanFavorites();
+            const existingIndex = favorites.findIndex(f => f.unit === unit && f.project === project);
+            if (existingIndex !== -1) {
+                favorites.splice(existingIndex, 1);
+                btn.innerHTML = '<i class="fas fa-plus"></i>';
+                btn.classList.remove('active');
+                showToast('✓ تم إزالة المشروع من قائمتي');
+            } else {
+                if (favorites.length >= 5) { showToast('⚠️ لا يمكن إضافة أكثر من 5 مشاريع مفضلة'); return; }
+                favorites.push({ unit, project, name: project });
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                btn.classList.add('active');
+                showToast('✓ تم إضافة المشروع إلى قائمتي');
+            }
+            savePlanFavorites(favorites);
+            renderPlanFavorites();
+        }
+        function renderPlanFavorites() {
+            const favorites = getPlanFavorites();
+            const container = document.getElementById('planFavItems');
+            const listContainer = document.getElementById('planFavoritesList');
+            if (favorites.length === 0) { listContainer.style.display = 'none'; return; }
+            listContainer.style.display = 'block';
+            container.innerHTML = '';
+            favorites.forEach((fav, idx) => {
+                const div = document.createElement('div');
+                div.className = 'fav-item';
+                div.innerHTML = `
+                    <div class="fav-item-info" onclick="loadPlanFavorite('${sanitize(fav.unit).replace(/'/g, "\\'")}', '${sanitize(fav.project).replace(/'/g, "\\'")}')">
+                        <div class="fav-item-title">${sanitize(fav.project)}</div>
+                        <div class="fav-item-sub">${sanitize(fav.unit)}</div>
+                    </div>
+                    <button class="fav-item-delete" onclick="deletePlanFavorite(${idx})">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>`;
+                container.appendChild(div);
+            });
+        }
+        function loadPlanFavorite(unit, project) {
+            const unitSelect = document.getElementById('unitSelect');
+            const projSelect = document.getElementById('projectSelect');
+            unitSelect.value = unit;
+            filterProjects();
+            setTimeout(() => { projSelect.value = project; renderTable(); showToast(`✓ تم تحميل المخطط: ${project}`); }, 200);
+        }
+        function deletePlanFavorite(index) {
+            let favorites = getPlanFavorites();
+            favorites.splice(index, 1);
+            savePlanFavorites(favorites);
+            renderPlanFavorites();
+            checkPlanFavoriteStatus();
+            showToast('✓ تم حذف المشروع من قائمتي');
+        }
+        let planFavCollapsed = false;
+        function togglePlanFavoritesCollapse() {
+            planFavCollapsed = !planFavCollapsed;
+            const items = document.getElementById('planFavItems');
+            const icon = document.getElementById('planFavToggleIcon');
+            if (planFavCollapsed) { items.parentElement.classList.add('fav-collapsed'); icon.className = 'fas fa-chevron-left'; }
+            else { items.parentElement.classList.remove('fav-collapsed'); icon.className = 'fas fa-chevron-down'; }
+        }
 
-document.addEventListener('DOMContentLoaded', () => {
-    const lc='?v='+Date.now();
-    ['splash-logo','header-logo'].forEach(id=>{ const img=document.getElementById(id); if(img){ if(!img.src.includes('?v=')) img.src='logo.png'+lc; img.onerror=function(){ this.src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007BFF" rx="15"/><text x="50" y="65" font-size="45" text-anchor="middle" fill="white">💧</text></svg>'; }; } });
-    handleOfflineStatus();
-    checkAppStartup();
-});
-</script>
+        // ========== إدارة المفضلات - الفواتير ==========
+        function getInvoiceFavorites() {
+            try { return JSON.parse(localStorage.getItem('invoiceFavorites') || '[]'); }
+            catch(e) { return []; }
+        }
+        function saveInvoiceFavorites(favorites) {
+            try { localStorage.setItem('invoiceFavorites', JSON.stringify(favorites.slice(0, 5))); }
+            catch(e) { console.warn('خطأ في حفظ مفضلات الفواتير:', e); }
+        }
+        function toggleInvoiceFavorite(subNumber, subName) {
+            let favorites = getInvoiceFavorites();
+            const existingIndex = favorites.findIndex(f => f.subNumber === subNumber);
+            if (existingIndex !== -1) {
+                favorites.splice(existingIndex, 1);
+                showToast(`✓ تم إزالة "${subName.substring(0, 20)}" من قائمتي`);
+            } else {
+                if (favorites.length >= 5) { showToast('⚠️ لا يمكن إضافة أكثر من 5 اشتراكات مفضلة'); return; }
+                favorites.push({ subNumber, subName: subName.substring(0, 50) });
+                showToast(`✓ تم إضافة "${subName.substring(0, 20)}" إلى قائمتي`);
+            }
+            saveInvoiceFavorites(favorites);
+            renderInvoiceFavorites();
+            updateFavButtonsState(subNumber, favorites);
+        }
+        function updateFavButtonsState(subNumber, favorites) {
+            document.querySelectorAll('.fav-btn-invoice').forEach(btn => {
+                if (btn.getAttribute('data-subnum') === subNumber) {
+                    const isFav = favorites.some(f => f.subNumber === subNumber);
+                    btn.innerHTML = isFav ? '<i class="fas fa-check"></i>' : '<i class="fas fa-plus"></i>';
+                    btn.classList.toggle('active', isFav);
+                }
+            });
+        }
+        function renderInvoiceFavorites() {
+            const favorites = getInvoiceFavorites();
+            const container = document.getElementById('invoiceFavItems');
+            const listContainer = document.getElementById('invoiceFavoritesList');
+            if (favorites.length === 0) { listContainer.style.display = 'none'; return; }
+            listContainer.style.display = 'block';
+            container.innerHTML = '';
+            favorites.forEach((fav, idx) => {
+                const div = document.createElement('div');
+                div.className = 'fav-item';
+                div.innerHTML = `
+                    <div class="fav-item-info" onclick="loadInvoiceFavorite('${sanitize(fav.subNumber).replace(/'/g, "\\'")}')">
+                        <div class="fav-item-title">${sanitize(fav.subName.substring(0, 30))}</div>
+                        <div class="fav-item-sub">رقم: ${sanitize(fav.subNumber)}</div>
+                    </div>
+                    <button class="fav-item-delete" onclick="deleteInvoiceFavorite(${idx})">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>`;
+                container.appendChild(div);
+            });
+        }
+        async function loadInvoiceFavorite(subNumber) {
+            document.getElementById('searchType').value = 'subNumber';
+            updateSearchPlaceholder();
+            document.getElementById('searchInput').value = subNumber;
+            await searchInvoice();
+        }
+        function deleteInvoiceFavorite(index) {
+            let favorites = getInvoiceFavorites();
+            favorites.splice(index, 1);
+            saveInvoiceFavorites(favorites);
+            renderInvoiceFavorites();
+            showToast('✓ تم حذف الاشتراك من قائمتي');
+        }
+        let invoiceFavCollapsed = false;
+        function toggleInvoiceFavoritesCollapse() {
+            invoiceFavCollapsed = !invoiceFavCollapsed;
+            const items = document.getElementById('invoiceFavItems');
+            const icon = document.getElementById('invoiceFavToggleIcon');
+            if (invoiceFavCollapsed) { items.parentElement.classList.add('fav-collapsed'); icon.className = 'fas fa-chevron-left'; }
+            else { items.parentElement.classList.remove('fav-collapsed'); icon.className = 'fas fa-chevron-down'; }
+        }
+
+        // ========== الدوال الأساسية ==========
+        function toggleDarkMode() {
+            const body = document.body;
+            const icon = document.getElementById('dark-mode-icon');
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+        function loadTheme() {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                document.getElementById('dark-mode-icon').className = 'fas fa-sun';
+            }
+        }
+        function initAudio() { try { notificationSound = new Audio('water_drops.mp3'); notificationSound.volume = 0.5; } catch(e) {} }
+        function playSound() { if(audioAllowed && notificationSound) { notificationSound.currentTime = 0; notificationSound.play().catch(()=>{}); } }
+        function hideSplash() { const splash = document.getElementById('splash-screen'); splash.style.opacity = '0'; setTimeout(() => splash.style.display = 'none', 800); }
+        function grantAudioPermission() {
+            if(audioAllowed) return;
+            audioAllowed = true; initAudio(); playSound();
+            localStorage.setItem('audioPermissionGranted', 'true');
+            hideSplash(); loadExcelData();
+        }
+        function checkAppStartup() {
+            const hasPermission = localStorage.getItem('audioPermissionGranted') === 'true';
+            const splash = document.getElementById('splash-screen');
+            loadTheme();
+            if (hasPermission) {
+                audioAllowed = true; initAudio();
+                splash.classList.add('auto-mode'); splash.style.display = 'flex';
+                setTimeout(hideSplash, 2000);
+                loadExcelData();
+            } else { splash.style.display = 'flex'; }
+        }
+        function handleOfflineStatus() {
+            if (!navigator.onLine) document.getElementById('offline-screen').style.display = 'flex';
+            window.addEventListener('offline', () => { document.getElementById('offline-screen').style.display = 'flex'; });
+            window.addEventListener('online', () => { document.getElementById('offline-screen').style.display = 'none'; loadExcelData(); });
+        }
+
+        let pullStartY = 0, isPulling = false;
+        const scrollableDiv = document.getElementById('scrollableContent');
+        scrollableDiv.addEventListener('touchstart', (e) => { if (scrollableDiv.scrollTop === 0) pullStartY = e.touches[0].clientY; });
+        scrollableDiv.addEventListener('touchmove', (e) => { if (pullStartY > 0 && scrollableDiv.scrollTop === 0) { if (e.touches[0].clientY - pullStartY > 70) { document.getElementById('pull-to-refresh').classList.add('show'); isPulling = true; } } });
+        scrollableDiv.addEventListener('touchend', () => { if (isPulling) { setTimeout(() => document.getElementById('pull-to-refresh').classList.remove('show'), 1000); loadExcelData(); showToast('جاري تحديث البيانات...'); } pullStartY = 0; isPulling = false; });
+
+        function showToast(msg) {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div');
+            t.className = 'toast'; t.textContent = msg;
+            c.appendChild(t);
+            setTimeout(() => t.classList.add('show'), 10);
+            setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, 2500);
+        }
+
+        document.addEventListener('click', (e) => {
+            const target = e.target.closest('.btn, .btn-action, .fav-btn, .fav-btn-invoice');
+            if (target && !target.classList.contains('fav-item-delete')) {
+                const circle = document.createElement('span');
+                circle.className = 'ripple-effect';
+                const d = Math.max(target.clientWidth, target.clientHeight), r = d / 2;
+                circle.style.width = circle.style.height = `${d}px`;
+                circle.style.left = `${e.clientX - target.getBoundingClientRect().left - r}px`;
+                circle.style.top = `${e.clientY - target.getBoundingClientRect().top - r}px`;
+                target.appendChild(circle);
+                setTimeout(() => circle.remove(), 600);
+            }
+        });
+
+        function navigateTo(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageName).classList.add('active');
+            const mainTitle = document.getElementById('dynamic-title');
+            const subTitle = document.getElementById('dynamic-subtitle');
+            const m = document.getElementById('theme-color-meta');
+            if(pageName === 'home') { mainTitle.innerHTML = 'شركة مياه طرطوس'; subTitle.innerHTML = 'التطبيق الرسمي'; m.content = '#004999'; if (cachedNotificationMessages.length > 0 && notificationQueue.length === 0) { cachedNotificationMessages.forEach(n => showNotification(n)); } }
+            else if(pageName === 'plan') { mainTitle.innerHTML = '📅 خطة توزيع المياه'; subTitle.innerHTML = 'اختر الوحدة والمشروع'; m.content = '#0056b3'; const savedMonth = localStorage.getItem('currentPlanMonth'); if(savedMonth && savedMonth !== '--') { document.getElementById('planMonthDisplay').innerHTML = `لشهر ${savedMonth}`; } renderPlanFavorites(); checkPlanFavoriteStatus(); }
+            else if(pageName === 'invoice') { mainTitle.innerHTML = '🧾 استعلام عن فاتورة'; subTitle.innerHTML = 'ابحث عن اشتراكك'; m.content = '#65a30d'; renderInvoiceFavorites(); showInvoiceEmptyState(); preloadInvoiceData(); }
+            else if(pageName === 'report') { mainTitle.innerHTML = 'الإبلاغ عن أعطال<br>الشبكات وهدر المياه'; subTitle.innerHTML = 'محافظة طرطوس - اختر المنطقة'; m.content = '#1e7e34'; }
+            scrollableDiv.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        function checkPlanFavoriteStatus() {
+            const unit = document.getElementById('unitSelect').value;
+            const project = document.getElementById('projectSelect').value;
+            const btn = document.getElementById('btn-fav-plan');
+            const favorites = getPlanFavorites();
+            const isFav = favorites.some(f => f.unit === unit && f.project === project);
+            btn.innerHTML = isFav ? '<i class="fas fa-check"></i>' : '<i class="fas fa-plus"></i>';
+            btn.classList.toggle('active', isFav);
+        }
+
+        function showNotification(msg) {
+            const isHomePage = document.getElementById('page-home').classList.contains('active');
+            if(msg && isHomePage) { notificationQueue.push(msg); processQueue(); }
+        }
+        function createSwipeableNotification(msg) {
+            const c = document.getElementById('notification-center');
+            const el = document.createElement('div');
+            el.className = 'android-notification';
+            el.innerHTML = `<i class="fas fa-bell" style="color:#ff9900;font-size:1.2rem;"></i><div style="flex:1"><strong>📢 تنبيه</strong><br>${sanitize(msg)}</div><i class="fas fa-times notification-dismiss"></i>`;
+            el.querySelector('.notification-dismiss').addEventListener('click', (e) => { e.stopPropagation(); removeNotification(el); });
+            let sx = 0, cx = 0, isD = false;
+            el.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; cx = sx; isD = true; el.style.transition = 'none'; });
+            el.addEventListener('touchmove', (e) => { if (!isD) return; cx = e.touches[0].clientX; let d = cx - sx; el.style.transform = `translateX(${d}px)`; el.style.opacity = 1 - Math.abs(d) / 200; });
+            el.addEventListener('touchend', () => { isD = false; if (Math.abs(cx - sx) > 80) removeNotification(el); else { el.style.transition = 'transform 0.3s ease, opacity 0.3s ease'; el.style.transform = ''; el.style.opacity = ''; } });
+            c.appendChild(el);
+        }
+        function removeNotification(el) { el.style.transform = 'translateX(-120%)'; el.style.opacity = '0'; setTimeout(() => { if(el.parentNode) el.remove(); isShowingNotification = false; setTimeout(processQueue, 500); }, 300); }
+        async function processQueue() { if(isShowingNotification || notificationQueue.length === 0) return; isShowingNotification = true; createSwipeableNotification(notificationQueue.shift()); playSound(); setTimeout(() => { const n = document.querySelectorAll('.android-notification'); if(n.length) removeNotification(n[n.length-1]); }, 7000); }
+        function sendSystemNotifications(messages) {
+            if (!window.median || !window.median.localNotification) return;
+            messages.forEach((msg, i) => { setTimeout(() => { median.localNotification.schedule({ title: "💧 مياه طرطوس", body: msg, delay: 0, id: 100 + i }); }, i * 5000); });
+        }
+
+        async function loadExcelData() {
+            const newsEl = document.getElementById('scrolling-news');
+            newsEl.className = 'news-bar-inner skeleton'; newsEl.style.width = '60%'; newsEl.innerHTML = '&nbsp;';
+            if (typeof XLSX === 'undefined') {
+                newsEl.className = 'news-bar-inner'; newsEl.style.width='';
+                newsEl.innerHTML = "🚰 مياه طرطوس - جاري تحميل المكتبة...";
+                await new Promise(resolve => setTimeout(resolve, 3000));
+                if (typeof XLSX === 'undefined') { newsEl.innerHTML = "🚰 مياه طرطوس - لا يوجد اتصال"; showToast('⚠️ مكتبة الجداول غير محملة، تحقق من الإنترنت'); return; }
+            }
+            try {
+                const res = await fetch('toze3.xlsx?v=' + Date.now());
+                if(!res.ok) throw new Error('Network error');
+                const buf = await res.arrayBuffer();
+                const wb = XLSX.read(new Uint8Array(buf), { type: 'array' }), sheet = wb.Sheets[wb.SheetNames[0]];
+                const news = [];
+                for(let i=1; i<=6; i++) { if(sheet['I'+i]?.v) news.push(sheet['I'+i].v); }
+                if(news.length) { newsEl.className = 'news-bar-inner'; newsEl.style.width = ''; newsEl.innerHTML = "🌀 " + news.join("  •  "); newsEl.style.animation = 'none'; setTimeout(() => newsEl.style.animation = 'scroll-news-right 40s linear infinite', 10); }
+                else { newsEl.className = 'news-bar-inner'; newsEl.innerHTML = "🚰 مياه طرطوس"; newsEl.style.width=''; }
+                const notifs = [];
+                for(let i=2; i<=5; i++) { if(sheet['H'+i]?.v) notifs.push(sheet['H'+i].v); }
+                cachedNotificationMessages = notifs;
+                localStorage.setItem('cached_notifications', JSON.stringify(notifs));
+                if (document.getElementById('page-home').classList.contains('active')) { notificationQueue = []; notifs.forEach(n => showNotification(n)); }
+                else { pendingPeriodicNotification = true; }
+                const sysAlerts = [];
+                for(let i=2; i<=10; i++) { if(sheet['J'+i] && sheet['J'+i].v && String(sheet['J'+i].v).trim() !== "") sysAlerts.push(String(sheet['J'+i].v)); }
+                if(sysAlerts.length > 0) sendSystemNotifications(sysAlerts);
+                waterPlanData = XLSX.utils.sheet_to_json(sheet);
+                let monthDisplay = "";
+                if(sheet['H1'] && sheet['H1'].v) {
+                    const rawMonthValue = sheet['H1'].v;
+                    const dateObj = convertToDate(rawMonthValue);
+                    if(dateObj) { monthDisplay = `${dateObj.getMonth() + 1}-${dateObj.getFullYear()}`; }
+                    else { monthDisplay = String(rawMonthValue); }
+                } else { const now = new Date(); monthDisplay = `${now.getMonth() + 1}-${now.getFullYear()}`; }
+                localStorage.setItem('currentPlanMonth', monthDisplay);
+                const currentActivePage = document.querySelector('.page.active')?.id;
+                if(currentActivePage === 'page-plan') { document.getElementById('planMonthDisplay').innerHTML = `لشهر ${monthDisplay}`; }
+                else { const monthSpan = document.getElementById('planMonthDisplay'); if(monthSpan) monthSpan.innerHTML = `لشهر ${monthDisplay}`; }
+                populateUnits();
+                renderPlanFavorites();
+                localStorage.setItem('cached_news', JSON.stringify(news));
+
+                // تحميل مسبق لبيانات الفواتير في الخلفية
+                preloadInvoiceData();
+            } catch(e) {
+                newsEl.className = 'news-bar-inner'; newsEl.style.width='';
+                const c = localStorage.getItem('cached_news');
+                if(c && JSON.parse(c).length) newsEl.innerHTML = "🌀 " + JSON.parse(c).join("  •  ");
+                else newsEl.innerHTML = "🚰 مياه طرطوس - لا يوجد اتصال";
+                const savedMonth = localStorage.getItem('currentPlanMonth');
+                if(savedMonth) { document.getElementById('planMonthDisplay').innerHTML = `لشهر ${savedMonth}`; }
+                preloadInvoiceData();
+            }
+        }
+
+        function convertToDate(v) {
+            if (!v) return null;
+            if (v instanceof Date && !isNaN(v)) return new Date(v.getFullYear(), v.getMonth(), v.getDate());
+            if (typeof v === 'number' && v > 0) { let d = new Date(new Date(1899, 11, 30).getTime() + (v * 86400000)); if (!isNaN(d.getTime())) return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
+            if (typeof v === 'string') { let p = new Date(v); if (!isNaN(p.getTime())) return new Date(p.getFullYear(), p.getMonth(), p.getDate()); let parts = v.split('/'); if (parts.length === 3) return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0])); }
+            return null;
+        }
+        function formatDate(v) { const d = convertToDate(v); return d ? `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}` : '—'; }
+        function isToday(v) { const d = convertToDate(v); if (!d) return false; const t = new Date(); return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear(); }
+        function populateUnits() {
+            const s = document.getElementById('unitSelect');
+            s.innerHTML = '<option value="">-- اختر الوحدة --</option>';
+            [...new Set(waterPlanData.map(r => r['المحافظة']).filter(Boolean))].forEach(u => s.innerHTML += `<option value="${u}">${u}</option>`);
+            s.onchange = null; s.onchange = filterProjects;
+        }
+        function filterProjects() {
+            const u = document.getElementById('unitSelect').value;
+            const p = document.getElementById('projectSelect');
+            p.innerHTML = '<option value="">-- اختر المشروع --</option>';
+            document.getElementById('tableWrapper').style.display = 'none';
+            checkPlanFavoriteStatus();
+            if(!u) return;
+            [...new Set(waterPlanData.filter(r => r['المحافظة'] === u).map(r => r['محور الضخ']).filter(Boolean))].forEach(pr => p.innerHTML += `<option value="${pr}">${pr}</option>`);
+            p.onchange = null; p.onchange = renderTable;
+            renderTable();
+        }
+        function renderTable() {
+            const u = document.getElementById('unitSelect').value;
+            const p = document.getElementById('projectSelect').value;
+            const tbody = document.getElementById('scheduleBody');
+            const wrapper = document.getElementById('tableWrapper');
+            checkPlanFavoriteStatus();
+            if(!u || !p) { wrapper.style.display = 'none'; return; }
+            const f = waterPlanData.filter(r => r['المحافظة'] === u && r['محور الضخ'] === p);
+            tbody.innerHTML = '';
+            if(!f.length) { wrapper.style.display = 'none'; showToast('لا توجد بيانات لهذا المشروع'); return; }
+            f.forEach(r => {
+                const isT = isToday(r['التاريخ']);
+                const tr = document.createElement('tr');
+                if(isT) tr.classList.add('highlight-today');
+                let dt = formatDate(r['التاريخ']);
+                if(isT) dt = `<span class="today-badge">اليوم 🌟</span><br>${dt}`;
+                tr.innerHTML = `<td>${r['اليوم'] || '—'}</td><td>${dt}</td><td>${r['محور الضخ'] || '—'}</td><td style="white-space:normal; font-size:0.7rem; text-align:right;">${r['المجمعات المستفيدة'] || '—'}</td><td>${r['عدد ساعات الضخ'] || '—'}</td>`;
+                tbody.appendChild(tr);
+            });
+            wrapper.style.display = 'block';
+        }
+        function shareWhatsApp() {
+            const u = document.getElementById('unitSelect').value;
+            const p = document.getElementById('projectSelect').value;
+            if(!u || !p) { showToast('الرجاء اختيار الوحدة والمشروع أولاً'); return; }
+            let t = `💧 *مؤسسة مياه طرطوس - خطة التوزيع* 💧%0A📍 *الوحدة:* ${u}%0A⚙️ *المشروع:* ${p}%0A%0A`;
+            const f = waterPlanData.filter(r => r['المحافظة'] === u && r['محور الضخ'] === p);
+            const td = f.find(r => isToday(r['التاريخ']));
+            if(td) t += `✅ *توزيع اليوم:* ${td['المجمعات المستفيدة']}%0A⏰ *الساعات:* ${td['عدد ساعات الضخ']}%0A%0A`;
+            t += `📲 حمل تطبيق مياه طرطوس الآن:%0Ahttps://twc.ct.ws/app/miyah-tartus.apk`;
+            window.open(`https://api.whatsapp.com/send?text=${t}`, '_blank');
+        }
+        function exportToPDF() {
+            if (typeof html2pdf === 'undefined') { showToast('⚠️ مكتبة التصدير غير محملة، تحقق من اتصالك بالإنترنت'); return; }
+            const tableWrapper = document.getElementById('tableWrapper');
+            if (!tableWrapper || tableWrapper.style.display !== 'block') { showToast('الرجاء اختيار الوحدة والمشروع أولاً'); return; }
+            const unit = document.getElementById('unitSelect').value;
+            const project = document.getElementById('projectSelect').value;
+            const monthText = document.getElementById('planMonthDisplay').innerHTML;
+            const printContent = document.createElement('div');
+            printContent.style.direction = 'rtl'; printContent.style.fontFamily = 'Tajawal, sans-serif'; printContent.style.padding = '20px'; printContent.style.background = 'white';
+            const header = document.createElement('div');
+            header.style.textAlign = 'center'; header.style.marginBottom = '20px'; header.style.borderBottom = '2px solid #007BFF'; header.style.paddingBottom = '10px';
+            header.innerHTML = `<h1 style="color: #007BFF; margin:0;">📅 خطة توزيع المياه</h1><h2 style="color: #ff9800; margin:5px 0;">${monthText}</h2><p style="color: #666; margin:5px 0;">الوحدة: ${sanitize(unit)} | مشروع الضخ: ${sanitize(project)}</p><p style="color: #999; font-size:12px;">تم التصدير بتاريخ: ${new Date().toLocaleDateString('ar-EG')}</p>`;
+            printContent.appendChild(header);
+            const tableClone = document.getElementById('resultTable').cloneNode(true);
+            tableClone.style.width = '100%'; tableClone.style.borderCollapse = 'collapse'; tableClone.style.fontSize = '12px';
+            const style = document.createElement('style');
+            style.textContent = `th, td { border: 1px solid #ddd; padding: 8px; text-align: center; } th { background: #f0f0f0; color: #0056a7; } .highlight-today { background: #d4f5d0; } .today-badge { background: #2b7d1e; color: white; border-radius: 20px; padding: 2px 8px; font-size: 10px; display: inline-block; margin-bottom: 4px; }`;
+            printContent.appendChild(style);
+            printContent.appendChild(tableClone);
+            const footerDiv = document.createElement('div');
+            footerDiv.style.textAlign = 'center'; footerDiv.style.marginTop = '20px'; footerDiv.style.paddingTop = '10px'; footerDiv.style.borderTop = '1px solid #ccc'; footerDiv.style.fontSize = '10px'; footerDiv.style.color = '#999';
+            footerDiv.innerHTML = 'المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا';
+            printContent.appendChild(footerDiv);
+            const opt = { margin: [0.5, 0.5, 0.5, 0.5], filename: `خطة_توزيع_المياه_${unit}_${project}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, letterRendering: true }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+            showToast('جاري تجهيز ملف PDF...');
+            html2pdf().set(opt).from(printContent).save().then(() => showToast('تم حفظ ملف PDF بنجاح')).catch(err => { console.error(err); showToast('حدث خطأ أثناء تصدير PDF'); });
+        }
+
+        // ========== دوال الفواتير (مُحدّثة: JSON + فهرسة + أمان) ==========
+        function updateSearchPlaceholder() {
+            const input = document.getElementById('searchInput');
+            const type = document.getElementById('searchType').value;
+            const placeholders = { nationalId: 'أدخل الرقم الوطني...', name: 'أدخل اسم المشترك...', barcode: 'أدخل رقم الباركود...', phone: 'أدخل رقم الجوال...', subNumber: 'أدخل رقم الاشتراك...' };
+            input.placeholder = placeholders[type] || 'أدخل قيمة البحث هنا...';
+        }
+
+        function showInvoiceEmptyState() {
+            const container = document.getElementById('invoiceResults');
+            container.innerHTML = `<div class="empty-state"><i class="fas fa-file-invoice-dollar"></i><p>ابحث عن فاتورتك</p><span>اختر نوع البحث وأدخل القيمة للبحث في بيانات المشتركين</span></div>`;
+        }
+
+        function getStatusInfo(status) {
+            const str = String(status || '');
+            if (str.includes('شغال')) return { text: 'شغال', cls: 'status-active' };
+            if (str.includes('معطل')) return { text: 'معطل', cls: 'status-disabled' };
+            if (str.includes('مغلق')) return { text: 'مغلق', cls: 'status-closed' };
+            if (str.includes('وصلة')) return { text: 'وصلة', cls: 'status-connection' };
+            return { text: str || '—', cls: '' };
+        }
+
+        function getCalcType(code) {
+            const str = String(code || '');
+            if (str.includes('منزلي')) return 'منزلي';
+            if (str.includes('تجاري')) return 'تجاري';
+            return str || '—';
+        }
+
+        function formatNumber(num) {
+            const n = Number(num);
+            if (isNaN(n)) return '—';
+            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function toArabicWords(num) {
+            if (!num && num !== 0) return '—';
+            num = parseInt(num);
+            if (isNaN(num)) return '—';
+            if (num === 0) return 'صفر ليرة سورية فقط';
+            const units = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'];
+            const teens = ['عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
+            const tensArr = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
+            const hundredsArr = ['', 'مائة', 'مائتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
+            function convertBelow100(n) { if (n === 0) return ''; if (n >= 10 && n <= 19) return teens[n - 10]; if (n >= 20) { const rem = n % 10; return (rem > 0 ? units[rem] + ' و' : '') + tensArr[Math.floor(n / 10)]; } return units[n]; }
+            function convertBelow1000(n) { if (n === 0) return ''; if (n >= 100) { const h = Math.floor(n / 100); const rem = n % 100; return hundredsArr[h] + (rem > 0 ? ' و' + convertBelow100(rem) : ''); } return convertBelow100(n); }
+            function convertBelowMillion(n) { if (n === 0) return ''; if (n >= 1000) { const thousands = Math.floor(n / 1000); const rem = n % 1000; let r = ''; if (thousands === 1) r = 'ألف'; else if (thousands === 2) r = 'ألفان'; else if (thousands <= 10) r = convertBelow1000(thousands) + ' آلاف'; else r = convertBelow1000(thousands) + ' ألف'; if (rem > 0) r += ' و' + convertBelow1000(rem); return r; } return convertBelow1000(n); }
+            let result = '';
+            if (num >= 1000000) { const millions = Math.floor(num / 1000000); const rem = num % 1000000; if (millions === 1) result = 'مليون'; else if (millions === 2) result = 'مليونان'; else if (millions <= 10) result = convertBelow1000(millions) + ' ملايين'; else result = convertBelow1000(millions) + ' مليون'; if (rem > 0) result += ' و' + convertBelowMillion(rem); } else { result = convertBelowMillion(num); }
+            return result + ' ليرة سورية فقط';
+        }
+
+        // ========================================================
+        //  البحث المحسّن بالفهرسة - بحث سريع O(1) للمطابقة التامة
+        // ========================================================
+        async function searchInvoice() {
+            const searchType = document.getElementById('searchType').value;
+            const rawSearchValue = document.getElementById('searchInput').value.trim();
+            const container = document.getElementById('invoiceResults');
+
+            if (!searchType || !rawSearchValue) {
+                showToast('يرجى اختيار نوع البحث وإدخال القيمة');
+                return;
+            }
+
+            // حد أقصى لطول البحث (حماية)
+            if (rawSearchValue.length > 100) {
+                showToast('⚠️ قيمة البحث طويلة جداً');
+                return;
+            }
+
+            container.innerHTML = '<div class="invoice-loading"><div class="spinner"></div><p style="color:var(--text-sub);font-size:0.9rem;">جاري البحث...</p></div>';
+
+            // تعطيل زر البحث مؤقتاً
+            const searchBtn = document.getElementById('btnSearchInvoice');
+            searchBtn.disabled = true;
+            searchBtn.style.opacity = '0.6';
+
+            try {
+                // تحميل البيانات إذا لم تُحمّل بعد
+                if (!invoiceDataLoaded) await loadInvoiceData();
+
+                if (!invoiceDataLoaded || invoiceData.length === 0) {
+                    container.innerHTML = `<div class="no-results"><i class="fas fa-exclamation-circle"></i><p>لم يتم تحميل بيانات الفواتير</p><p style="font-size:0.8rem;margin-top:5px;opacity:0.7;">تأكد من اتصالك بالإنترنت وأن ملف data_compact.json متوفر</p></div>`;
+                    return;
+                }
+
+                const sv = normalizeStr(rawSearchValue);
+                let resultIndices = [];
+
+                // ========== البحث بالفهرس الذكي ==========
+                switch(searchType) {
+                    case 'nationalId': {
+                        // مطابقة تامة أولاً O(1)
+                        if (invoiceIndexes.nationalId.has(sv)) {
+                            resultIndices = invoiceIndexes.nationalId.get(sv);
+                        } else {
+                            // بحث يحتوي O(k) حيث k = عدد القيم الفريدة
+                            for (const [key, indices] of invoiceIndexes.nationalId) {
+                                if (key.includes(sv)) resultIndices.push(...indices);
+                            }
+                        }
+                        break;
+                    }
+                    case 'name': {
+                        // بحث بالبادئة - نفحص كل المفاتيح المطابقة للبادئة
+                        const searchPrefix = sv.substring(0, Math.min(Math.max(sv.length, 3), 10));
+                        for (const [key, indices] of invoiceIndexes.name) {
+                            if (key.includes(sv)) resultIndices.push(...indices);
+                        }
+                        break;
+                    }
+                    case 'barcode': {
+                        const svClean = sv.replace(/^0+/, '');
+                        // محاولة مطابقة تامة
+                        if (invoiceIndexes.barcode.has(sv)) {
+                            resultIndices = invoiceIndexes.barcode.get(sv);
+                        } else if (svClean !== sv && invoiceIndexes.barcode.has(svClean)) {
+                            resultIndices = invoiceIndexes.barcode.get(svClean);
+                        } else {
+                            // بحث يحتوي
+                            for (const [key, indices] of invoiceIndexes.barcode) {
+                                if (key.includes(sv) || key.includes(svClean)) resultIndices.push(...indices);
+                            }
+                        }
+                        break;
+                    }
+                    case 'phone': {
+                        const cleanPhone = sv.replace(/^0/, '');
+                        if (invoiceIndexes.phone.has(sv)) {
+                            resultIndices = invoiceIndexes.phone.get(sv);
+                        } else if (cleanPhone !== sv && invoiceIndexes.phone.has(cleanPhone)) {
+                            resultIndices = invoiceIndexes.phone.get(cleanPhone);
+                        } else {
+                            for (const [key, indices] of invoiceIndexes.phone) {
+                                if (key.includes(sv) || key.includes(cleanPhone)) resultIndices.push(...indices);
+                            }
+                        }
+                        break;
+                    }
+                    case 'subNumber': {
+                        if (invoiceIndexes.subNumber.has(sv)) {
+                            resultIndices = invoiceIndexes.subNumber.get(sv);
+                        } else {
+                            for (const [key, indices] of invoiceIndexes.subNumber) {
+                                if (key.includes(sv)) resultIndices.push(...indices);
+                            }
+                        }
+                        break;
+                    }
+                }
+
+                // إزالة التكرارات مع الحفاظ على الترتيب
+                const seen = new Set();
+                resultIndices = resultIndices.filter(i => { if (seen.has(i)) return false; seen.add(i); return true; });
+
+                const results = resultIndices.map(i => invoiceData[i]);
+
+                // ========== عرض النتائج (مع تعقيم كامل) ==========
+                if (results.length === 0) {
+                    container.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><p>لا توجد نتائج مطابقة لـ "${sanitize(rawSearchValue)}"</p><p style="font-size:0.8rem;margin-top:5px;opacity:0.7;">تأكد من صحة البيانات المدخلة وحاول مرة أخرى</p></div>`;
+                    return;
+                }
+
+                const favorites = getInvoiceFavorites();
+                let html = '';
+                if (results.length > 1) html += `<div class="results-count-label">تم العثور على ${results.length} نتيجة</div>`;
+                html += '<div class="result-cards">';
+
+                results.forEach((r, idx) => {
+                    const status = getStatusInfo(getField(r, 'meterStatus'));
+                    const calcType = getCalcType(getField(r, 'calcType'));
+                    const total = Number(getField(r, 'totalUnpaid')) || 0;
+                    const count = Number(getField(r, 'countUnpaid')) || 0;
+                    const phone = String(getField(r, 'phone') || '');
+                    const address = String(getField(r, 'address') || '—');
+                    const subNum = String(getField(r, 'subNumber') || '—');
+                    const barcode = String(getField(r, 'barcode') || '—');
+                    const meterNum = String(getField(r, 'meterNumber') || '');
+                    const meterDisplay = (meterNum === '' || meterNum === 'undefined' || meterNum === 'null') ? '—' : meterNum;
+                    const natId = String(getField(r, 'nationalId') || '—');
+                    const phoneDisplay = (phone === '*' || phone === 'undefined' || phone === 'null' || !phone.trim()) ? '—' : phone;
+                    const subName = String(getField(r, 'name') || '—');
+                    const isFav = favorites.some(f => f.subNumber === subNum);
+                    const iconClass = isFav ? 'fa-check' : 'fa-plus';
+                    const btnClass = isFav ? 'active' : '';
+                    // كل القيم تُمر عبر sanitize() لمنع XSS
+                    const safeName = sanitize(subName);
+                    const safeNatId = sanitize(natId);
+                    const safeAddress = sanitize(address);
+                    const safeSubNum = sanitize(subNum);
+                    const safeBarcode = sanitize(barcode);
+                    const safeMeter = sanitize(meterDisplay);
+                    const safePhone = sanitize(phoneDisplay);
+                    const safeCalcType = sanitize(calcType);
+                    const safeArabicAmount = sanitize(toArabicWords(total));
+                    // تعقيم رقم الاشتراك للاستخدام في onclick
+                    const safeSubNumAttr = safeSubNum.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    const safeNameAttr = safeName.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+
+                    html += `<div class="invoice-result-card" style="animation-delay:${idx * 0.1}s">
+                        <div class="result-header">
+                            <div class="result-header-flex">
+                                <div class="header-texts">
+                                    <div class="subscriber-name">${safeName}</div>
+                                    <div class="subscriber-meta">
+                                        <span><i class="fas fa-id-card"></i> ${safeNatId}</span>
+                                        <span><i class="fas fa-map-marker-alt"></i> ${safeAddress}</span>
+                                        <span class="status-badge ${status.cls}">${sanitize(status.text)}</span>
+                                    </div>
+                                </div>
+                                <button class="fav-btn fav-btn-invoice ${btnClass}" data-subnum="${safeSubNum}" onclick="toggleInvoiceFavorite('${safeSubNumAttr}', '${safeNameAttr}')" title="${isFav ? 'إزالة من قائمتي' : 'إضافة إلى قائمتي'}"><i class="fas ${iconClass}"></i></button>
+                            </div>
+                        </div>
+                        <div class="result-body">
+                            <div class="detail-grid">
+                                <div class="detail-item"><span class="detail-label">رقم الاشتراك</span><span class="detail-value">${safeSubNum}</span></div>
+                                <div class="detail-item"><span class="detail-label">الباركود</span><span class="detail-value">${safeBarcode}</span></div>
+                                <div class="detail-item"><span class="detail-label">رقم العداد</span><span class="detail-value">${safeMeter}</span></div>
+                                <div class="detail-item"><span class="detail-label">نوع الاحتساب</span><span class="detail-value">${safeCalcType}</span></div>
+                                <div class="detail-item"><span class="detail-label">رقم الجوال</span><span class="detail-value">${safePhone}</span></div>
+                                <div class="detail-item"><span class="detail-label">التأشيرة الحالية</span><span class="detail-value">—</span></div>
+                            </div>
+                            <div class="amount-section">
+                                <div class="amount-value">${formatNumber(total)} ل.س</div>
+                                <div class="arabic-amount">${safeArabicAmount}</div>
+                                <div class="warning-badge"><i class="fas fa-exclamation-circle"></i><span class="fees-disclaimer">غير متضمنة الرسوم</span></div>
+                                <div class="invoices-count">📄 عدد الفواتير الغير مدفوعة: ${count}</div>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+
+                html += '</div>';
+                html += `<div class="disclaimer-box"><i class="fas fa-exclamation-triangle"></i><div><strong>تنبيه هام:</strong> القيمة الظاهرة أعلاه هي البيانات المتوفرة بشكل <strong>أوف لاين</strong> (غير متصلة بالخادم المباشر). من الممكن أن يكون المشترك قد قام بسداد فاتورته ولكنها ستظل ظاهرة هنا لحين تحديث الملف من قبل الإدارة. يرجى مراجعة قسم الحسابات في المؤسسة للتأكد من الرصيد الفعلي.</div></div>`;
+                container.innerHTML = html;
+
+            } catch (e) {
+                console.error('خطأ في البحث:', e);
+                container.innerHTML = `<div class="no-results"><i class="fas fa-exclamation-circle"></i><p>حدث خطأ أثناء البحث</p><p style="font-size:0.8rem;margin-top:5px;opacity:0.7;">يرجى المحاولة مرة أخرى</p></div>`;
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.style.opacity = '1';
+            }
+        }
+
+        async function exportInvoicePDF() {
+            if (typeof html2pdf === 'undefined') { showToast('⚠️ مكتبة التصدير غير محملة، تحقق من اتصالك بالإنترنت'); return; }
+            const cards = document.querySelectorAll('.invoice-result-card');
+            if (!cards.length) { showToast('لا توجد نتائج للتصدير'); return; }
+            showToast('جاري تجهيز ملف PDF...');
+            const printContent = document.createElement('div');
+            printContent.style.direction = 'rtl'; printContent.style.fontFamily = 'Tajawal, sans-serif'; printContent.style.padding = '20px'; printContent.style.background = 'white';
+            const header = document.createElement('div');
+            header.style.textAlign = 'center'; header.style.marginBottom = '20px'; header.style.borderBottom = '3px solid #007BFF'; header.style.paddingBottom = '12px';
+            header.innerHTML = `<h1 style="color:#007BFF;margin:0;">🧾 استعلام عن فاتورة</h1><p style="color:#666;font-size:12px;margin-top:6px;">شركة مياه طرطوس | تاريخ الاستعلام: ${new Date().toLocaleDateString('ar-EG')}</p>`;
+            printContent.appendChild(header);
+            cards.forEach(card => { const cardClone = card.cloneNode(true); cardClone.style.boxShadow = 'none'; cardClone.style.border = '1px solid #ddd'; cardClone.style.animation = 'none'; cardClone.style.marginBottom = '20px'; const favBtn = cardClone.querySelector('.fav-btn'); if(favBtn) favBtn.style.display = 'none'; printContent.appendChild(cardClone); });
+            const disclaimer = document.querySelector('.disclaimer-box');
+            if (disclaimer) { const disclaimerClone = disclaimer.cloneNode(true); disclaimerClone.style.marginTop = '15px'; disclaimerClone.style.padding = '10px 15px'; printContent.appendChild(disclaimerClone); }
+            const footerDiv = document.createElement('div');
+            footerDiv.style.textAlign = 'center'; footerDiv.style.marginTop = '15px'; footerDiv.style.paddingTop = '10px'; footerDiv.style.borderTop = '1px solid #ccc'; footerDiv.style.fontSize = '10px'; footerDiv.style.color = '#999';
+            footerDiv.innerHTML = 'المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا';
+            printContent.appendChild(footerDiv);
+            const style = document.createElement('style');
+            style.textContent = `.result-header { background: #007BFF !important; color: white !important; padding: 12px 15px; } .result-header * { color: white !important; } .subscriber-name { font-size: 14px; font-weight: 800; } .subscriber-meta { display: flex; gap: 10px; font-size: 11px; flex-wrap: wrap; margin-top: 6px; } .status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; color: white; } .status-active { background: #28a745; } .status-disabled { background: #dc3545; } .status-closed { background: #6c757d; } .status-connection { background: #17a2b8; } .result-body { padding: 12px 15px; } .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } .detail-item { padding: 8px; background: #f5f5f5; border-radius: 10px; } .detail-label { font-size: 10px; color: #666; } .detail-value { font-size: 12px; font-weight: 700; color: #333; } .amount-section { margin-top: 12px; padding: 14px; background: #f0fff0; border-radius: 12px; text-align: center; border:1px solid #c8e6c9; } .amount-value { font-size: 20px; font-weight: 800; color: #1b5e20; } .arabic-amount { font-size: 12px; color: #2e7d32; margin-top: 4px; font-weight: 700; } .warning-badge { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: rgba(211,47,47,0.12); padding: 8px 12px; border-radius: 40px; margin-top: 8px; } .fees-disclaimer { color: #d32f2f; font-weight: bold; font-size: 12px; } .invoices-count { font-size: 11px; color: #666; margin-top: 6px; }`;
+            printContent.appendChild(style);
+            const opt = { margin: [0.4, 0.4, 0.4, 0.4], filename: `فاتورة_${new Date().getTime()}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true, letterRendering: true }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
+            html2pdf().set(opt).from(printContent).save().then(() => showToast('تم حفظ ملف PDF بنجاح')).catch(err => { console.error(err); showToast('حدث خطأ أثناء التصدير'); });
+        }
+
+        // ========== تفريغ ذاكرة ذكي ==========
+        function clearAppMemory() {
+            notificationQueue = []; isShowingNotification = false; pendingPeriodicNotification = false; cachedNotificationMessages = [];
+            const notifCenter = document.getElementById('notification-center');
+            if (notifCenter) notifCenter.innerHTML = '';
+            // نسخ احتياطي للبيانات المهمة
+            const planFavBackup = getPlanFavorites();
+            const invoiceFavBackup = getInvoiceFavorites();
+            const themeBackup = localStorage.getItem('theme');
+            const audioPermissionBackup = localStorage.getItem('audioPermissionGranted');
+            const lastNotificationBackup = localStorage.getItem('lastNotificationTime');
+            const cachedNewsBackup = localStorage.getItem('cached_news');
+            const cachedNotifsBackup = localStorage.getItem('cached_notifications');
+            const currentPlanMonthBackup = localStorage.getItem('currentPlanMonth');
+            localStorage.clear(); sessionStorage.clear();
+            // إعادة البيانات المهمة
+            savePlanFavorites(planFavBackup);
+            saveInvoiceFavorites(invoiceFavBackup);
+            if (themeBackup) localStorage.setItem('theme', themeBackup);
+            if (audioPermissionBackup) localStorage.setItem('audioPermissionGranted', audioPermissionBackup);
+            if (lastNotificationBackup) localStorage.setItem('lastNotificationTime', lastNotificationBackup);
+            if (cachedNewsBackup) localStorage.setItem('cached_news', cachedNewsBackup);
+            if (cachedNotifsBackup) localStorage.setItem('cached_notifications', cachedNotifsBackup);
+            if (currentPlanMonthBackup) localStorage.setItem('currentPlanMonth', currentPlanMonthBackup);
+            if ('caches' in window) { caches.keys().then(names => { names.forEach(name => caches.delete(name)); }).catch(() => {}); }
+            if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(registrations => { registrations.forEach(reg => reg.unregister()); }).catch(() => {}); }
+            // مسح الفهارس من الذاكرة
+            for (const key of Object.keys(invoiceIndexes)) invoiceIndexes[key].clear();
+            invoiceDataLoaded = false; invoiceDataLoading = false; invoiceData = [];
+            showToast('✓ تم افراغ الذاكرة بنجاح، جاري إعادة التحميل...');
+            setTimeout(() => { window.location.reload(true); }, 1500);
+        }
+
+        // ========== التهيئة ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            const lc = '?v=' + Date.now();
+            ['splash-logo', 'header-logo'].forEach(id => {
+                const img = document.getElementById(id);
+                if (img) {
+                    if (!img.src.includes('?v=')) img.src = 'logo.png' + lc;
+                    img.onerror = function() {
+                        this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007BFF" rx="15"/><text x="50" y="65" font-size="45" text-anchor="middle" fill="white">💧</text></svg>';
+                    };
+                }
+            });
+            handleOfflineStatus();
+            checkAppStartup();
+        });
+    </script>
 </body>
 </html>
