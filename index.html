@@ -1512,9 +1512,7 @@ async function loadInvoiceData(forceRefresh = false) {
     async function attemptLoad() {
         try {
             // الرابط المباشر من GitHub
-            const url = 'https://raw.githubusercontent.com/friendsyria/miyah-tartus/main/data_compact.json?v=' + Date.now();
-            console.log('جاري تحميل:', url);
-            
+            const url = 'https://friendsyria.github.io/miyah-tartus/data_compact.json?v=' + Date.now();
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 ثانية مهلة
             
