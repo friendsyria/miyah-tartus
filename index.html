@@ -16,9 +16,8 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <script async src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
-    <script async src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <style>
         html, body {
@@ -30,84 +29,330 @@
             height: 100%;
             overflow-x: hidden;
         }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Tajawal', sans-serif; }
-        .app-container { display: flex; flex-direction: column; height: 100%; width: 100%; overflow: hidden; background: var(--bg-main); }
-        .fixed-top { flex-shrink: 0; z-index: 1000; position: relative; }
-        .scrollable-content { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding-bottom: 70px; }
+
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Tajawal', sans-serif; 
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+            background: var(--bg-main);
+        }
+
+        .fixed-top {
+            flex-shrink: 0;
+            z-index: 1000;
+            position: relative;
+        }
+
+        .scrollable-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 70px;
+        }
+
         :root {
             --bg-main: linear-gradient(135deg, #e8f0fe 0%, #d4e0f0 100%);
-            --bg-card: #ffffff; --text-main: #333333; --text-sub: #666666;
-            --border-color: #e9ecef; --input-bg: #f8f9fa;
+            --bg-card: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --border-color: #e9ecef;
+            --input-bg: #f8f9fa;
             --header-bg: linear-gradient(135deg, #007BFF, #004999);
-            --news-bg: #ffcc00; --news-text: #1a3a4a;
+            --news-bg: #ffcc00;
+            --news-text: #1a3a4a;
         }
+
         [data-theme="dark"] {
             --bg-main: linear-gradient(135deg, #121212 0%, #1e1e1e 100%);
-            --bg-card: #2c2c2c; --text-main: #e0e0e0; --text-sub: #aaaaaa;
-            --border-color: #444444; --input-bg: #383838;
+            --bg-card: #2c2c2c;
+            --text-main: #e0e0e0;
+            --text-sub: #aaaaaa;
+            --border-color: #444444;
+            --input-bg: #383838;
             --header-bg: linear-gradient(135deg, #004e99, #002b55);
-            --news-bg: #3e3e00; --news-text: #e0e0e0;
+            --news-bg: #3e3e00;
+            --news-text: #e0e0e0;
         }
-        body { background: var(--bg-main); color: var(--text-main); transition: background 0.3s, color 0.3s; height: 100%; overflow: hidden; }
+
+        body { 
+            background: var(--bg-main); 
+            color: var(--text-main); 
+            transition: background 0.3s, color 0.3s; 
+            height: 100%;
+            overflow: hidden;
+        }
 
         #splash-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(145deg, #007BFF, #004999);
             display: none; flex-direction: column; justify-content: center; align-items: center;
-            z-index: 20000; color: white; text-align: center; transition: opacity 0.8s ease;
+            z-index: 20000; color: white; text-align: center;
+            transition: opacity 0.8s ease;
         }
+        
         #splash-screen .splash-content { animation: fadeInUp 0.8s ease; }
-        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-        #splash-screen img { width: 120px; height: 120px; border-radius: 30px; border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin-bottom: 20px; object-fit: cover; }
+        
+        @keyframes fadeInUp { 
+            from { opacity: 0; transform: translateY(30px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        #splash-screen img { 
+            width: 120px; height: 120px; border-radius: 30px; 
+            border: 4px solid white; box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
+            margin-bottom: 20px; object-fit: cover; 
+        }
+        
         #splash-screen h1 { font-size: 1.8rem; margin-bottom: 10px; }
         #splash-screen p { font-size: 1rem; opacity: 0.9; margin-bottom: 30px; }
-        .audio-btn { background: rgba(255,255,255,0.2); border: 2px solid white; border-radius: 60px; padding: 14px 32px; display: inline-flex; align-items: center; gap: 12px; font-size: 1.1rem; cursor: pointer; }
+        
+        .audio-btn { 
+            background: rgba(255,255,255,0.2); border: 2px solid white; 
+            border-radius: 60px; padding: 14px 32px; display: inline-flex; 
+            align-items: center; gap: 12px; font-size: 1.1rem; cursor: pointer; 
+        }
+        
         #splash-screen.auto-mode .audio-btn { display: none; }
         #splash-screen.auto-mode p:last-of-type { display: none; }
 
-        .skeleton { background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; }
-        [data-theme="dark"] .skeleton { background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%); background-size: 200% 100%; }
-        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        #offline-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: var(--bg-main); z-index: 15000; display: none; 
+            flex-direction: column; justify-content: center; align-items: center; 
+            text-align: center; padding: 2rem; 
+        }
+        
+        #offline-screen i { font-size: 5rem; color: #ff4d4d; margin-bottom: 1.5rem; }
+        #offline-screen h2 { margin-bottom: 1rem; color: var(--text-main); }
+        #offline-screen p { color: var(--text-sub); margin-bottom: 10px; }
+        
+        #offline-screen button { 
+            background: #007BFF; color: white; border: none; padding: 12px 30px; 
+            border-radius: 50px; font-size: 1.1rem; margin-top: 1rem; cursor: pointer; 
+            font-family: 'Tajawal'; 
+        }
 
-        #pull-to-refresh { position: fixed; top: -60px; left: 50%; transform: translateX(-50%); width: 50px; height: 50px; background: white; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 9999; display: flex; align-items: center; justify-content: center; transition: top 0.3s ease; }
+        .skeleton { 
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%); 
+            background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 4px; 
+        }
+        
+        [data-theme="dark"] .skeleton { 
+            background: linear-gradient(90deg, #333 25%, #444 50%, #333 75%); 
+            background-size: 200% 100%; 
+        }
+        
+        @keyframes shimmer { 
+            0% { background-position: 200% 0; } 
+            100% { background-position: -200% 0; } 
+        }
+
+        #pull-to-refresh { 
+            position: fixed; top: -60px; left: 50%; transform: translateX(-50%); 
+            width: 50px; height: 50px; background: white; border-radius: 50%; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); z-index: 9999; 
+            display: flex; align-items: center; justify-content: center; 
+            transition: top 0.3s ease; 
+        }
+        
         #pull-to-refresh.show { top: 90px; }
         #pull-to-refresh i { color: #007BFF; animation: spin 1s linear infinite; }
+        
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        header { background: var(--header-bg); color: white; padding: 12px 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; justify-content: space-between; align-items: center; width: 100%; min-height: 80px; }
-        .header-content { display: flex; align-items: center; justify-content: center; gap: 10px; flex: 1; overflow: hidden; }
-        header img { height: 52px; width: 52px; border-radius: 15px; border: 2px solid white; object-fit: cover; flex-shrink: 0; }
-        .header-text { overflow: hidden; text-align: center; display: flex; flex-direction: column; gap: 4px; }
-        header h1 { font-size: 0.95rem; font-weight: 800; line-height: 1.3; white-space: normal; word-break: break-word; max-width: 180px; }
-        header .subtitle { font-size: 0.65rem; opacity: 0.9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .dark-mode-toggle { background: rgba(255,255,255,0.2); border: none; color: white; width: 42px; height: 42px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        header { 
+            background: var(--header-bg); 
+            color: white; 
+            padding: 12px 12px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            width: 100%;
+            min-height: 80px;
+        }
+        
+        .header-content { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 10px; 
+            flex: 1; 
+            overflow: hidden;
+        }
+        
+        header img { 
+            height: 52px; 
+            width: 52px; 
+            border-radius: 15px; 
+            border: 2px solid white; 
+            object-fit: cover; 
+            flex-shrink: 0; 
+        }
+        
+        .header-text { 
+            overflow: hidden; 
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        header h1 { 
+            font-size: 0.95rem; 
+            font-weight: 800;
+            line-height: 1.3;
+            white-space: normal;
+            word-break: break-word;
+            max-width: 180px;
+        }
+        
+        header .subtitle { 
+            font-size: 0.65rem; 
+            opacity: 0.9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-        .news-bar { background: var(--news-bg); padding: 10px 0; overflow: hidden; white-space: nowrap; min-height: 42px; width: 100%; }
-        .news-bar-inner { display: inline-block; animation: scroll-news-right 40s linear infinite; font-weight: bold; font-size: 0.9rem; color: var(--news-text); padding: 0 20px; }
-        @keyframes scroll-news-right { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+        .dark-mode-toggle { 
+            background: rgba(255,255,255,0.2); 
+            border: none; 
+            color: white; 
+            width: 42px; 
+            height: 42px; 
+            border-radius: 50%; 
+            font-size: 1.2rem; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            flex-shrink: 0; 
+        }
 
-        footer { background: var(--header-bg); color: white; padding: 10px; font-size: 0.85rem; text-align: center; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; padding-bottom: env(safe-area-inset-bottom); font-weight: 500; }
-        footer .footer-text { display: block; text-align: center; width: 100%; }
+        .news-bar { 
+            background: var(--news-bg); 
+            padding: 10px 0; 
+            overflow: hidden; 
+            white-space: nowrap; 
+            min-height: 42px; 
+            width: 100%;
+        }
+        
+        .news-bar-inner { 
+            display: inline-block; 
+            animation: scroll-news-right 40s linear infinite; 
+            font-weight: bold; 
+            font-size: 0.9rem; 
+            color: var(--news-text); 
+            padding: 0 20px;
+        }
+        
+        @keyframes scroll-news-right { 
+            0% { transform: translateX(-100%); } 
+            100% { transform: translateX(100%); } 
+        }
 
-        #notification-center { position: fixed; top: 90px; right: 10px; width: 300px; z-index: 10001; pointer-events: none; }
-        .android-notification { background: var(--bg-card); border-right:5px solid #ffcc00; border-radius: 16px; padding: 12px 15px; margin-bottom: 10px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; pointer-events: auto; transition: transform 0.3s ease, opacity 0.3s ease; animation: slideInFromRight 0.4s ease; cursor: grab; color: var(--text-main); font-size: 0.85rem; }
-        @keyframes slideInFromRight { from { transform: translateX(130%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        footer { 
+            background: var(--header-bg); 
+            color: white; 
+            padding: 10px; 
+            font-size: 0.85rem; 
+            text-align: center; 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            z-index: 100; 
+            padding-bottom: env(safe-area-inset-bottom); 
+            font-weight: 500;
+        }
+        
+        footer .footer-text {
+            display: block;
+            text-align: center;
+            width: 100%;
+        }
+
+        #notification-center { 
+            position: fixed; top: 90px; right: 10px; width: 300px; 
+            z-index: 10001; pointer-events: none; 
+        }
+        
+        .android-notification { 
+            background: var(--bg-card); border-right: 5px solid #ffcc00; 
+            border-radius: 16px; padding: 12px 15px; margin-bottom: 10px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); display: flex; 
+            align-items: center; gap: 12px; pointer-events: auto; 
+            transition: transform 0.3s ease, opacity 0.3s ease; 
+            animation: slideInFromRight 0.4s ease; cursor: grab; 
+            color: var(--text-main); font-size: 0.85rem;
+        }
+        
+        @keyframes slideInFromRight { 
+            from { transform: translateX(130%); opacity: 0; } 
+            to { transform: translateX(0); opacity: 1; } 
+        }
+        
         .notification-dismiss { margin-right: auto; color: #aaa; cursor: pointer; padding: 5px; font-size: 1rem; }
 
-        #toast-container { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 20000; pointer-events: none; }
-        .toast { background: #333; color: white; padding: 10px 20px; border-radius: 30px; font-size: 0.85rem; opacity: 0; transition: opacity 0.3s; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); max-width: 90%; }
+        #toast-container { 
+            position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); 
+            z-index: 20000; pointer-events: none; 
+        }
+        
+        .toast { 
+            background: #333; color: white; padding: 10px 20px; border-radius: 30px; 
+            font-size: 0.85rem; opacity: 0; transition: opacity 0.3s; 
+            text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+        }
+        
         .toast.show { opacity: 1; }
 
-        .page { display: none; width: 95%; max-width: 950px; margin: 15px auto; background: var(--bg-card); border-radius: 28px; padding: 1.5rem; box-shadow: 0 15px 35px rgba(0,0,0,0.1); transition: background 0.3s, color 0.3s; }
+        .page { 
+            display: none; width: 95%; max-width: 950px; margin: 15px auto; 
+            background: var(--bg-card); border-radius: 28px; padding: 1.5rem; 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); transition: background 0.3s, color 0.3s; 
+        }
+        
         .page.active { display: block; animation: slideInFromLeft 0.3s ease; }
-        @keyframes slideInFromLeft { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        
+        @keyframes slideInFromLeft { 
+            from { opacity: 0; transform: translateX(20px); } 
+            to { opacity: 1; transform: translateX(0); } 
+        }
 
         .main-buttons { display: flex; flex-direction: column; gap: 0.7rem; width: 100%; }
-        .btn, .btn-action { display: flex; align-items: center; gap: 10px; padding: 12px 16px; width: 100%; border: none; border-radius: 60px; font-size: 0.85rem; font-weight: bold; color: white; text-decoration: none; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; box-shadow: 0 5px 12px rgba(0,0,0,0.15); position: relative; overflow: hidden; font-family: 'Tajawal'; text-align: right; line-height: 1.3; }
+        
+        .btn, .btn-action { 
+            display: flex; align-items: center; gap: 10px; padding: 12px 16px; 
+            width: 100%; border: none; border-radius: 60px; font-size: 0.85rem; 
+            font-weight: bold; color: white; text-decoration: none; cursor: pointer; 
+            transition: transform 0.1s, box-shadow 0.2s; box-shadow: 0 5px 12px rgba(0,0,0,0.15); 
+            position: relative; overflow: hidden; font-family: 'Tajawal'; 
+            text-align: right; line-height: 1.3; 
+        }
+        
         .btn:active, .btn-action:active { transform: scale(0.97); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        
         .btn-icon { font-size: 1.1rem; min-width: 28px; text-align: center; }
         .btn-text { flex-grow: 1; }
-        .ripple-effect { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.5); transform: scale(0); animation: ripple-anim 0.6s linear; pointer-events: none; }
+        
+        .ripple-effect { 
+            position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.5); 
+            transform: scale(0); animation: ripple-anim 0.6s linear; pointer-events: none; 
+        }
+        
         @keyframes ripple-anim { to { transform: scale(4); opacity: 0; } }
 
         .btn-complaint { background: linear-gradient(135deg, #28a745, #1e7e34); }
@@ -116,7 +361,15 @@
         .btn-sanitation { background: linear-gradient(135deg, #17a2b8, #138496); }
         .btn-facebook { background: linear-gradient(135deg, #FF7F00, #e67300); }
         .btn-install { background: linear-gradient(135deg, #6f42c1, #5e35b1); }
-        .btn-back { background: linear-gradient(135deg, #757575, #616161); justify-content: center !important; margin-top: 15px; width: 100% !important; }
+        .btn-guide { background: linear-gradient(135deg, #00bcd4, #0097a7); }
+        
+        .btn-back { 
+            background: linear-gradient(135deg, #757575, #616161); 
+            justify-content: center !important; 
+            margin-top: 15px;
+            width: 100% !important;
+        }
+        
         .btn-tartus-city { background: linear-gradient(135deg, #2196F3, #1976D2); }
         .btn-rural-tartus { background: linear-gradient(135deg, #4CAF50, #388E3C); }
         .btn-safsafah { background: linear-gradient(135deg, #FF9800, #F57C00); }
@@ -126,179 +379,710 @@
         .btn-qadmus { background: linear-gradient(135deg, #FF5722, #E64A19); }
         .btn-safita { background: linear-gradient(135deg, #3F51B5, #303F9F); }
         .btn-dreikish { background: linear-gradient(135deg, #009688, #00796B); }
+        
         .btn-whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); }
         .btn-pdf { background: linear-gradient(135deg, #dc3545, #b02a37); }
         .btn-home { background: linear-gradient(135deg, #6c757d, #495057); }
-        .btn-clear { background: linear-gradient(135deg, #90a4ae, #78909c); font-size: 0.75rem !important; padding: 9px 14px !important; opacity: 0.8; }
-        .btn-pdf-inv { background: linear-gradient(135deg, #dc3545, #b02a37); }
-        .btn-help { background: linear-gradient(135deg, #17a2b8, #0f6b7a); }
-        .btn-retry { background: linear-gradient(135deg, #ff9800, #e68900); }
-        .btn-retry:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .actions-row { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
-        .actions-row .btn-action { flex: 1; min-width: 140px; padding: 12px 16px; justify-content: center; }
+        .btn-clear { 
+            background: linear-gradient(135deg, #90a4ae, #78909c); 
+            font-size: 0.75rem !important; 
+            padding: 9px 14px !important; 
+            opacity: 0.8; 
+        }
+
+        .btn-pdf-inv { background: linear-gradient(135deg, #dc3545, #b02a37); }
+
+        .actions-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .actions-row .btn-action {
+            flex: 1;
+            min-width: 140px;
+            padding: 12px 16px;
+            justify-content: center;
+        }
+        
         .btn-back-full { margin-top: 12px; }
 
-        .plan-header { text-align: center; margin-bottom: 1.2rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.8rem; }
-        .plan-main-title { font-size: 1.4rem; font-weight: 800; color: #007BFF; display: block; line-height: 1.3; }
-        .plan-month-title { font-size: 1.1rem; font-weight: 700; color: #ff9800; display: block; margin-top: 4px; }
-        .plan-subtitle { font-size: 0.85rem; color: var(--text-sub); margin-top: 8px; display: block; }
+        .plan-header {
+            text-align: center;
+            margin-bottom: 1.2rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.8rem;
+        }
+        
+        .plan-main-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #007BFF;
+            display: block;
+            line-height: 1.3;
+        }
+        
+        .plan-month-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ff9800;
+            display: block;
+            margin-top: 4px;
+        }
+        
+        .plan-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-top: 8px;
+            display: block;
+        }
 
-        .instruction-text { color: #007BFF; margin-bottom: 1.2rem; font-weight: bold; border-right: 4px solid #007BFF; padding-right: 12px; font-size: 0.85rem; }
+        .instruction-text { 
+            color: #007BFF; margin-bottom: 1.2rem; font-weight: bold; 
+            border-right: 4px solid #007BFF; padding-right: 12px; font-size: 0.85rem; 
+        }
+        
         .form-controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
-        .input-group label { font-weight: 800; color: var(--text-main); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; }
-        select, input { padding: 12px 16px; border-radius: 60px; border: 2px solid var(--border-color); font-size: 0.9rem; width: 100%; background: var(--input-bg); color: var(--text-main); cursor: pointer; transition: 0.2s; font-family: 'Tajawal'; }
+        
+        .input-group label { 
+            font-weight: 800; color: var(--text-main); margin-bottom: 6px; 
+            display: block; font-size: 0.8rem; 
+        }
+        
+        select, input {
+            padding: 12px 16px;
+            border-radius: 60px;
+            border: 2px solid var(--border-color);
+            font-size: 0.9rem;
+            width: 100%;
+            background: var(--input-bg);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Tajawal';
+        }
+        
         select:focus, input:focus { border-color: #007BFF; outline: none; box-shadow: 0 0 0 3px rgba(0,123,255,0.2); }
-
-        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; display: none; margin-top: 20px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-card); }
-        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; background: var(--bg-card); table-layout: auto; }
-        th, td { border-bottom: 1px solid var(--border-color); padding: 10px 8px; text-align: center; color: var(--text-main); }
+        
+        .table-container { 
+            overflow-x: auto; 
+            -webkit-overflow-scrolling: touch;
+            display: none; 
+            margin-top: 20px; 
+            border-radius: 20px; 
+            border: 1px solid var(--border-color); 
+            background: var(--bg-card);
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 0.75rem; 
+            background: var(--bg-card); 
+            table-layout: auto;
+        }
+        
+        th, td { 
+            border-bottom: 1px solid var(--border-color); 
+            padding: 10px 8px; 
+            text-align: center; 
+            color: var(--text-main); 
+        }
+        
         th { background: var(--input-bg); color: #0056a7; font-weight: 800; }
-        td:nth-child(4) { white-space: normal; word-break: break-word; text-align: right; max-width: 200px; }
+        
+        td:nth-child(4) { 
+            white-space: normal; 
+            word-break: break-word; 
+            text-align: right; 
+            max-width: 200px;
+        }
+        
         .highlight-today { background: #d4f5d0 !important; border-right: 4px solid #2b7d1e; font-weight: bold; }
         [data-theme="dark"] .highlight-today { background: #1b4d1b !important; }
-        .today-badge { background: #2b7d1e; color: white; border-radius: 30px; padding: 2px 8px; font-size: 0.6rem; display: inline-block; margin-bottom: 4px; }
+        
+        .today-badge { 
+            background: #2b7d1e; color: white; border-radius: 30px; 
+            padding: 2px 8px; font-size: 0.6rem; display: inline-block; margin-bottom: 4px; 
+        }
 
-        .invoice-search-box { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-        .invoice-search-box input { padding: 12px 16px; border-radius: 60px; border: 2px solid var(--border-color); font-size: 0.9rem; width: 100%; background: var(--input-bg); color: var(--text-main); font-family: 'Tajawal'; transition: 0.2s; }
-        .invoice-search-box input:focus { border-color: #84cc16; outline: none; box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.2); }
-        .invoice-search-box select:focus { border-color: #84cc16; box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.2); }
-        .btn-search { background: linear-gradient(135deg, #84cc16, #65a30d); color: white; border: none; padding: 13px; border-radius: 60px; font-size: 1rem; font-weight: bold; cursor: pointer; font-family: 'Tajawal'; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 5px 12px rgba(132, 204, 22, 0.3); transition: transform 0.1s; }
+        .invoice-search-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .invoice-search-box input {
+            padding: 12px 16px;
+            border-radius: 60px;
+            border: 2px solid var(--border-color);
+            font-size: 0.9rem;
+            width: 100%;
+            background: var(--input-bg);
+            color: var(--text-main);
+            font-family: 'Tajawal';
+            transition: 0.2s;
+        }
+
+        .invoice-search-box input:focus {
+            border-color: #84cc16;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.2);
+        }
+
+        .invoice-search-box select:focus {
+            border-color: #84cc16;
+            box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.2);
+        }
+
+        .btn-search {
+            background: linear-gradient(135deg, #84cc16, #65a30d);
+            color: white;
+            border: none;
+            padding: 13px;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Tajawal';
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 5px 12px rgba(132, 204, 22, 0.3);
+            transition: transform 0.1s;
+        }
+
         .btn-search:active { transform: scale(0.97); }
 
         .result-cards { display: flex; flex-direction: column; gap: 15px; }
-        .invoice-result-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; overflow: hidden; animation: slideInFromLeft 0.4s ease; box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
-        .result-header { background: linear-gradient(135deg, #007BFF, #0056b3); color: white; padding: 14px 15px; display: flex; flex-direction: column; gap: 8px; }
-        .result-header .subscriber-name { font-size: 1.1rem; font-weight: 800; }
-        .result-header .subscriber-meta { display: flex; gap: 12px; font-size: 0.75rem; opacity: 0.95; flex-wrap: wrap; align-items: center; }
-        .result-header .subscriber-meta span { display: inline-flex; align-items: center; gap: 4px; }
-        .status-badge { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; font-weight: bold; color: white; }
+
+        .invoice-result-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            overflow: hidden;
+            animation: slideInFromLeft 0.4s ease;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        }
+
+        .result-header {
+            background: linear-gradient(135deg, #007BFF, #0056b3);
+            color: white;
+            padding: 14px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .result-header .subscriber-name {
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .result-header .subscriber-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 0.75rem;
+            opacity: 0.95;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .result-header .subscriber-meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: white;
+        }
+
         .status-active { background: #28a745; }
         .status-disabled { background: #dc3545; }
         .status-closed { background: #6c757d; }
         .status-connection { background: #17a2b8; }
+
         .result-body { padding: 15px; }
-        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .detail-item { display: flex; flex-direction: column; gap: 2px; padding: 10px; background: var(--input-bg); border-radius: 14px; }
-        .detail-item .detail-label { font-size: 0.68rem; color: var(--text-sub); font-weight: 500; }
-        .detail-item .detail-value { font-size: 0.88rem; font-weight: 700; color: var(--text-main); }
-        .amount-section { margin-top: 14px; padding: 20px 16px; background: linear-gradient(135deg, #f0fff0, #e8f5e9); border-radius: 16px; text-align: center; border: 1px solid #c8e6c9; }
-        [data-theme="dark"] .amount-section { background: linear-gradient(135deg, #1b3a1b, #1e4d1e); border-color: #2e5a2e; }
-        .amount-value { font-size: 1.8rem; font-weight: 800; color: #1b5e20; }
-        [data-theme="dark"] .amount-value { color: #66bb6a; }
-        .arabic-amount { font-size: 1rem; color: #2e7d32; margin-top: 8px; font-weight: 700; line-height: 1.5; }
-        .warning-badge { display: inline-flex; align-items: center; justify-content: center; gap: 10px; background: rgba(211, 47, 47, 0.12); padding: 12px 16px; border-radius: 50px; margin-top: 14px; border-right: 3px solid #d32f2f; }
-        .warning-badge i { font-size: 1.6rem; color: #d32f2f; }
-        .fees-disclaimer { color: #d32f2f; font-weight: 800; font-size: 1.15rem; letter-spacing: 0.3px; }
-        [data-theme="dark"] .fees-disclaimer { color: #ff7b7b; }
-        [data-theme="dark"] .warning-badge { background: rgba(255, 90, 90, 0.2); }
-        .invoices-count { font-size: 0.82rem; color: var(--text-sub); margin-top: 10px; font-weight: 600; }
-        .disclaimer-box { margin-top: 15px; padding: 12px 15px; background: #fff8e1; border: 1px solid #ffcc02; border-radius: 15px; display: flex; align-items: flex-start; gap: 10px; font-size: 0.78rem; color: #795548; line-height: 1.6; }
-        [data-theme="dark"] .disclaimer-box { background: #2e2a1a; border-color: #5a5020; color: #bcaaa4; }
-        .disclaimer-box i { color: #f57f17; font-size: 1.2rem; margin-top: 2px; flex-shrink: 0; }
 
-        .no-results { text-align: center; padding: 30px; color: var(--text-sub); }
-        .no-results i { font-size: 3rem; color: #ccc; margin-bottom: 10px; display: block; }
-        [data-theme="dark"] .no-results i { color: #555; }
-        .no-results p { font-size: 0.9rem; margin-top: 6px; }
-        .invoice-loading { text-align: center; padding: 30px; }
-        .invoice-loading .spinner { width: 40px; height: 40px; border: 4px solid var(--border-color); border-top-color: #84cc16; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 10px; }
-        .empty-state { text-align: center; padding: 35px 20px; color: var(--text-sub); }
-        .empty-state i { font-size: 4rem; color: #84cc16; opacity: 0.25; margin-bottom: 12px; display: block; }
-        .empty-state p { font-size: 0.95rem; font-weight: 600; }
-        .empty-state span { font-size: 0.8rem; display: block; margin-top: 5px; opacity: 0.7; }
-        .results-count-label { text-align: center; font-size: 0.8rem; color: var(--text-sub); margin-bottom: 12px; font-weight: 600; }
-        .invoice-footer-actions { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-        .invoice-footer-actions .btn-action { justify-content: center; margin: 0; width: 100%; }
-
-        .fav-btn { background: linear-gradient(135deg, #28a745, #1e7e34); border: none; color: white; cursor: pointer; width: 38px; height: 38px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.15); flex-shrink: 0; }
-        .fav-btn:hover { transform: scale(1.1); }
-        .fav-btn.active { background: linear-gradient(135deg, #dc3545, #c82333); }
-        .fav-btn-invoice { background: linear-gradient(135deg, #ffc107, #ff9800); }
-        .fav-btn-invoice.active { background: linear-gradient(135deg, #dc3545, #c82333); }
-
-        .favorites-list { background: var(--input-bg); border-radius: 20px; margin-bottom: 15px; overflow: hidden; border: 1px solid var(--border-color); }
-        .favorites-header { background: linear-gradient(135deg, #ffc107, #ff9800); color: white; padding: 8px 15px; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; cursor: pointer; }
-        .favorites-header i { font-size: 0.9rem; }
-        .favorites-items { padding: 8px; display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
-        .fav-item { background: var(--bg-card); border-radius: 12px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.2s; border: 1px solid var(--border-color); }
-        .fav-item:hover { background: var(--border-color); }
-        .fav-item-info { flex: 1; }
-        .fav-item-title { font-weight: bold; font-size: 0.85rem; color: var(--text-main); }
-        .fav-item-sub { font-size: 0.7rem; color: var(--text-sub); }
-        .fav-item-delete { background: rgba(220, 53, 69, 0.1); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; color: #dc3545; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        .fav-item-delete:hover { background: rgba(220, 53, 69, 0.2); transform: scale(1.05); }
-        .fav-collapsed .favorites-items { display: none; }
-        .result-header-flex { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; gap: 12px; }
-        .header-texts { flex: 1; }
-
-        /* واجهة حالة تحميل البيانات */
-        .data-status-box {
-            text-align: center; padding: 25px 20px; border-radius: 20px;
-            margin-bottom: 15px; border: 1px solid var(--border-color);
-            background: var(--input-bg); display: none;
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
         }
-        .data-status-box.visible { display: block; }
-        .data-status-box .status-icon { font-size: 2.5rem; margin-bottom: 10px; display: block; }
-        .data-status-box .status-title { font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 6px; }
-        .data-status-box .status-desc { font-size: 0.82rem; color: var(--text-sub); line-height: 1.7; margin-bottom: 12px; }
-        .data-status-box .status-details {
-            font-size: 0.72rem; color: var(--text-sub); opacity: 0.7;
-            direction: ltr; text-align: left; background: var(--bg-card);
-            padding: 8px 12px; border-radius: 10px; margin-bottom: 12px;
-            word-break: break-all; font-family: monospace; display: none;
-        }
-        .data-status-box.loading .status-icon { color: #007BFF; }
-        .data-status-box.error .status-icon { color: #dc3545; }
-        .data-status-box.success .status-icon { color: #28a745; }
-        .data-status-box.lfs-warning .status-icon { color: #ff9800; }
-        .load-progress { width: 100%; height: 4px; background: var(--border-color); border-radius: 4px; margin-top: 10px; overflow: hidden; }
-        .load-progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #84cc16, #65a30d); border-radius: 4px; transition: width 0.4s ease; }
 
-        /* خطوات الحل */
-        .solution-steps {
-            text-align: right;
-            background: var(--bg-card);
-            border-radius: 14px;
-            padding: 14px 16px;
-            margin-bottom: 12px;
-            border: 1px solid var(--border-color);
-        }
-        .solution-steps .step-title {
-            font-weight: 800;
-            font-size: 0.85rem;
-            color: #ff9800;
-            margin-bottom: 10px;
+        .detail-item {
             display: flex;
-            align-items: center;
-            gap: 6px;
+            flex-direction: column;
+            gap: 2px;
+            padding: 10px;
+            background: var(--input-bg);
+            border-radius: 14px;
         }
-        .solution-steps ol {
-            padding-right: 18px;
-            margin: 0;
-            font-size: 0.78rem;
+
+        .detail-item .detail-label {
+            font-size: 0.68rem;
             color: var(--text-sub);
-            line-height: 2;
+            font-weight: 500;
         }
-        .solution-steps ol li strong {
+
+        .detail-item .detail-value {
+            font-size: 0.88rem;
+            font-weight: 700;
             color: var(--text-main);
         }
-        .solution-steps code {
-            background: var(--input-bg);
-            padding: 1px 6px;
-            border-radius: 6px;
-            font-size: 0.72rem;
-            direction: ltr;
-            display: inline-block;
+
+        .amount-section {
+            margin-top: 14px;
+            padding: 20px 16px;
+            background: linear-gradient(135deg, #f0fff0, #e8f5e9);
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid #c8e6c9;
         }
 
-        @media (max-width: 600px) {
-            #notification-center { width: 280px; right: 8px; top: 85px; }
-            .btn, .btn-action { padding: 10px 12px; font-size: 0.8rem; gap: 8px; }
+        [data-theme="dark"] .amount-section {
+            background: linear-gradient(135deg, #1b3a1b, #1e4d1e);
+            border-color: #2e5a2e;
+        }
+
+        .amount-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1b5e20;
+        }
+
+        [data-theme="dark"] .amount-value { color: #66bb6a; }
+
+        .arabic-amount {
+            font-size: 1rem;
+            color: #2e7d32;
+            margin-top: 8px;
+            font-weight: 700;
+            line-height: 1.5;
+        }
+        
+        .warning-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(211, 47, 47, 0.12);
+            padding: 12px 16px;
+            border-radius: 50px;
+            margin-top: 14px;
+            border-right: 3px solid #d32f2f;
+        }
+        
+        .warning-badge i {
+            font-size: 1.6rem;
+            color: #d32f2f;
+        }
+        
+        .fees-disclaimer {
+            color: #d32f2f; 
+            font-weight: 800; 
+            font-size: 1.15rem; 
+            letter-spacing: 0.3px;
+        }
+
+        [data-theme="dark"] .fees-disclaimer { color: #ff7b7b; }
+        [data-theme="dark"] .warning-badge { background: rgba(255, 90, 90, 0.2); }
+
+        .invoices-count {
+            font-size: 0.82rem;
+            color: var(--text-sub);
+            margin-top: 10px;
+            font-weight: 600;
+        }
+
+        .disclaimer-box {
+            margin-top: 15px;
+            padding: 12px 15px;
+            background: #fff8e1;
+            border: 1px solid #ffcc02;
+            border-radius: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 0.78rem;
+            color: #795548;
+            line-height: 1.6;
+        }
+
+        [data-theme="dark"] .disclaimer-box {
+            background: #2e2a1a;
+            border-color: #5a5020;
+            color: #bcaaa4;
+        }
+
+        .disclaimer-box i {
+            color: #f57f17;
+            font-size: 1.2rem;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-sub);
+        }
+
+        .no-results i {
+            font-size: 3rem;
+            color: #ccc;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        [data-theme="dark"] .no-results i { color: #555; }
+
+        .no-results p { font-size: 0.9rem; margin-top: 6px; }
+
+        .invoice-loading {
+            text-align: center;
+            padding: 30px;
+        }
+
+        .invoice-loading .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top-color: #84cc16;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 35px 20px;
+            color: var(--text-sub);
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: #84cc16;
+            opacity: 0.25;
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .empty-state p { font-size: 0.95rem; font-weight: 600; }
+        .empty-state span { font-size: 0.8rem; display: block; margin-top: 5px; opacity: 0.7; }
+
+        .results-count-label {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .invoice-footer-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .invoice-footer-actions .btn-action {
+            justify-content: center;
+            margin: 0;
+            width: 100%;
+        }
+
+        /* ========== STYLES FOR COMING SOON ========== */
+        .coming-soon-wrapper {
+            position: relative;
+            padding: 40px 20px;
+            text-align: center;
+            border-radius: 28px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(118, 75, 162, 0.4);
+            animation: fadeIn 1s ease-out;
+            min-height: 450px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cs-bg-blob {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1;
+        }
+
+        .cs-blob-1 { width: 300px; height: 300px; top: -50px; left: -100px; animation: float 6s ease-in-out infinite; }
+        .cs-blob-2 { width: 200px; height: 200px; bottom: -50px; right: -50px; animation: float 8s ease-in-out infinite reverse; }
+
+        .cs-content { position: relative; z-index: 2; width: 100%; }
+
+        .cs-icon-wrapper {
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .cs-icon-wrapper i {
+            font-size: 3rem;
+            animation: pulse-glow 2s infinite;
+        }
+
+        .cs-title-en {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            background: -webkit-linear-gradient(#fff, #e0c3fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .cs-title-ar {
+            font-size: 1.4rem;
+            font-weight: 700;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .cs-loader-container {
+            width: 200px;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .cs-loader-bar {
+            height: 100%;
+            background: #fff;
+            width: 0%;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.7);
+            animation: loading-progress 3s ease-in-out infinite;
+        }
+
+        .cs-sub-text {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .cs-back-btn {
+            margin-top: 35px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            padding: 12px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            z-index: 10;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .cs-back-btn:active { transform: scale(0.95); }
+        .cs-back-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        @keyframes pulse-glow {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes loading-progress {
+            0% { width: 0%; margin-left: 0; }
+            50% { width: 70%; }
+            100% { width: 100%; margin-left: 100%; }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ================= END COMING SOON STYLES ================= */
+        
+        /* ================= GUIDE PAGE STYLES ================= */
+        .guide-wrapper {
+            direction: rtl;
+        }
+        
+        .guide-header {
+            background: linear-gradient(135deg, #007BFF, #004999);
+            color: white;
+            padding: 25px 20px;
+            border-radius: 25px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .guide-header h2 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+        }
+        
+        .guide-header h2 i {
+            margin-left: 10px;
+        }
+        
+        .guide-header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .guide-section {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 18px;
+            margin-bottom: 18px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .guide-section-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #007BFF;
+            border-right: 4px solid #007BFF;
+            padding-right: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .guide-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--input-bg);
+            padding: 12px 15px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .guide-step-num {
+            background: #007BFF;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+        
+        .guide-step-text {
+            flex: 1;
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+        
+        .guide-step-text strong {
+            color: #007BFF;
+        }
+        
+        .guide-tip {
+            background: #fff3cd;
+            border-right: 4px solid #ffc107;
+            padding: 12px 15px;
+            border-radius: 14px;
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        [data-theme="dark"] .guide-tip {
+            background: #2e2a1a;
+            border-right-color: #ffc107;
+        }
+        
+        .guide-tip i {
+            color: #ffc107;
+            font-size: 1.2rem;
+        }
+        
+        .guide-tip span {
+            flex: 1;
+            font-size: 0.8rem;
+            color: var(--text-main);
+        }
+        
+        .guide-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 50px;
+            font-size: 0.7rem;
+        }
+        
+        .guide-badge.gold {
+            background: linear-gradient(135deg, #ff9800, #f57c00);
+        }
+        
+        .btn-guide-back {
+            background: linear-gradient(135deg, #6c757d, #495057);
+            margin-top: 10px;
+        }
+        /* ================= END GUIDE STYLES ================= */
+
+        @media (max-width: 600px) { 
+            #notification-center { width: 280px; right: 8px; top: 85px; } 
+            .btn, .btn-action { padding: 10px 12px; font-size: 0.8rem; gap: 8px; } 
             .btn-icon { font-size: 1rem; min-width: 24px; }
             th, td { padding: 8px 4px; font-size: 0.7rem; }
             .page { padding: 1.2rem; width: 96%; margin: 10px auto; }
             .plan-main-title { font-size: 1.2rem; }
+            .plan-month-title { font-size: 1rem; }
             .actions-row .btn-action { min-width: 110px; padding: 10px 12px; }
             footer { font-size: 0.75rem; padding: 8px; }
             header h1 { font-size: 0.85rem; max-width: 150px; }
@@ -312,25 +1096,56 @@
             .amount-value { font-size: 1.5rem; }
             .arabic-amount { font-size: 0.9rem; }
             .result-header .subscriber-name { font-size: 1rem; }
+            .result-header .subscriber-meta { font-size: 0.68rem; gap: 8px; }
             .fees-disclaimer { font-size: 1rem; }
             .warning-badge i { font-size: 1.3rem; }
-            .fav-btn { width: 32px; height: 32px; font-size: 0.85rem; }
-            .solution-steps ol { font-size: 0.73rem; }
+            .warning-badge { padding: 8px 12px; }
+            .cs-title-en { font-size: 2rem; }
+            .cs-title-ar { font-size: 1.1rem; }
+            .guide-header h2 { font-size: 1.3rem; }
+            .guide-section-title { font-size: 1rem; }
         }
+        
         .table-container::-webkit-scrollbar { height: 4px; }
         .table-container::-webkit-scrollbar-track { background: var(--border-color); border-radius: 4px; }
         .table-container::-webkit-scrollbar-thumb { background: #007BFF; border-radius: 4px; }
+        
         @media print {
-            .fixed-top, footer, .actions-row, .invoice-footer-actions, .form-controls, .dark-mode-toggle, .invoice-search-box, .disclaimer-box, .news-bar, #notification-center, #toast-container, .results-count-label, #pull-to-refresh, .empty-state, .favorites-list, .data-status-box, .load-progress { display: none !important; }
-            .page { margin: 0; padding: 10px; width: 100%; box-shadow: none; border-radius: 0; }
+            .fixed-top, footer, .actions-row, .invoice-footer-actions, .form-controls, 
+            .dark-mode-toggle, .invoice-search-box, .disclaimer-box, 
+            .news-bar, #notification-center, #toast-container,
+            .results-count-label, #pull-to-refresh, .empty-state, .coming-soon-wrapper, .cs-back-btn {
+                display: none !important;
+            }
+            .page { 
+                margin: 0; padding: 10px; width: 100%; box-shadow: none; 
+                border-radius: 0; 
+            }
             body { background: white; overflow: visible; height: auto; }
             .scrollable-content { overflow: visible; padding-bottom: 0; height: auto; }
             .app-container { height: auto; overflow: visible; }
-            .invoice-result-card { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; margin-bottom: 15px; }
-            .result-header { background: #007BFF !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .amount-section { background: #f0fff0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .invoice-result-card { 
+                break-inside: avoid; box-shadow: none; border: 1px solid #ddd; 
+                margin-bottom: 15px; 
+            }
+            .result-header { 
+                background: #007BFF !important; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+            }
+            .amount-section { 
+                background: #f0fff0 !important; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+            }
+            .status-badge {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
             .detail-item { background: #f5f5f5 !important; }
             .result-cards { gap: 0; }
+            
+            #invoice-form-container { display: block !important; }
         }
     </style>
 </head>
@@ -357,14 +1172,38 @@
         <div class="scrollable-content" id="scrollableContent">
             <div id="page-home" class="page active">
                 <div class="main-buttons">
-                    <button onclick="navigateTo('report')" class="btn btn-complaint"><i class="fas fa-exclamation-triangle btn-icon"></i><span class="btn-text">📢 إبلاغ عن هدر المياه وأعطال الشبكات</span></button>
-                    <button onclick="navigateTo('plan')" class="btn btn-water-plan"><i class="fas fa-tint btn-icon"></i><span class="btn-text">🗓️ خطة توزيع المياه</span></button>
-                    <button onclick="navigateTo('invoice')" class="btn btn-invoice"><i class="fas fa-file-invoice-dollar btn-icon"></i><span class="btn-text">🧾 استعلام عن فاتورة</span></button>
-                    <a href="https://ee.kobotoolbox.org/x/VcxqvTkO" class="btn btn-sanitation" target="_blank"><i class="fas fa-wrench btn-icon"></i><span class="btn-text">🔧 خدمات الصرف الصحي</span></a>
-                    <a href="https://www.facebook.com/tawsse.com.sy" class="btn btn-facebook" target="_blank"><i class="fab fa-facebook-f btn-icon"></i><span class="btn-text">📘 تابعونا على فيسبوك</span></a>
-                    <button onclick="window.open('https://twc.ct.ws/app/miyah-tartus.apk', '_blank')" class="btn btn-install"><i class="fas fa-download btn-icon"></i><span class="btn-text">📲 حمل التطبيق الآن</span></button>
-                    <button onclick="clearAppMemory()" class="btn btn-clear"><i class="fas fa-broom btn-icon"></i><span class="btn-text">🧹 افراغ الذاكرة المؤقتة</span></button>
-                    <button onclick="openHelpPage()" class="btn btn-help"><i class="fas fa-question-circle btn-icon"></i><span class="btn-text">📖 التعليمات والدعم الفني</span></button>
+                    <button onclick="navigateTo('report')" class="btn btn-complaint">
+                        <i class="fas fa-exclamation-triangle btn-icon"></i>
+                        <span class="btn-text">📢 إبلاغ عن هدر المياه وأعطال الشبكات</span>
+                    </button>
+                    <button onclick="navigateTo('plan')" class="btn btn-water-plan">
+                        <i class="fas fa-tint btn-icon"></i>
+                        <span class="btn-text">🗓️ خطة توزيع المياه</span>
+                    </button>
+                    <button onclick="navigateTo('invoice')" class="btn btn-invoice">
+                        <i class="fas fa-file-invoice-dollar btn-icon"></i>
+                        <span class="btn-text">🧾 استعلام عن فاتورة</span>
+                    </button>
+                    <button onclick="navigateTo('guide')" class="btn btn-guide">
+                        <i class="fas fa-question-circle btn-icon"></i>
+                        <span class="btn-text">📚 التعليمات والدعم</span>
+                    </button>
+                    <a href="https://ee.kobotoolbox.org/x/VcxqvTkO" class="btn btn-sanitation" target="_blank">
+                        <i class="fas fa-wrench btn-icon"></i>
+                        <span class="btn-text">🔧 خدمات الصرف الصحي</span>
+                    </a>
+                    <a href="https://www.facebook.com/tawsse.com.sy" class="btn btn-facebook" target="_blank">
+                        <i class="fab fa-facebook-f btn-icon"></i>
+                        <span class="btn-text">📘 تابعونا على فيسبوك</span>
+                    </a>
+                    <button onclick="window.open('https://twc.ct.ws/app/miyah-tartus.apk', '_blank')" class="btn btn-install">
+                        <i class="fas fa-download btn-icon"></i>
+                        <span class="btn-text">📲 حمل التطبيق الآن</span>
+                    </button>
+                    <button onclick="clearAppMemory()" class="btn btn-clear">
+                        <i class="fas fa-broom btn-icon"></i>
+                        <span class="btn-text">🧹 افراغ الذاكرة المؤقتة</span>
+                    </button>
                 </div>
             </div>
 
@@ -374,89 +1213,107 @@
                     <span class="plan-month-title" id="planMonthDisplay">--</span>
                     <span class="plan-subtitle">اختر الوحدة والمشروع الخاص بك</span>
                 </div>
-                <div class="favorites-list" id="planFavoritesList" style="display:none;">
-                    <div class="favorites-header" onclick="togglePlanFavoritesCollapse()">
-                        <span><i class="fas fa-star" style="color:#ffc107;"></i> مشاريعي المفضلة</span>
-                        <i class="fas fa-chevron-down" id="planFavToggleIcon"></i>
-                    </div>
-                    <div class="favorites-items" id="planFavItems"></div>
-                </div>
+
                 <div class="form-controls">
                     <div class="input-group">
                         <label><i class="fas fa-city"></i> الوحدة الإدارية:</label>
                         <select id="unitSelect"><option value="">-- اختر الوحدة --</option></select>
                     </div>
                     <div class="input-group">
-                        <label>
-                            <span><i class="fas fa-tachometer-alt"></i> مشروع الضخ:</span>
-                            <button class="fav-btn" id="btn-fav-plan" onclick="togglePlanFavorite()" title="إضافة هذا المشروع إلى قائمتي"><i class="fas fa-plus"></i></button>
-                        </label>
+                        <label><i class="fas fa-tachometer-alt"></i> مشروع الضخ:</label>
                         <select id="projectSelect"><option value="">-- اختر المشروع أولاً --</option></select>
                     </div>
                 </div>
+
                 <div class="table-container" id="tableWrapper">
                     <table id="resultTable">
-                        <thead><tr><th>📅 اليوم</th><th>🗓️ التاريخ</th><th>⚙️ المشروع</th><th>👥 المستفيدين</th><th>⏱️ الساعات</th></tr></thead>
+                        <thead>
+                            <tr>
+                                <th>📅 اليوم</th>
+                                <th>🗓️ التاريخ</th>
+                                <th>⚙️ المشروع</th>
+                                <th>👥 المستفيدين</th>
+                                <th>⏱️ الساعات</th>
+                            </tr>
+                        </thead>
                         <tbody id="scheduleBody"></tbody>
                     </table>
                 </div>
+
                 <div class="actions-row">
-                    <button onclick="shareWhatsApp()" class="btn-action btn-whatsapp"><i class="fab fa-whatsapp"></i> مشاركة الخطة</button>
-                    <button onclick="exportToPDF()" class="btn-action btn-pdf"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
+                    <button onclick="shareWhatsApp()" class="btn-action btn-whatsapp">
+                        <i class="fab fa-whatsapp"></i> مشاركة الخطة
+                    </button>
+                    <button onclick="exportToPDF()" class="btn-action btn-pdf">
+                        <i class="fas fa-file-pdf"></i> تصدير PDF
+                    </button>
                 </div>
-                <div class="btn-back-full"><button onclick="navigateTo('home')" class="btn btn-back"><i class="fas fa-home"></i> العودة للرئيسية</button></div>
+                
+                <div class="btn-back-full">
+                    <button onclick="navigateTo('home')" class="btn btn-back">
+                        <i class="fas fa-home"></i> العودة للرئيسية
+                    </button>
+                </div>
             </div>
 
             <div id="page-invoice" class="page">
-                <div class="plan-header">
-                    <span class="plan-main-title" style="color: #65a30d;">🧾 استعلام عن فاتورة</span>
-                    <span class="plan-subtitle">ابحث عن اشتراكك بأي من الطرق التالية</span>
+                <div class="coming-soon-wrapper">
+                    <div class="cs-bg-blob cs-blob-1"></div>
+                    <div class="cs-bg-blob cs-blob-2"></div>
+                    <div class="cs-content">
+                        <div class="cs-icon-wrapper">
+                            <i class="fas fa-cogs"></i>
+                        </div>
+                        <h2 class="cs-title-en">Coming Soon</h2>
+                        <p class="cs-title-ar">قريباً مع التحديث الجديد للتطبيق</p>
+                        <div class="cs-loader-container">
+                            <div class="cs-loader-bar"></div>
+                        </div>
+                        <p class="cs-sub-text">نقوم حالياً بتطوير الخدمة لتقديم تجربة أفضل</p>
+                        
+                        <button class="cs-back-btn" onclick="navigateTo('home')">
+                            <i class="fas fa-home"></i> العودة للرئيسية
+                        </button>
+                    </div>
                 </div>
 
-                <div class="data-status-box" id="invoiceDataStatus">
-                    <i class="status-icon fas fa-spinner fa-spin" id="statusIcon"></i>
-                    <div class="status-title" id="statusTitle">جاري تحميل البيانات...</div>
-                    <div class="status-desc" id="statusDesc">يتم الآن تحميل بيانات المشتركين</div>
-                    <div class="status-details" id="statusDetails"></div>
-                    <div id="statusSolution"></div>
-                    <div class="load-progress" id="invoiceLoadProgress" style="display:none;">
-                        <div class="load-progress-bar" id="invoiceLoadBar"></div>
+                <div id="invoice-form-container" style="display:none;">
+                    <div class="plan-header">
+                        <span class="plan-main-title" style="color: #65a30d;">🧾 استعلام عن فاتورة</span>
+                        <span class="plan-subtitle">ابحث عن اشتراكك بأي من الطرق التالية</span>
                     </div>
-                    <button class="btn btn-retry" id="btnRetryLoad" style="display:none; width:auto; padding:10px 25px; margin:0 auto;" onclick="retryLoadInvoiceData()">
-                        <i class="fas fa-redo"></i> <span>إعادة تحميل البيانات</span>
-                    </button>
-                </div>
 
-                <div class="favorites-list" id="invoiceFavoritesList" style="display:none;">
-                    <div class="favorites-header" onclick="toggleInvoiceFavoritesCollapse()">
-                        <span><i class="fas fa-star" style="color:#ffc107;"></i> اشتراكاتي المفضلة</span>
-                        <i class="fas fa-chevron-down" id="invoiceFavToggleIcon"></i>
+                    <div class="invoice-search-box">
+                        <div class="input-group">
+                            <label><i class="fas fa-search"></i> نوع البحث:</label>
+                            <select id="searchType" onchange="updateSearchPlaceholder()">
+                                <option value="">-- اختر نوع البحث --</option>
+                                <option value="nationalId">الرقم الوطني</option>
+                                <option value="name">اسم المشترك</option>
+                                <option value="barcode">الباركود</option>
+                                <option value="phone">رقم الجوال</option>
+                                <option value="subNumber">رقم الاشتراك</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label><i class="fas fa-keyboard"></i> قيمة البحث:</label>
+                            <input type="text" id="searchInput" placeholder="أدخل قيمة البحث هنا..." autocomplete="off" onkeydown="if(event.key==='Enter')searchInvoice()">
+                        </div>
+                        <button class="btn-search" onclick="searchInvoice()">
+                            <i class="fas fa-search"></i> بحث
+                        </button>
                     </div>
-                    <div class="favorites-items" id="invoiceFavItems"></div>
-                </div>
 
-                <div class="invoice-search-box" id="invoiceSearchBox">
-                    <div class="input-group">
-                        <label><i class="fas fa-search"></i> نوع البحث:</label>
-                        <select id="searchType" onchange="updateSearchPlaceholder()">
-                            <option value="">-- اختر نوع البحث --</option>
-                            <option value="nationalId">الرقم الوطني</option>
-                            <option value="name">اسم المشترك</option>
-                            <option value="barcode">الباركود</option>
-                            <option value="phone">رقم الجوال</option>
-                            <option value="subNumber">رقم الاشتراك</option>
-                        </select>
+                    <div id="invoiceResults"></div>
+
+                    <div class="invoice-footer-actions">
+                        <button onclick="exportInvoicePDF()" class="btn-action btn-pdf-inv">
+                            <i class="fas fa-file-pdf"></i> تصدير PDF
+                        </button>
+                        <button onclick="navigateTo('home')" class="btn-action btn-back">
+                            <i class="fas fa-home"></i> العودة للرئيسية
+                        </button>
                     </div>
-                    <div class="input-group">
-                        <label><i class="fas fa-keyboard"></i> قيمة البحث:</label>
-                        <input type="text" id="searchInput" placeholder="أدخل قيمة البحث هنا..." autocomplete="off" maxlength="100" onkeydown="if(event.key==='Enter')searchInvoice()">
-                    </div>
-                    <button class="btn-search" id="btnSearchInvoice" onclick="searchInvoice()"><i class="fas fa-search"></i> بحث</button>
-                </div>
-                <div id="invoiceResults"></div>
-                <div class="invoice-footer-actions">
-                    <button onclick="exportInvoicePDF()" class="btn-action btn-pdf-inv"><i class="fas fa-file-pdf"></i> تصدير PDF</button>
-                    <button onclick="navigateTo('home')" class="btn-action btn-back"><i class="fas fa-home"></i> العودة للرئيسية</button>
                 </div>
             </div>
 
@@ -475,8 +1332,191 @@
                     <button onclick="navigateTo('home')" class="btn btn-back"><i class="fas fa-arrow-right btn-icon"></i><span class="btn-text">العودة للرئيسية</span></button>
                 </div>
             </div>
+
+            <!-- صفحة التعليمات والدعم -->
+            <div id="page-guide" class="page">
+                <div class="guide-wrapper">
+                    <div class="guide-header">
+                        <h2><i class="fas fa-question-circle"></i> دليل استخدام التطبيق</h2>
+                        <p>دليل كامل وشامل لكل وظائف التطبيق - خطوة بخطوة</p>
+                    </div>
+
+                    <!-- بدء التشغيل -->
+                    <div class="guide-section">
+                        <div class="guide-section-title">
+                            <i class="fas fa-play-circle"></i> بدء التشغيل
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">1</div>
+                            <div class="guide-step-text"><strong>افتح التطبيق</strong> - ستظهر شاشة ترحيب عليها شعار المؤسسة</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">2</div>
+                            <div class="guide-step-text"><strong>اضغط على الزر الأزرق</strong> المكتوب عليه "اضغط لتفعيل الصوت والدخول"</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">3</div>
+                            <div class="guide-step-text"><strong>سيتم نقلك تلقائياً</strong> إلى الصفحة الرئيسية للتطبيق</div>
+                        </div>
+                        <div class="guide-tip">
+                            <i class="fas fa-info-circle"></i>
+                            <span><strong>ملاحظة:</strong> بعد المرة الأولى، لن تظهر لك شاشة الترحيب مرة أخرى، وستفتح مباشرة على الصفحة الرئيسية.</span>
+                        </div>
+                    </div>
+
+                    <!-- الصفحة الرئيسية -->
+                    <div class="guide-section">
+                        <div class="guide-section-title">
+                            <i class="fas fa-home"></i> الصفحة الرئيسية
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">📢</div>
+                            <div class="guide-step-text"><strong>إبلاغ عن هدر المياه:</strong> ينقلك لصفحة فيها روابط جميع مناطق طرطوس للإبلاغ</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">🗓️</div>
+                            <div class="guide-step-text"><strong>خطة توزيع المياه:</strong> يعرض مواعيد ضخ المياه حسب منطقتك ومشروع الضخ</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">🧾</div>
+                            <div class="guide-step-text"><strong>استعلام عن فاتورة:</strong> للبحث عن فاتورة المياه (قيد التطوير)</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">📚</div>
+                            <div class="guide-step-text"><strong>التعليمات والدعم:</strong> هذا الدليل الشامل لاستخدام التطبيق</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">🔧</div>
+                            <div class="guide-step-text"><strong>خدمات الصرف الصحي:</strong> رابط مباشر لمنصة تقديم طلبات الصرف الصحي</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">📘</div>
+                            <div class="guide-step-text"><strong>تابعونا على فيسبوك:</strong> يفتح صفحة المؤسسة الرسمية على فيسبوك</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">📲</div>
+                            <div class="guide-step-text"><strong>حمل التطبيق الآن:</strong> رابط تحميل APK لمشاركة التطبيق مع الآخرين</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">🧹</div>
+                            <div class="guide-step-text"><strong>افراغ الذاكرة المؤقتة:</strong> لتنظيف التطبيق (دون فقدان المفضلات)</div>
+                        </div>
+                    </div>
+
+                    <!-- خطة المياه -->
+                    <div class="guide-section">
+                        <div class="guide-section-title">
+                            <i class="fas fa-calendar-alt"></i> خطة توزيع المياه
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">1</div>
+                            <div class="guide-step-text"><strong>اختر الوحدة الإدارية</strong> - اضغط على القائمة المنسدلة واختر منطقتك</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">2</div>
+                            <div class="guide-step-text"><strong>اختر مشروع الضخ</strong> - بعد اختيار الوحدة، ستظهر قائمة ثانية</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">3</div>
+                            <div class="guide-step-text"><strong>شاهد الجدول</strong> - سيظهر جدول يحتوي على أيام الضخ والمناطق المستفيدة</div>
+                        </div>
+                        <div class="guide-tip">
+                            <i class="fas fa-star"></i>
+                            <span><strong>🌟 اليوم الحالي</strong> يظهر بلون أخضر فاتح وعليه شارة "اليوم"</span>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">📤</div>
+                            <div class="guide-step-text"><strong>مشاركة الخطة:</strong> زر واتساب - يرسل تفاصيل الخطة عبر واتساب</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">📄</div>
+                            <div class="guide-step-text"><strong>تصدير PDF:</strong> يحفظ الخطة كملف PDF على هاتفك</div>
+                        </div>
+                    </div>
+
+                    <!-- الإشعارات -->
+                    <div class="guide-section">
+                        <div class="guide-section-title">
+                            <i class="fas fa-bell"></i> الإشعارات والتنبيهات
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">🔔</div>
+                            <div class="guide-step-text"><strong>متى تظهر؟</strong> - فقط عندما تكون في الصفحة الرئيسية</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">📢</div>
+                            <div class="guide-step-text"><strong>ماذا تحتوي؟</strong> - أخبار وتنبيهات مهمة من المؤسسة</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">⏱️</div>
+                            <div class="guide-step-text"><strong>كم تبقى؟</strong> - تختفي تلقائياً بعد 7 ثوانٍ</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">👆</div>
+                            <div class="guide-step-text"><strong>كيف تخفيها؟</strong> - اسحب الإشعار إلى اليسار لإخفائه فوراً</div>
+                        </div>
+                        <div class="guide-step">
+                            <div class="guide-step-num">🔊</div>
+                            <div class="guide-step-text"><strong>صوت الإشعار</strong> - يصدر صوت قطرات ماء مع كل إشعار جديد</div>
+                        </div>
+                    </div>
+
+                    <!-- نصائح سريعة -->
+                    <div class="guide-section">
+                        <div class="guide-section-title">
+                            <i class="fas fa-lightbulb"></i> نصائح سريعة
+                        </div>
+                        <div class="guide-tip">
+                            <i class="fas fa-sync-alt"></i>
+                            <span><strong>التطبيق لا يستجيب؟</strong> - اسحب الشاشة من أعلى إلى أسفل للتحديث</span>
+                        </div>
+                        <div class="guide-tip">
+                            <i class="fas fa-moon"></i>
+                            <span><strong>تفعيل الوضع الليلي:</strong> - اضغط على زر القمر/الشمس في أعلى اليمين</span>
+                        </div>
+                        <div class="guide-tip">
+                            <i class="fas fa-star"></i>
+                            <span><strong>حفظ المشاريع المفضلة:</strong> - في صفحة الخطة، اضغط على الزر الأخضر "أضف لقائمتي"</span>
+                        </div>
+                        <div class="guide-tip">
+                            <i class="fas fa-trash-alt"></i>
+                            <span><strong>حذف مشروع من المفضلة:</strong> - اضغط على علامة (X) بجانبه في القائمة</span>
+                        </div>
+                        <div class="guide-tip">
+                            <i class="fas fa-share-alt"></i>
+                            <span><strong>مشاركة التطبيق مع صديق:</strong> - استخدم زر "📲 حمل التطبيق الآن"</span>
+                        </div>
+                    </div>
+
+                    <!-- التحديثات القادمة -->
+                    <div class="guide-section">
+                        <div class="guide-section-title">
+                            <i class="fas fa-clock"></i> التحديثات القادمة
+                        </div>
+                        <div class="guide-tip">
+                            <i class="fas fa-search"></i>
+                            <span><strong>استعلام عن الفواتير:</strong> تتيح لك معرفة قيمة فواتيرك بكل سهولة</span>
+                        </div>
+                        <div class="guide-tip">
+                            <i class="fas fa-chart-line"></i>
+                            <span><strong>سجل الاستهلاك:</strong> لمتابعة كمية المياه المستهلكة بشكل دوري</span>
+                        </div>
+                        <div class="guide-tip">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <span><strong>دفع الفواتير:</strong> دفع آمن وسريع عبر التطبيق</span>
+                        </div>
+                    </div>
+
+                    <button onclick="navigateTo('home')" class="btn btn-guide-back">
+                        <i class="fas fa-home"></i> العودة للرئيسية
+                    </button>
+                </div>
+            </div>
         </div>
-        <footer><span class="footer-text"><i class="fas fa-chalkboard-user"></i> المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا</span></footer>
+
+        <footer>
+            <span class="footer-text"><i class="fas fa-chalkboard-user"></i> المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا</span>
+        </footer>
     </div>
 
     <div id="splash-screen">
@@ -484,385 +1524,962 @@
             <img src="logo.png?v=2" alt="شعار المؤسسة" id="splash-logo">
             <h1>💧 شركة مياه طرطوس</h1>
             <p>خدمات مائية موثوقة</p>
-            <div class="audio-btn" onclick="grantAudioPermission()"><i class="fas fa-volume-up"></i> <span>اضغط لتفعيل الصوت والدخول</span></div>
+            <div class="audio-btn" onclick="grantAudioPermission()">
+                <i class="fas fa-volume-up"></i> <span>اضغط لتفعيل الصوت والدخول</span>
+            </div>
         </div>
     </div>
+
+    <div id="offline-screen">
+        <i class="fas fa-wifi"></i>
+        <h2>لا يوجد اتصال بالإنترنت</h2>
+        <p>يرجى التحقق من اتصالك بالشبكة والمحاولة مرة أخرى</p>
+        <button onclick="location.reload()"><i class="fas fa-redo"></i> إعادة المحاولة</button>
+    </div>
+
     <div id="pull-to-refresh"><i class="fas fa-sync-alt"></i></div>
     <div id="notification-center"></div>
     <div id="toast-container"></div>
 
     <script>
-        // ========== المتغيرات العامة ==========
-        let notificationSound = null, audioAllowed = false, notificationQueue = [], isShowingNotification = false;
-        let waterPlanData = [], invoiceData = [], invoiceDataLoaded = false, invoiceDataLoading = false;
-        let pendingPeriodicNotification = false, cachedNotificationMessages = [];
+        let notificationSound = null;
+        let audioAllowed = false;
+        let notificationQueue = [];
+        let isShowingNotification = false;
+        let waterPlanData = [];
+        let invoiceData = [];
+        let invoiceDataLoaded = false;
+        let pendingPeriodicNotification = false;
+        let cachedNotificationMessages = [];
 
-        // ========================================================
-        //  ⚠️ أسماء الحقول في ملف data_compact.json
-        //  عدّلها فقط إذا كانت أسماء الحقول في JSON مختلفة
-        // ========================================================
-        const INVOICE_FIELDS = {
-            nationalId:   ['الرقم الوطني'],
-            name:         ['الاسم'],
-            barcode:      ['باركود'],
-            phone:        ['رقم الجوال'],
-            subNumber:    ['رقم الاشتراك'],
-            meterStatus:  ['حالة العداد'],
-            calcType:     ['رمز الاحتساب'],
-            totalUnpaid:  ['إجمالي الفواتير الغير مدفوعة', 'إجمالي الفواتير غير المدفوعة'],
-            countUnpaid:  ['عدد الفواتير الغير مدفوعة', 'عدد الفواتير غير المدفوعة'],
-            address:      ['العنوان'],
-            meterNumber:  ['رقم العداد']
-        };
-
-        const invoiceIndexes = { nationalId: new Map(), name: new Map(), barcode: new Map(), phone: new Map(), subNumber: new Map() };
-
-        // ========== أدوات ==========
-        function normalizeStr(val) { if (val === null || val === undefined) return ''; return String(val).trim().replace(/\s+/g, ' ').toLowerCase(); }
-        function sanitize(str) { if (str === null || str === undefined) return ''; const div = document.createElement('div'); div.textContent = String(str); return div.innerHTML; }
-
-        function getField(row, fieldKey) {
-            const names = INVOICE_FIELDS[fieldKey];
-            if (!names || !row) return null;
-            for (const name of names) { if (Object.prototype.hasOwnProperty.call(row, name) && row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== '') return row[name]; }
-            const rowKeys = Object.keys(row);
-            const normRowKeys = rowKeys.map(k => ({ orig: k, norm: k.replace(/[\s\-–—_]/g, '').toLowerCase() }));
-            for (const name of names) { const normName = name.replace(/[\s\-–—_]/g, '').toLowerCase(); for (const nk of normRowKeys) { if (nk.norm === normName) { const val = row[nk.orig]; if (val !== undefined && val !== null && String(val).trim() !== '') return val; } } }
-            const keywords = names.filter(n => n.length > 3).map(n => n.replace(/[\s\-–—_]/g, ''));
-            for (const nk of normRowKeys) { for (const kw of keywords) { if (nk.norm.includes(kw) || kw.includes(nk.norm)) { const val = row[nk.orig]; if (val !== undefined && val !== null && String(val).trim() !== '') return val; } } }
-            return null;
-        }
-
-        function buildInvoiceIndexes() {
-            for (const key of Object.keys(invoiceIndexes)) invoiceIndexes[key].clear();
-            invoiceData.forEach((row, idx) => {
-                const natId = normalizeStr(getField(row, 'nationalId')); if (natId) addToIdx(invoiceIndexes.nationalId, natId, idx);
-                const name = normalizeStr(getField(row, 'name')); if (name) { addToIdx(invoiceIndexes.name, name.substring(0, Math.min(Math.max(name.length, 3), 10)), idx); addToIdx(invoiceIndexes.name, name, idx); }
-                const barcode = normalizeStr(getField(row, 'barcode')); if (barcode) { addToIdx(invoiceIndexes.barcode, barcode, idx); const c = barcode.replace(/^0+/, ''); if (c && c !== barcode) addToIdx(invoiceIndexes.barcode, c, idx); }
-                const phone = normalizeStr(getField(row, 'phone')); if (phone && phone !== '*') { addToIdx(invoiceIndexes.phone, phone, idx); const c = phone.replace(/^0/, ''); if (c && c !== phone) addToIdx(invoiceIndexes.phone, c, idx); }
-                const subNum = normalizeStr(getField(row, 'subNumber')); if (subNum) addToIdx(invoiceIndexes.subNumber, subNum, idx);
-            });
-        }
-        function addToIdx(map, key, idx) { if (!map.has(key)) map.set(key, []); const arr = map.get(key); if (arr[arr.length - 1] !== idx) arr.push(idx); }
-
-        // ========== واجهة حالة التحميل ==========
-        function showDataStatus(type, title, desc, details, solutionHTML) {
-            const box = document.getElementById('invoiceDataStatus');
-            const icon = document.getElementById('statusIcon');
-            const tEl = document.getElementById('statusTitle');
-            const dEl = document.getElementById('statusDesc');
-            const detEl = document.getElementById('statusDetails');
-            const solEl = document.getElementById('statusSolution');
-            const retryBtn = document.getElementById('btnRetryLoad');
-            const progress = document.getElementById('invoiceLoadProgress');
-            const searchBar = document.getElementById('invoiceSearchBox');
-
-            box.className = 'data-status-box visible ' + type;
-            if (type === 'loading') { icon.className = 'status-icon fas fa-spinner fa-spin'; retryBtn.style.display = 'none'; progress.style.display = 'block'; searchBar.style.opacity = '0.4'; searchBar.style.pointerEvents = 'none'; detEl.style.display = 'none'; }
-            else if (type === 'error' || type === 'lfs-warning') { icon.className = 'status-icon fas fa-exclamation-triangle'; retryBtn.style.display = 'inline-flex'; progress.style.display = 'none'; searchBar.style.opacity = '0.4'; searchBar.style.pointerEvents = 'none'; detEl.style.display = details ? 'block' : 'none'; detEl.textContent = details || ''; }
-            else if (type === 'success') { icon.className = 'status-icon fas fa-check-circle'; retryBtn.style.display = 'none'; progress.style.display = 'none'; searchBar.style.opacity = '1'; searchBar.style.pointerEvents = 'auto'; detEl.style.display = 'none'; setTimeout(() => box.classList.remove('visible'), 2000); }
-            tEl.textContent = title; dEl.textContent = desc;
-            solEl.innerHTML = solutionHTML || '';
-        }
-        function hideDataStatus() { document.getElementById('invoiceDataStatus').classList.remove('visible'); document.getElementById('invoiceSearchBox').style.opacity = '1'; document.getElementById('invoiceSearchBox').style.pointerEvents = 'auto'; }
-        function updateLoadProgress(p) { document.getElementById('invoiceLoadBar').style.width = p + '%'; }
-
-        // ========== كشف Git LFS ==========
-        function isLFSPointer(text) {
-            return text.trimStart().startsWith('version https://git-lfs.github.com/spec/v1');
-        }
-
-        function getLFSSolutionHTML() {
-            return `<div class="solution-steps">
-                <div class="step-title"><i class="fas fa-tools"></i> كيفية حل المشكلة:</div>
-                <ol>
-                    <li><strong>افتح Git Bash</strong> في مجلد المشروع</li>
-                    <li>نفذ: <code>git lfs install</code></li>
-                    <li>نفذ: <code>git lfs pull</code></li>
-                    <li>تحقق أن الملف أصبح بحجمه الحقيقي (<strong>37.3 MB</strong>) وليس بضعة أسطر</li>
-                    <li>أعد رفع الملف: <code>git add data_compact.json</code></li>
-                    <li><strong>الأفضل:</strong> نفذ <code>git lfs untrack "data_compact.json"</code> ثم أعد رفعه بدون LFS لأن GitHub Pages يخدم الملفات العادية بشكل صحيح</li>
-                </ol>
-            </div>`;
-        }
-
-        // ========== تحميل بيانات الفواتير ==========
-        async function loadInvoiceData(showUI) {
-            if (invoiceDataLoaded) return true;
-            if (invoiceDataLoading) return false;
-            invoiceDataLoading = true;
-
-            if (showUI) showDataStatus('loading', 'جاري تحميل البيانات...', 'يتم الآن تحميل بيانات المشتركين من الخادم');
-            else updateLoadProgress(20);
-
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 25000);
-
-                if (showUI) updateLoadProgress(30);
-
-                const res = await fetch('data_compact.json?v=' + Date.now(), { signal: controller.signal });
-                clearTimeout(timeoutId);
-
-                if (showUI) updateLoadProgress(65);
-
-                if (!res.ok) throw new Error(`خطأ الخادم: HTTP ${res.status} ${res.statusText}`);
-
-                // ★ قراءة كنص أولاً للتحقق من LFS ★
-                const text = await res.text();
-
-                if (showUI) updateLoadProgress(80);
-
-                // ★ كشف مؤشر Git LFS ★
-                if (isLFSPointer(text)) {
-                    const pointerLines = text.trim().split('\n');
-                    const sizeLine = pointerLines.find(l => l.startsWith('size:'));
-                    const pointerSize = sizeLine ? sizeLine.split(':')[1].trim() : 'غير معروف';
-
-                    throw new Error(`LFS_DETECTED:${pointerSize}`);
-                }
-
-                // محاولة تحليل JSON
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (parseErr) {
-                    // إذا فشل التحليل، أظهر جزء من النص للمساعدة في التشخيص
-                    const preview = text.substring(0, 200).replace(/[\n\r]/g, ' ');
-                    throw new Error(`فشل تحليل JSON. بداية الملف: "${preview}..."`);
-                }
-
-                if (showUI) updateLoadProgress(90);
-
-                if (!Array.isArray(data)) {
-                    const arrayKey = Object.keys(data).find(k => Array.isArray(data[k]));
-                    if (arrayKey) invoiceData = data[arrayKey];
-                    else throw new Error(`البيانات ليست مصفوفة. المفاتيح: [${Object.keys(data).slice(0,5).join(', ')}]`);
-                } else {
-                    invoiceData = data;
-                }
-
-                if (invoiceData.length === 0) throw new Error('ملف البيانات فارغ - لا توجد سجلات');
-
-                if (showUI) updateLoadProgress(95);
-
-                buildInvoiceIndexes();
-                invoiceDataLoaded = true;
-
-                if (showUI) showDataStatus('success', `تم التحميل بنجاح`, `تم تحميل ${invoiceData.length} سجل مشترك`);
-
-                console.log(`✅ فواتير: ${invoiceData.length} سجل`);
-                return true;
-
-            } catch (e) {
-                invoiceData = []; invoiceDataLoaded = false;
-
-                // ★ معالجة خاصة لمؤشر LFS ★
-                if (e.message && e.message.startsWith('LFS_DETECTED:')) {
-                    const pointerSize = e.message.split(':')[1];
-                    const errorMsg = `الملف محفوظ بـ Git LFS (حجم المؤشر: ${pointerSize} بايت بينما الحجم الفعلي 37.3 MB) — المتصفح يحصل على مؤشر وهمي بدلاً من البيانات الحقيقية`;
-
-                    if (showUI) {
-                        showDataStatus('lfs-warning',
-                            '⚠️ الملف محفوظ بـ Git LFS',
-                            'GitHub يُرجع مؤشراً وهمياً بدلاً من البيانات الفعلية. يجب إزالة LFS من هذا الملف.',
-                            errorMsg,
-                            getLFSSolutionHTML()
-                        );
-                    }
-                    console.error('❌ LFS:', errorMsg);
-                    return false;
-                }
-
-                // ★ معالجة مهلة ★
-                const errorDetail = e.name === 'AbortError'
-                    ? 'انتهت مهلة الاتصال (25 ثانية) — قد يكون الملف كبيراً جداً أو الاتصال بطيء'
-                    : e.message;
-
-                console.error('❌ فشل تحميل الفواتير:', errorDetail);
-
-                if (showUI) {
-                    showDataStatus('error',
-                        'فشل تحميل بيانات الفواتير',
-                        'تأكد أن ملف data_compact.json موجود بجانب index.html وأنه ليس محفوظاً بـ Git LFS.',
-                        errorDetail
-                    );
-                }
-                return false;
-
-            } finally {
-                invoiceDataLoading = false;
+        function toggleDarkMode() {
+            const body = document.body;
+            const icon = document.getElementById('dark-mode-icon');
+            if (body.getAttribute('data-theme') === 'dark') {
+                body.removeAttribute('data-theme');
+                icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                icon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
             }
         }
 
-        async function retryLoadInvoiceData() {
-            const btn = document.getElementById('btnRetryLoad');
-            btn.disabled = true; btn.querySelector('span').textContent = 'جاري المحاولة...';
-            invoiceDataLoaded = false; invoiceDataLoading = false;
-            const ok = await loadInvoiceData(true);
-            if (!ok) { btn.disabled = false; btn.querySelector('span').textContent = 'إعادة تحميل البيانات'; }
+        function loadTheme() {
+            if (localStorage.getItem('theme') === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                document.getElementById('dark-mode-icon').className = 'fas fa-sun';
+            }
         }
 
-        function preloadInvoiceData() { if (!invoiceDataLoaded && !invoiceDataLoading) loadInvoiceData(false).catch(() => {}); }
-
-        // ========== بقية الدوال (نفسها بدون تغيير) ==========
-        function openHelpPage() { try { window.open('Help.html', '_blank'); } catch(e) { showToast('⚠️ خطأ في فتح التعليمات'); } }
-        function getPlanFavorites() { try { return JSON.parse(localStorage.getItem('planFavorites') || '[]'); } catch(e) { return []; } }
-        function savePlanFavorites(f) { try { localStorage.setItem('planFavorites', JSON.stringify(f.slice(0, 5))); } catch(e) {} }
-        function togglePlanFavorite() { const u = document.getElementById('unitSelect').value, p = document.getElementById('projectSelect').value, btn = document.getElementById('btn-fav-plan'); if (!u||!p) { showToast('اختر الوحدة والمشروع أولاً'); return; } let f = getPlanFavorites(); const i = f.findIndex(x => x.unit===u && x.project===p); if (i!==-1) { f.splice(i,1); btn.innerHTML='<i class="fas fa-plus"></i>'; btn.classList.remove('active'); showToast('✓ تم الإزالة'); } else { if(f.length>=5){showToast('⚠️ الحد 5 مشاريع');return;} f.push({unit:u,project:p,name:p}); btn.innerHTML='<i class="fas fa-check"></i>'; btn.classList.add('active'); showToast('✓ تم الإضافة'); } savePlanFavorites(f); renderPlanFavorites(); }
-        function renderPlanFavorites() { const f=getPlanFavorites(),c=document.getElementById('planFavItems'),l=document.getElementById('planFavoritesList'); if(!f.length){l.style.display='none';return;} l.style.display='block'; c.innerHTML=''; f.forEach((fav,idx)=>{const d=document.createElement('div');d.className='fav-item';d.innerHTML=`<div class="fav-item-info" onclick="loadPlanFavorite('${sanitize(fav.unit).replace(/'/g,"\\'")}','${sanitize(fav.project).replace(/'/g,"\\'")}')"><div class="fav-item-title">${sanitize(fav.project)}</div><div class="fav-item-sub">${sanitize(fav.unit)}</div></div><button class="fav-item-delete" onclick="deletePlanFavorite(${idx})"><i class="fas fa-trash-alt"></i></button>`;c.appendChild(d);}); }
-        function loadPlanFavorite(u,p){document.getElementById('unitSelect').value=u;filterProjects();setTimeout(()=>{document.getElementById('projectSelect').value=p;renderTable();showToast(`✓ ${p}`);},200);}
-        function deletePlanFavorite(i){let f=getPlanFavorites();f.splice(i,1);savePlanFavorites(f);renderPlanFavorites();checkPlanFavoriteStatus();showToast('✓ تم الحذف');}
-        let planFavCollapsed=false;
-        function togglePlanFavoritesCollapse(){planFavCollapsed=!planFavCollapsed;const items=document.getElementById('planFavItems'),icon=document.getElementById('planFavToggleIcon');if(planFavCollapsed){items.parentElement.classList.add('fav-collapsed');icon.className='fas fa-chevron-left';}else{items.parentElement.classList.remove('fav-collapsed');icon.className='fas fa-chevron-down';}}
-
-        function getInvoiceFavorites(){try{return JSON.parse(localStorage.getItem('invoiceFavorites')||'[]');}catch(e){return[];}}
-        function saveInvoiceFavorites(f){try{localStorage.setItem('invoiceFavorites',JSON.stringify(f.slice(0,5)));}catch(e){}}
-        function toggleInvoiceFavorite(sn,name){let f=getInvoiceFavorites();const i=f.findIndex(x=>x.subNumber===sn);if(i!==-1){f.splice(i,1);showToast('✓ تم الإزالة');}else{if(f.length>=5){showToast('⚠️ الحد 5');return;}f.push({subNumber:sn,subName:name.substring(0,50)});showToast('✓ تم الإضافة');}saveInvoiceFavorites(f);renderInvoiceFavorites();document.querySelectorAll('.fav-btn-invoice').forEach(btn=>{if(btn.getAttribute('data-subnum')===sn){const isFav=f.some(x=>x.subNumber===sn);btn.innerHTML=isFav?'<i class="fas fa-check"></i>':'<i class="fas fa-plus"></i>';btn.classList.toggle('active',isFav);}});}
-        function renderInvoiceFavorites(){const f=getInvoiceFavorites(),c=document.getElementById('invoiceFavItems'),l=document.getElementById('invoiceFavoritesList');if(!f.length){l.style.display='none';return;}l.style.display='block';c.innerHTML='';f.forEach((fav,idx)=>{const d=document.createElement('div');d.className='fav-item';d.innerHTML=`<div class="fav-item-info" onclick="loadInvoiceFavorite('${sanitize(fav.subNumber).replace(/'/g,"\\'")}')"><div class="fav-item-title">${sanitize(fav.subName.substring(0,30))}</div><div class="fav-item-sub">رقم: ${sanitize(fav.subNumber)}</div></div><button class="fav-item-delete" onclick="deleteInvoiceFavorite(${idx})"><i class="fas fa-trash-alt"></i></button>`;c.appendChild(d);});}
-        async function loadInvoiceFavorite(sn){document.getElementById('searchType').value='subNumber';updateSearchPlaceholder();document.getElementById('searchInput').value=sn;await searchInvoice();}
-        function deleteInvoiceFavorite(i){let f=getInvoiceFavorites();f.splice(i,1);saveInvoiceFavorites(f);renderInvoiceFavorites();showToast('✓ تم الحذف');}
-        let invoiceFavCollapsed=false;
-        function toggleInvoiceFavoritesCollapse(){invoiceFavCollapsed=!invoiceFavCollapsed;const items=document.getElementById('invoiceFavItems'),icon=document.getElementById('invoiceFavToggleIcon');if(invoiceFavCollapsed){items.parentElement.classList.add('fav-collapsed');icon.className='fas fa-chevron-left';}else{items.parentElement.classList.remove('fav-collapsed');icon.className='fas fa-chevron-down';}}
-
-        function toggleDarkMode(){const b=document.body,i=document.getElementById('dark-mode-icon');if(b.getAttribute('data-theme')==='dark'){b.removeAttribute('data-theme');i.className='fas fa-moon';localStorage.setItem('theme','light');}else{b.setAttribute('data-theme','dark');i.className='fas fa-sun';localStorage.setItem('theme','dark');}}
-        function loadTheme(){if(localStorage.getItem('theme')==='dark'){document.body.setAttribute('data-theme','dark');document.getElementById('dark-mode-icon').className='fas fa-sun';}}
-        function initAudio(){try{notificationSound=new Audio('water_drops.mp3');notificationSound.volume=0.5;}catch(e){}}
-        function playSound(){if(audioAllowed&&notificationSound){notificationSound.currentTime=0;notificationSound.play().catch(()=>{});}}
-        function hideSplash(){const s=document.getElementById('splash-screen');s.style.opacity='0';setTimeout(()=>s.style.display='none',800);}
-        function grantAudioPermission(){if(audioAllowed)return;audioAllowed=true;initAudio();playSound();localStorage.setItem('audioPermissionGranted','true');hideSplash();loadExcelData();}
-        function checkAppStartup(){const has=localStorage.getItem('audioPermissionGranted')==='true';const s=document.getElementById('splash-screen');loadTheme();if(has){audioAllowed=true;initAudio();s.classList.add('auto-mode');s.style.display='flex';setTimeout(hideSplash,2000);loadExcelData();}else{s.style.display='flex';}}
-
-        let pullStartY=0,isPulling=false;const scrollableDiv=document.getElementById('scrollableContent');
-        scrollableDiv.addEventListener('touchstart',(e)=>{if(scrollableDiv.scrollTop===0)pullStartY=e.touches[0].clientY;});
-        scrollableDiv.addEventListener('touchmove',(e)=>{if(pullStartY>0&&scrollableDiv.scrollTop===0&&e.touches[0].clientY-pullStartY>70){document.getElementById('pull-to-refresh').classList.add('show');isPulling=true;}});
-        scrollableDiv.addEventListener('touchend',()=>{if(isPulling){setTimeout(()=>document.getElementById('pull-to-refresh').classList.remove('show'),1000);loadExcelData();showToast('جاري التحديث...');}pullStartY=0;isPulling=false;});
-
-        function showToast(msg){const c=document.getElementById('toast-container'),t=document.createElement('div');t.className='toast';t.textContent=msg;c.appendChild(t);setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>{t.classList.remove('show');setTimeout(()=>t.remove(),300);},2500);}
-        document.addEventListener('click',(e)=>{const target=e.target.closest('.btn,.btn-action,.fav-btn,.fav-btn-invoice');if(target&&!target.classList.contains('fav-item-delete')){const circle=document.createElement('span');circle.className='ripple-effect';const d=Math.max(target.clientWidth,target.clientHeight),r=d/2;circle.style.width=circle.style.height=`${d}px`;circle.style.left=`${e.clientX-target.getBoundingClientRect().left-r}px`;circle.style.top=`${e.clientY-target.getBoundingClientRect().top-r}px`;target.appendChild(circle);setTimeout(()=>circle.remove(),600);}});
-
-        function navigateTo(pageName){
-            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-            document.getElementById('page-'+pageName).classList.add('active');
-            const mt=document.getElementById('dynamic-title'),st=document.getElementById('dynamic-subtitle'),m=document.getElementById('theme-color-meta');
-            if(pageName==='home'){mt.innerHTML='شركة مياه طرطوس';st.innerHTML='التطبيق الرسمي';m.content='#004999';if(cachedNotificationMessages.length>0&&notificationQueue.length===0){cachedNotificationMessages.forEach(n=>showNotification(n));}}
-            else if(pageName==='plan'){mt.innerHTML='📅 خطة توزيع المياه';st.innerHTML='اختر الوحدة والمشروع';m.content='#0056b3';const sm=localStorage.getItem('currentPlanMonth');if(sm&&sm!=='--')document.getElementById('planMonthDisplay').innerHTML=`لشهر ${sm}`;renderPlanFavorites();checkPlanFavoriteStatus();}
-            else if(pageName==='invoice'){mt.innerHTML='🧾 استعلام عن فاتورة';st.innerHTML='ابحث عن اشتراكك';m.content='#65a30d';renderInvoiceFavorites();if(invoiceDataLoaded){hideDataStatus();showInvoiceEmptyState();}else{loadInvoiceData(true);}}
-            else if(pageName==='report'){mt.innerHTML='الإبلاغ عن أعطال<br>الشبكات وهدر المياه';st.innerHTML='محافظة طرطوس';m.content='#1e7e34';}
-            scrollableDiv.scrollTo({top:0,behavior:'smooth'});
+        function initAudio() { 
+            try { 
+                notificationSound = new Audio('water_drops.mp3'); 
+                notificationSound.volume = 0.5; 
+            } catch(e) {} 
         }
-        function checkPlanFavoriteStatus(){const u=document.getElementById('unitSelect').value,p=document.getElementById('projectSelect').value,btn=document.getElementById('btn-fav-plan');const isFav=getPlanFavorites().some(f=>f.unit===u&&f.project===p);btn.innerHTML=isFav?'<i class="fas fa-check"></i>':'<i class="fas fa-plus"></i>';btn.classList.toggle('active',isFav);}
-
-        function showNotification(msg){if(msg&&document.getElementById('page-home').classList.contains('active')){notificationQueue.push(msg);processQueue();}}
-        function createSwipeableNotification(msg){const c=document.getElementById('notification-center'),el=document.createElement('div');el.className='android-notification';el.innerHTML=`<i class="fas fa-bell" style="color:#ff9900;font-size:1.2rem;"></i><div style="flex:1"><strong>📢 تنبيه</strong><br>${sanitize(msg)}</div><i class="fas fa-times notification-dismiss"></i>`;el.querySelector('.notification-dismiss').addEventListener('click',(e)=>{e.stopPropagation();removeNotification(el);});let sx=0,cx=0,isD=false;el.addEventListener('touchstart',(e)=>{sx=e.touches[0].clientX;cx=sx;isD=true;el.style.transition='none';});el.addEventListener('touchmove',(e)=>{if(!isD)return;cx=e.touches[0].clientX;let d=cx-sx;el.style.transform=`translateX(${d}px)`;el.style.opacity=1-Math.abs(d)/200;});el.addEventListener('touchend',()=>{isD=false;if(Math.abs(cx-sx)>80)removeNotification(el);else{el.style.transition='transform 0.3s ease, opacity 0.3s ease';el.style.transform='';el.style.opacity='';}});c.appendChild(el);}
-        function removeNotification(el){el.style.transform='translateX(-120%)';el.style.opacity='0';setTimeout(()=>{if(el.parentNode)el.remove();isShowingNotification=false;setTimeout(processQueue,500);},300);}
-        async function processQueue(){if(isShowingNotification||notificationQueue.length===0)return;isShowingNotification=true;createSwipeableNotification(notificationQueue.shift());playSound();setTimeout(()=>{const n=document.querySelectorAll('.android-notification');if(n.length)removeNotification(n[n.length-1]);},7000);}
-        function sendSystemNotifications(messages){if(!window.median||!window.median.localNotification)return;messages.forEach((msg,i)=>{setTimeout(()=>{median.localNotification.schedule({title:"💧 مياه طرطوس",body:msg,delay:0,id:100+i});},i*5000);});}
-
-        async function loadExcelData(){
-            const newsEl=document.getElementById('scrolling-news');newsEl.className='news-bar-inner skeleton';newsEl.style.width='60%';newsEl.innerHTML='&nbsp;';
-            if(typeof XLSX==='undefined'){newsEl.className='news-bar-inner';newsEl.style.width='';newsEl.innerHTML="🚰 جاري تحميل المكتبة...";await new Promise(r=>setTimeout(r,3000));if(typeof XLSX==='undefined'){newsEl.innerHTML="🚰 لا يوجد اتصال";showToast('⚠️ مكتبة الجداول غير محملة');return;}}
-            try{
-                const res=await fetch('toze3.xlsx?v='+Date.now());if(!res.ok)throw new Error('err');const buf=await res.arrayBuffer();const wb=XLSX.read(new Uint8Array(buf),{type:'array'}),sheet=wb.Sheets[wb.SheetNames[0]];
-                const news=[];for(let i=1;i<=6;i++){if(sheet['I'+i]?.v)news.push(sheet['I'+i].v);}
-                if(news.length){newsEl.className='news-bar-inner';newsEl.style.width='';newsEl.innerHTML="🌀 "+news.join("  •  ");newsEl.style.animation='none';setTimeout(()=>newsEl.style.animation='scroll-news-right 40s linear infinite',10);}
-                else{newsEl.className='news-bar-inner';newsEl.innerHTML="🚰 مياه طرطوس";newsEl.style.width='';}
-                const notifs=[];for(let i=2;i<=5;i++){if(sheet['H'+i]?.v)notifs.push(sheet['H'+i].v);}
-                cachedNotificationMessages=notifs;localStorage.setItem('cached_notifications',JSON.stringify(notifs));
-                if(document.getElementById('page-home').classList.contains('active')){notificationQueue=[];notifs.forEach(n=>showNotification(n));}else{pendingPeriodicNotification=true;}
-                waterPlanData=XLSX.utils.sheet_to_json(sheet);
-                let monthDisplay="";if(sheet['H1']&&sheet['H1'].v){const d=convertToDate(sheet['H1'].v);if(d)monthDisplay=`${d.getMonth()+1}-${d.getFullYear()}`;else monthDisplay=String(sheet['H1'].v);}else{const n=new Date();monthDisplay=`${n.getMonth()+1}-${n.getFullYear()}`;}
-                localStorage.setItem('currentPlanMonth',monthDisplay);const pm=document.getElementById('planMonthDisplay');if(pm)pm.innerHTML=`لشهر ${monthDisplay}`;
-                populateUnits();renderPlanFavorites();localStorage.setItem('cached_news',JSON.stringify(news));preloadInvoiceData();
-            }catch(e){newsEl.className='news-bar-inner';newsEl.style.width='';const c=localStorage.getItem('cached_news');if(c&&JSON.parse(c).length)newsEl.innerHTML="🌀 "+JSON.parse(c).join("  •  ");else newsEl.innerHTML="🚰 مياه طرطوس";const sm=localStorage.getItem('currentPlanMonth');if(sm){const pm=document.getElementById('planMonthDisplay');if(pm)pm.innerHTML=`لشهر ${sm}`;}preloadInvoiceData();}
+        
+        function playSound() { 
+            if(audioAllowed && notificationSound) { 
+                notificationSound.currentTime = 0; 
+                notificationSound.play().catch(()=>{}); 
+            } 
         }
 
-        function convertToDate(v){if(!v)return null;if(v instanceof Date&&!isNaN(v))return new Date(v.getFullYear(),v.getMonth(),v.getDate());if(typeof v==='number'&&v>0){let d=new Date(new Date(1899,11,30).getTime()+v*86400000);if(!isNaN(d.getTime()))return new Date(d.getFullYear(),d.getMonth(),d.getDate());}if(typeof v==='string'){let p=new Date(v);if(!isNaN(p.getTime()))return new Date(p.getFullYear(),p.getMonth(),p.getDate());let parts=v.split('/');if(parts.length===3)return new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));}return null;}
-        function formatDate(v){const d=convertToDate(v);return d?`${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`:'—';}
-        function isToday(v){const d=convertToDate(v);if(!d)return false;const t=new Date();return d.getDate()===t.getDate()&&d.getMonth()===t.getMonth()&&d.getFullYear()===t.getFullYear();}
-        function populateUnits(){const s=document.getElementById('unitSelect');s.innerHTML='<option value="">-- اختر الوحدة --</option>';[...new Set(waterPlanData.map(r=>r['المحافظة']).filter(Boolean))].forEach(u=>s.innerHTML+=`<option value="${u}">${u}</option>`);s.onchange=null;s.onchange=filterProjects;}
-        function filterProjects(){const u=document.getElementById('unitSelect').value,p=document.getElementById('projectSelect');p.innerHTML='<option value="">-- اختر المشروع --</option>';document.getElementById('tableWrapper').style.display='none';checkPlanFavoriteStatus();if(!u)return;[...new Set(waterPlanData.filter(r=>r['المحافظة']===u).map(r=>r['محور الضخ']).filter(Boolean))].forEach(pr=>p.innerHTML+=`<option value="${pr}">${pr}</option>`);p.onchange=null;p.onchange=renderTable;renderTable();}
-        function renderTable(){const u=document.getElementById('unitSelect').value,p=document.getElementById('projectSelect').value,tbody=document.getElementById('scheduleBody'),w=document.getElementById('tableWrapper');checkPlanFavoriteStatus();if(!u||!p){w.style.display='none';return;}const f=waterPlanData.filter(r=>r['المحافظة']===u&&r['محور الضخ']===p);tbody.innerHTML='';if(!f.length){w.style.display='none';showToast('لا توجد بيانات');return;}f.forEach(r=>{const isT=isToday(r['التاريخ']);const tr=document.createElement('tr');if(isT)tr.classList.add('highlight-today');let dt=formatDate(r['التاريخ']);if(isT)dt=`<span class="today-badge">اليوم 🌟</span><br>${dt}`;tr.innerHTML=`<td>${r['اليوم']||'—'}</td><td>${dt}</td><td>${r['محور الضخ']||'—'}</td><td style="white-space:normal;font-size:0.7rem;text-align:right;">${r['المجمعات المستفيدة']||'—'}</td><td>${r['عدد ساعات الضخ']||'—'}</td>`;tbody.appendChild(tr);});w.style.display='block';}
-        function shareWhatsApp(){const u=document.getElementById('unitSelect').value,p=document.getElementById('projectSelect').value;if(!u||!p){showToast('اختر الوحدة والمشروع');return;}let t=`💧 *خطة التوزيع* 💧%0A📍 ${u}%0A⚙️ ${p}%0A%0A`;const f=waterPlanData.filter(r=>r['المحافظة']===u&&r['محور الضخ']===p);const td=f.find(r=>isToday(r['التاريخ']));if(td)t+=`✅ اليوم: ${td['المجمعات المستفيدة']}%0A⏰ ${td['عدد ساعات الضخ']}%0A%0A`;t+=`📲 https://twc.ct.ws/app/miyah-tartus.apk`;window.open(`https://api.whatsapp.com/send?text=${t}`,'_blank');}
-        function exportToPDF(){if(typeof html2pdf==='undefined'){showToast('⚠️ مكتبة التصدير غير محملة');return;}const w=document.getElementById('tableWrapper');if(!w||w.style.display!=='block'){showToast('اختر الوحدة والمشروع');return;}const unit=document.getElementById('unitSelect').value,project=document.getElementById('projectSelect').value,mt=document.getElementById('planMonthDisplay').innerHTML;const pc=document.createElement('div');pc.style.direction='rtl';pc.style.fontFamily='Tajawal,sans-serif';pc.style.padding='20px';pc.style.background='white';pc.innerHTML=`<div style="text-align:center;margin-bottom:20px;border-bottom:2px solid #007BFF;padding-bottom:10px"><h1 style="color:#007BFF;margin:0">📅 خطة توزيع المياه</h1><h2 style="color:#ff9800;margin:5px 0">${mt}</h2><p style="color:#666;margin:5px 0">${sanitize(unit)} | ${sanitize(project)}</p></div>`;const tc=document.getElementById('resultTable').cloneNode(true);tc.style.cssText='width:100%;border-collapse:collapse;font-size:12px';const st=document.createElement('style');st.textContent='th,td{border:1px solid #ddd;padding:8px;text-align:center}th{background:#f0f0f0;color:#0056a7}.highlight-today{background:#d4f5d0}.today-badge{background:#2b7d1e;color:white;border-radius:20px;padding:2px 8px;font-size:10px}';pc.appendChild(st);pc.appendChild(tc);showToast('جاري تجهيز PDF...');html2pdf().set({margin:[0.5,0.5,0.5,0.5],filename:`خطة_${unit}_${project}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}}).from(pc).save().then(()=>showToast('تم حفظ PDF')).catch(()=>showToast('خطأ'));}
-
-        function updateSearchPlaceholder(){const i=document.getElementById('searchInput'),t=document.getElementById('searchType').value;const p={nationalId:'أدخل الرقم الوطني...',name:'أدخل اسم المشترك...',barcode:'أدخل رقم الباركود...',phone:'أدخل رقم الجوال...',subNumber:'أدخل رقم الاشتراك...'};i.placeholder=p[t]||'أدخل قيمة البحث هنا...';}
-        function showInvoiceEmptyState(){document.getElementById('invoiceResults').innerHTML=`<div class="empty-state"><i class="fas fa-file-invoice-dollar"></i><p>ابحث عن فاتورتك</p><span>اختر نوع البحث وأدخل القيمة</span></div>`;}
-        function getStatusInfo(s){const str=String(s||'');if(str.includes('شغال'))return{text:'شغال',cls:'status-active'};if(str.includes('معطل'))return{text:'معطل',cls:'status-disabled'};if(str.includes('مغلق'))return{text:'مغلق',cls:'status-closed'};if(str.includes('وصلة'))return{text:'وصلة',cls:'status-connection'};return{text:str||'—',cls:''};}
-        function getCalcType(c){const s=String(c||'');if(s.includes('منزلي'))return'منزلي';if(s.includes('تجاري'))return'تجاري';return s||'—';}
-        function formatNumber(n){const num=Number(n);if(isNaN(num))return'—';return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g,",");}
-        function toArabicWords(num){if(!num&&num!==0)return'—';num=parseInt(num);if(isNaN(num))return'—';if(num===0)return'صفر ليرة سورية فقط';const u=['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة'],t=['عشرة','أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'],tn=['','','عشرون','ثلاثون','أربعون','خمسون','ستون','سبعون','ثمانون','تسعون'],h=['','مائة','مائتان','ثلاثمائة','أربعمائة','خمسمائة','ستمائة','سبعمائة','ثمانمائة','تسعمائة'];function c100(n){if(n===0)return'';if(n>=10&&n<=19)return t[n-10];if(n>=20){const r=n%10;return(r>0?u[r]+' و':'')+tn[Math.floor(n/10)];}return u[n];}function c1k(n){if(n===0)return'';if(n>=100){const hh=Math.floor(n/100),r=n%100;return h[hh]+(r>0?' و'+c100(r):'');}return c100(n);}function c1m(n){if(n===0)return'';if(n>=1000){const th=Math.floor(n/1000),r=n%1000;let rr='';if(th===1)rr='ألف';else if(th===2)rr='ألفان';else if(th<=10)rr=c1k(th)+' آلاف';else rr=c1k(th)+' ألف';if(r>0)rr+=' و'+c1k(r);return rr;}return c1k(n);}let result='';if(num>=1000000){const m=Math.floor(num/1000000),r=num%1000000;if(m===1)result='مليون';else if(m===2)result='مليونان';else if(m<=10)result=c1k(m)+' ملايين';else result=c1k(m)+' مليون';if(r>0)result+=' و'+c1m(r);}else{result=c1m(num);}return result+' ليرة سورية فقط';}
-
-        async function searchInvoice(){
-            const searchType=document.getElementById('searchType').value,rawValue=document.getElementById('searchInput').value.trim(),container=document.getElementById('invoiceResults');
-            if(!searchType||!rawValue){showToast('يرجى اختيار نوع البحث وإدخال القيمة');return;}
-            if(rawValue.length>100){showToast('قيمة طويلة جداً');return;}
-            container.innerHTML='<div class="invoice-loading"><div class="spinner"></div><p style="color:var(--text-sub);font-size:0.9rem;">جاري البحث...</p></div>';
-            const searchBtn=document.getElementById('btnSearchInvoice');searchBtn.disabled=true;searchBtn.style.opacity='0.6';
-            try{
-                if(!invoiceDataLoaded){const loaded=await loadInvoiceData(true);if(!loaded)return;}
-                else{hideDataStatus();}
-                const sv=normalizeStr(rawValue);let resultIndices=[];
-                switch(searchType){
-                    case'nationalId':{if(invoiceIndexes.nationalId.has(sv))resultIndices=invoiceIndexes.nationalId.get(sv);else{for(const[k,v]of invoiceIndexes.nationalId){if(k.includes(sv))resultIndices.push(...v);}}break;}
-                    case'name':{for(const[k,v]of invoiceIndexes.name){if(k.includes(sv))resultIndices.push(...v);}break;}
-                    case'barcode':{const clean=sv.replace(/^0+/,'');if(invoiceIndexes.barcode.has(sv))resultIndices=invoiceIndexes.barcode.get(sv);else if(clean!==sv&&invoiceIndexes.barcode.has(clean))resultIndices=invoiceIndexes.barcode.get(clean);else{for(const[k,v]of invoiceIndexes.barcode){if(k.includes(sv)||k.includes(clean))resultIndices.push(...v);}}break;}
-                    case'phone':{const clean=sv.replace(/^0/,'');if(invoiceIndexes.phone.has(sv))resultIndices=invoiceIndexes.phone.get(sv);else if(clean!==sv&&invoiceIndexes.phone.has(clean))resultIndices=invoiceIndexes.phone.get(clean);else{for(const[k,v]of invoiceIndexes.phone){if(k.includes(sv)||k.includes(clean))resultIndices.push(...v);}}break;}
-                    case'subNumber':{if(invoiceIndexes.subNumber.has(sv))resultIndices=invoiceIndexes.subNumber.get(sv);else{for(const[k,v]of invoiceIndexes.subNumber){if(k.includes(sv))resultIndices.push(...v);}}break;}
-                }
-                const seen=new Set();resultIndices=resultIndices.filter(i=>{if(seen.has(i))return false;seen.add(i);return true;});
-                const results=resultIndices.map(i=>invoiceData[i]);
-                if(results.length===0){container.innerHTML=`<div class="no-results"><i class="fas fa-search"></i><p>لا توجد نتائج لـ "${sanitize(rawValue)}"</p></div>`;return;}
-                const favorites=getInvoiceFavorites();let html='';
-                if(results.length>1)html+=`<div class="results-count-label">تم العثور على ${results.length} نتيجة</div>`;
-                html+='<div class="result-cards">';
-                results.forEach((r,idx)=>{
-                    const status=getStatusInfo(getField(r,'meterStatus')),calcType=getCalcType(getField(r,'calcType')),total=Number(getField(r,'totalUnpaid'))||0,count=Number(getField(r,'countUnpaid'))||0;
-                    const phone=String(getField(r,'phone')||''),address=String(getField(r,'address')||'—'),subNum=String(getField(r,'subNumber')||'—'),barcode=String(getField(r,'barcode')||'—'),meterNum=String(getField(r,'meterNumber')||'');
-                    const meterDisplay=(!meterNum||meterNum==='undefined'||meterNum==='null')?'—':meterNum;
-                    const natId=String(getField(r,'nationalId')||'—'),phoneDisplay=(!phone||phone==='*'||phone==='undefined')?'—':phone,subName=String(getField(r,'name')||'—');
-                    const isFav=favorites.some(f=>f.subNumber===subNum);
-                    const sN=sanitize(subName),sId=sanitize(natId),sA=sanitize(address),sSub=sanitize(subNum),sB=sanitize(barcode),sM=sanitize(meterDisplay),sP=sanitize(phoneDisplay),sC=sanitize(calcType),sAW=sanitize(toArabicWords(total));
-                    const sSubA=sSub.replace(/'/g,"\\'").replace(/"/g,'&quot;'),sNA=sN.replace(/'/g,"\\'").replace(/"/g,'&quot;');
-                    html+=`<div class="invoice-result-card" style="animation-delay:${idx*0.1}s"><div class="result-header"><div class="result-header-flex"><div class="header-texts"><div class="subscriber-name">${sN}</div><div class="subscriber-meta"><span><i class="fas fa-id-card"></i> ${sId}</span><span><i class="fas fa-map-marker-alt"></i> ${sA}</span><span class="status-badge ${status.cls}">${sanitize(status.text)}</span></div></div><button class="fav-btn fav-btn-invoice ${isFav?'active':''}" data-subnum="${sSub}" onclick="toggleInvoiceFavorite('${sSubA}','${sNA}')"><i class="fas ${isFav?'fa-check':'fa-plus'}"></i></button></div></div><div class="result-body"><div class="detail-grid"><div class="detail-item"><span class="detail-label">رقم الاشتراك</span><span class="detail-value">${sSub}</span></div><div class="detail-item"><span class="detail-label">الباركود</span><span class="detail-value">${sB}</span></div><div class="detail-item"><span class="detail-label">رقم العداد</span><span class="detail-value">${sM}</span></div><div class="detail-item"><span class="detail-label">نوع الاحتساب</span><span class="detail-value">${sC}</span></div><div class="detail-item"><span class="detail-label">رقم الجوال</span><span class="detail-value">${sP}</span></div><div class="detail-item"><span class="detail-label">التأشيرة</span><span class="detail-value">—</span></div></div><div class="amount-section"><div class="amount-value">${formatNumber(total)} ل.س</div><div class="arabic-amount">${sAW}</div><div class="warning-badge"><i class="fas fa-exclamation-circle"></i><span class="fees-disclaimer">غير متضمنة الرسوم</span></div><div class="invoices-count">📄 عدد الفواتير الغير مدفوعة: ${count}</div></div></div></div>`;
-                });
-                html+='</div><div class="disclaimer-box"><i class="fas fa-exclamation-triangle"></i><div><strong>تنبيه:</strong> البيانات أوف لاين. قد تكون هناك فواتير مسددة ولم تُحدث بعد. راجع قسم الحسابات للتأكد.</div></div>';
-                container.innerHTML=html;
-            }catch(e){console.error('خطأ:',e);container.innerHTML=`<div class="no-results"><i class="fas fa-exclamation-circle"></i><p>حدث خطأ</p></div>`;}
-            finally{searchBtn.disabled=false;searchBtn.style.opacity='1';}
+        function hideSplash() {
+            const splash = document.getElementById('splash-screen');
+            splash.style.opacity = '0';
+            setTimeout(() => splash.style.display = 'none', 800);
         }
 
-        async function exportInvoicePDF(){
-            if(typeof html2pdf==='undefined'){showToast('⚠️ مكتبة التصدير غير محملة');return;}
-            const cards=document.querySelectorAll('.invoice-result-card');if(!cards.length){showToast('لا توجد نتائج');return;}
-            showToast('جاري تجهيز PDF...');
-            const pc=document.createElement('div');pc.style.direction='rtl';pc.style.fontFamily='Tajawal,sans-serif';pc.style.padding='20px';pc.style.background='white';
-            pc.innerHTML=`<div style="text-align:center;margin-bottom:20px;border-bottom:3px solid #007BFF;padding-bottom:12px"><h1 style="color:#007BFF;margin:0">🧾 استعلام عن فاتورة</h1><p style="color:#666;font-size:12px;margin-top:6px">شركة مياه طرطوس | ${new Date().toLocaleDateString('ar-EG')}</p></div>`;
-            cards.forEach(card=>{const c=card.cloneNode(true);c.style.cssText='box-shadow:none;border:1px solid #ddd;animation:none;margin-bottom:20px';const fb=c.querySelector('.fav-btn');if(fb)fb.style.display='none';pc.appendChild(c);});
-            const disc=document.querySelector('.disclaimer-box');if(disc){const dc=disc.cloneNode(true);dc.style.marginTop='15px';pc.appendChild(dc);}
-            pc.innerHTML+='<div style="text-align:center;margin-top:15px;padding-top:10px;border-top:1px solid #ccc;font-size:10px;color:#999">المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا</div>';
-            const st=document.createElement('style');st.textContent='.result-header{background:#007BFF!important;color:white!important;padding:12px 15px}.result-header *{color:white!important}.subscriber-name{font-size:14px;font-weight:800}.subscriber-meta{display:flex;gap:10px;font-size:11px;flex-wrap:wrap;margin-top:6px}.status-badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:10px;font-weight:bold;color:white}.status-active{background:#28a745}.status-disabled{background:#dc3545}.result-body{padding:12px 15px}.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.detail-item{padding:8px;background:#f5f5f5;border-radius:10px}.detail-label{font-size:10px;color:#666}.detail-value{font-size:12px;font-weight:700;color:#333}.amount-section{margin-top:12px;padding:14px;background:#f0fff0;border-radius:12px;text-align:center;border:1px solid #c8e6c9}.amount-value{font-size:20px;font-weight:800;color:#1b5e20}.arabic-amount{font-size:12px;color:#2e7d32;margin-top:4px;font-weight:700}.warning-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(211,47,47,0.12);padding:8px 12px;border-radius:40px;margin-top:8px}.fees-disclaimer{color:#d32f2f;font-weight:bold;font-size:12px}.invoices-count{font-size:11px;color:#666;margin-top:6px}';pc.appendChild(st);
-            html2pdf().set({margin:[0.4,0.4,0.4,0.4],filename:`فاتورة_${Date.now()}.pdf`,image:{type:'jpeg',quality:0.98},html2canvas:{scale:2,useCORS:true},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}}).from(pc).save().then(()=>showToast('تم حفظ PDF')).catch(()=>showToast('خطأ'));
+        function grantAudioPermission() {
+            if(audioAllowed) return;
+            audioAllowed = true;
+            initAudio();
+            playSound();
+            localStorage.setItem('audioPermissionGranted', 'true');
+            hideSplash();
+            loadExcelData();
+        }
+        
+        function checkAppStartup() {
+            const hasPermission = localStorage.getItem('audioPermissionGranted') === 'true';
+            const splash = document.getElementById('splash-screen');
+            loadTheme();
+            if (hasPermission) {
+                audioAllowed = true;
+                initAudio();
+                splash.classList.add('auto-mode'); 
+                splash.style.display = 'flex';
+                setTimeout(hideSplash, 2000);
+                loadExcelData();
+            } else {
+                splash.style.display = 'flex';
+            }
         }
 
-        function clearAppMemory(){
-            notificationQueue=[];isShowingNotification=false;pendingPeriodicNotification=false;cachedNotificationMessages=[];
-            document.getElementById('notification-center').innerHTML='';
-            const pf=getPlanFavorites(),inf=getInvoiceFavorites(),th=localStorage.getItem('theme'),ap=localStorage.getItem('audioPermissionGranted'),ln=localStorage.getItem('lastNotificationTime'),cn=localStorage.getItem('cached_news'),cni=localStorage.getItem('cached_notifications'),cpm=localStorage.getItem('currentPlanMonth');
-            localStorage.clear();sessionStorage.clear();
-            savePlanFavorites(pf);saveInvoiceFavorites(inf);
-            if(th)localStorage.setItem('theme',th);if(ap)localStorage.setItem('audioPermissionGranted',ap);if(ln)localStorage.setItem('lastNotificationTime',ln);if(cn)localStorage.setItem('cached_news',cn);if(cni)localStorage.setItem('cached_notifications',cni);if(cpm)localStorage.setItem('currentPlanMonth',cpm);
-            if('caches' in window)caches.keys().then(n=>n.forEach(k=>caches.delete(k))).catch(()=>{});
-            for(const k of Object.keys(invoiceIndexes))invoiceIndexes[k].clear();
-            invoiceDataLoaded=false;invoiceDataLoading=false;invoiceData=[];
-            showToast('✓ تم افراغ الذاكرة');setTimeout(()=>window.location.reload(true),1500);
+        function shouldShowNotificationsNow() {
+            const lastTime = localStorage.getItem('lastNotificationTime');
+            if (!lastTime) return true;
+            return (Date.now() - parseInt(lastTime)) >= (24 * 60 * 60 * 1000);
         }
 
-        document.addEventListener('DOMContentLoaded',()=>{
-            const lc='?v='+Date.now();
-            ['splash-logo','header-logo'].forEach(id=>{const img=document.getElementById(id);if(img){if(!img.src.includes('?v='))img.src='logo.png'+lc;img.onerror=function(){this.src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007BFF" rx="15"/><text x="50" y="65" font-size="45" text-anchor="middle" fill="white">💧</text></svg>';};}});
-            checkAppStartup();
+        function handleOfflineStatus() {
+            if (!navigator.onLine) document.getElementById('offline-screen').style.display = 'flex';
+            window.addEventListener('offline', () => { document.getElementById('offline-screen').style.display = 'flex'; });
+            window.addEventListener('online', () => { document.getElementById('offline-screen').style.display = 'none'; loadExcelData(); });
+        }
+
+        let pullStartY = 0, isPulling = false;
+        const scrollableDiv = document.getElementById('scrollableContent');
+        
+        scrollableDiv.addEventListener('touchstart', (e) => { 
+            if (scrollableDiv.scrollTop === 0) pullStartY = e.touches[0].clientY; 
         });
+        
+        scrollableDiv.addEventListener('touchmove', (e) => { 
+            if (pullStartY > 0 && scrollableDiv.scrollTop === 0) { 
+                if (e.touches[0].clientY - pullStartY > 70) { 
+                    document.getElementById('pull-to-refresh').classList.add('show'); 
+                    isPulling = true; 
+                } 
+            } 
+        });
+        
+        scrollableDiv.addEventListener('touchend', () => { 
+            if (isPulling) { 
+                setTimeout(() => document.getElementById('pull-to-refresh').classList.remove('show'), 1000); 
+                loadExcelData(); 
+                showToast('جاري تحديث البيانات...'); 
+            } 
+            pullStartY = 0; 
+            isPulling = false; 
+        });
+
+        function showToast(msg) { 
+            const c = document.getElementById('toast-container'); 
+            const t = document.createElement('div'); 
+            t.className = 'toast'; 
+            t.textContent = msg; 
+            c.appendChild(t); 
+            setTimeout(() => t.classList.add('show'), 10); 
+            setTimeout(() => { 
+                t.classList.remove('show'); 
+                setTimeout(() => t.remove(), 300); 
+            }, 2500); 
+        }
+
+        document.addEventListener('click', (e) => {
+            const target = e.target.closest('.btn, .btn-action, .cs-back-btn');
+            if (target) {
+                const circle = document.createElement('span'); 
+                circle.className = 'ripple-effect';
+                const d = Math.max(target.clientWidth, target.clientHeight), r = d / 2;
+                circle.style.width = circle.style.height = `${d}px`;
+                circle.style.left = `${e.clientX - target.getBoundingClientRect().left - r}px`;
+                circle.style.top = `${e.clientY - target.getBoundingClientRect().top - r}px`;
+                target.appendChild(circle); 
+                setTimeout(() => circle.remove(), 600);
+            }
+        });
+
+        function navigateTo(pageName) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById('page-' + pageName).classList.add('active');
+            
+            const mainTitle = document.getElementById('dynamic-title');
+            const subTitle = document.getElementById('dynamic-subtitle');
+            const m = document.getElementById('theme-color-meta');
+            
+            if(pageName === 'home') { 
+                mainTitle.innerHTML = 'شركة مياه طرطوس'; 
+                subTitle.innerHTML = 'التطبيق الرسمي'; 
+                m.content = '#004999'; 
+                if (pendingPeriodicNotification && shouldShowNotificationsNow() && cachedNotificationMessages.length) {
+                    pendingPeriodicNotification = false;
+                    notificationQueue = [];
+                    cachedNotificationMessages.forEach(n => notificationQueue.push(n));
+                    processQueue();
+                    localStorage.setItem('lastNotificationTime', Date.now().toString());
+                }
+            }
+            else if(pageName === 'plan') { 
+                mainTitle.innerHTML = '📅 خطة توزيع المياه'; 
+                subTitle.innerHTML = 'اختر الوحدة والمشروع'; 
+                m.content = '#0056b3'; 
+                const savedMonth = localStorage.getItem('currentPlanMonth');
+                if(savedMonth && savedMonth !== '--') {
+                    document.getElementById('planMonthDisplay').innerHTML = `لشهر ${savedMonth}`;
+                }
+            }
+            else if(pageName === 'invoice') { 
+                mainTitle.innerHTML = '🧾 استعلام عن فاتورة'; 
+                subTitle.innerHTML = 'خدمة قيد التطوير'; 
+                m.content = '#65a30d'; 
+            }
+            else if(pageName === 'report') { 
+                mainTitle.innerHTML = 'الإبلاغ عن أعطال<br>الشبكات وهدر المياه'; 
+                subTitle.innerHTML = 'محافظة طرطوس - اختر المنطقة'; 
+                m.content = '#1e7e34'; 
+            }
+            else if(pageName === 'guide') { 
+                mainTitle.innerHTML = '📚 التعليمات والدعم'; 
+                subTitle.innerHTML = 'دليل استخدام التطبيق'; 
+                m.content = '#0097a7'; 
+            }
+            scrollableDiv.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function exportToPDF() {
+            const tableWrapper = document.getElementById('tableWrapper');
+            if (!tableWrapper || tableWrapper.style.display !== 'block') {
+                showToast('الرجاء اختيار الوحدة والمشروع أولاً');
+                return;
+            }
+            
+            const unit = document.getElementById('unitSelect').value;
+            const project = document.getElementById('projectSelect').value;
+            const monthText = document.getElementById('planMonthDisplay').innerHTML;
+            
+            const printContent = document.createElement('div');
+            printContent.style.direction = 'rtl';
+            printContent.style.fontFamily = 'Tajawal, sans-serif';
+            printContent.style.padding = '20px';
+            printContent.style.background = 'white';
+            
+            const header = document.createElement('div');
+            header.style.textAlign = 'center';
+            header.style.marginBottom = '20px';
+            header.style.borderBottom = '2px solid #007BFF';
+            header.style.paddingBottom = '10px';
+            header.innerHTML = `
+                <h1 style="color: #007BFF; margin:0;">📅 خطة توزيع المياه</h1>
+                <h2 style="color: #ff9800; margin:5px 0;">${monthText}</h2>
+                <p style="color: #666; margin:5px 0;">الوحدة: ${unit} | مشروع الضخ: ${project}</p>
+                <p style="color: #999; font-size:12px;">تم التصدير بتاريخ: ${new Date().toLocaleDateString('ar-EG')}</p>
+            `;
+            printContent.appendChild(header);
+            
+            const originalTable = document.getElementById('resultTable');
+            const tableClone = originalTable.cloneNode(true);
+            tableClone.style.width = '100%';
+            tableClone.style.borderCollapse = 'collapse';
+            tableClone.style.fontSize = '12px';
+            
+            const style = document.createElement('style');
+            style.textContent = `
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+                th { background: #f0f0f0; color: #0056a7; }
+                .highlight-today { background: #d4f5d0; }
+                .today-badge { background: #2b7d1e; color: white; border-radius: 20px; padding: 2px 8px; font-size: 10px; display: inline-block; margin-bottom: 4px; }
+            `;
+            printContent.appendChild(style);
+            printContent.appendChild(tableClone);
+            
+            const footer = document.createElement('div');
+            footer.style.textAlign = 'center';
+            footer.style.marginTop = '20px';
+            footer.style.paddingTop = '10px';
+            footer.style.borderTop = '1px solid #ccc';
+            footer.style.fontSize = '10px';
+            footer.style.color = '#999';
+            footer.innerHTML = 'المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا';
+            printContent.appendChild(footer);
+            
+            const opt = {
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: `خطة_توزيع_المياه_${unit}_${project}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            
+            showToast('جاري تجهيز ملف PDF...');
+            html2pdf().set(opt).from(printContent).save().then(() => {
+                showToast('تم حفظ ملف PDF بنجاح');
+            }).catch(err => {
+                console.error(err);
+                showToast('حدث خطأ أثناء تصدير PDF');
+            });
+        }
+
+        function showNotification(msg) { 
+            const isHomePage = document.getElementById('page-home').classList.contains('active');
+            if(msg && isHomePage) { 
+                notificationQueue.push(msg); 
+                processQueue(); 
+            } 
+        }
+
+        function createSwipeableNotification(msg) {
+            const c = document.getElementById('notification-center');
+            const el = document.createElement('div'); 
+            el.className = 'android-notification';
+            el.innerHTML = `
+                <i class="fas fa-bell" style="color:#ff9900;font-size:1.2rem;"></i>
+                <div style="flex:1"><strong>📢 تنبيه</strong><br>${msg}</div>
+                <i class="fas fa-times notification-dismiss"></i>
+            `;
+            el.querySelector('.notification-dismiss').addEventListener('click', (e) => { 
+                e.stopPropagation(); 
+                removeNotification(el); 
+            });
+            let sx = 0, cx = 0, isD = false;
+            el.addEventListener('touchstart', (e) => { 
+                sx = e.touches[0].clientX; cx = sx; isD = true; el.style.transition = 'none'; 
+            });
+            el.addEventListener('touchmove', (e) => { 
+                if (!isD) return; cx = e.touches[0].clientX; 
+                let d = cx - sx; el.style.transform = `translateX(${d}px)`; el.style.opacity = 1 - Math.abs(d) / 200; 
+            });
+            el.addEventListener('touchend', () => { 
+                isD = false; 
+                if (Math.abs(cx - sx) > 80) removeNotification(el); 
+                else { el.style.transition = 'transform 0.3s ease, opacity 0.3s ease'; el.style.transform = ''; el.style.opacity = ''; } 
+            });
+            c.appendChild(el);
+        }
+
+        function removeNotification(el) { 
+            el.style.transform = 'translateX(-120%)'; el.style.opacity = '0'; 
+            setTimeout(() => { 
+                if(el.parentNode) el.remove(); 
+                isShowingNotification = false; 
+                setTimeout(processQueue, 500); 
+            }, 300); 
+        }
+        
+        async function processQueue() { 
+            if(isShowingNotification || notificationQueue.length === 0) return; 
+            isShowingNotification = true; 
+            createSwipeableNotification(notificationQueue.shift()); 
+            playSound(); 
+            setTimeout(() => { 
+                const n = document.querySelectorAll('.android-notification'); 
+                if(n.length) removeNotification(n[n.length-1]); 
+            }, 7000); 
+        }
+
+        function sendSystemNotifications(messages) {
+            if (!window.median || !window.median.localNotification) return;
+            messages.forEach((msg, i) => { 
+                setTimeout(() => { 
+                    median.localNotification.schedule({ 
+                        title: "💧 مياه طرطوس", 
+                        body: msg, delay: 0, id: 100 + i 
+                    }); 
+                }, i * 5000); 
+            });
+        }
+
+        async function loadExcelData() {
+            const newsEl = document.getElementById('scrolling-news');
+            newsEl.className = 'news-bar-inner skeleton'; newsEl.style.width = '60%'; newsEl.innerHTML = '&nbsp;';
+            try {
+                const res = await fetch('toze3.xlsx?v=' + Date.now());
+                if(!res.ok) throw new Error('Network error');
+                const buf = await res.arrayBuffer();
+                const wb = XLSX.read(new Uint8Array(buf), { type: 'array' }), sheet = wb.Sheets[wb.SheetNames[0]];
+                
+                const news = []; 
+                for(let i=1; i<=6; i++) { if(sheet['I'+i]?.v) news.push(sheet['I'+i].v); }
+                if(news.length) { 
+                    newsEl.className = 'news-bar-inner'; newsEl.style.width = ''; 
+                    newsEl.innerHTML = "🌀 " + news.join("  •  "); 
+                    newsEl.style.animation = 'none'; 
+                    setTimeout(() => newsEl.style.animation = 'scroll-news-right 40s linear infinite', 10); 
+                } else { newsEl.className = 'news-bar-inner'; newsEl.innerHTML = "🚰 مياه طرطوس"; newsEl.style.width=''; }
+                
+                const notifs = [];
+                for(let i=2; i<=5; i++) { if(sheet['H'+i]?.v) notifs.push(sheet['H'+i].v); }
+                cachedNotificationMessages = notifs;
+                localStorage.setItem('cached_notifications', JSON.stringify(notifs));
+
+                if (shouldShowNotificationsNow()) {
+                    notificationQueue = [];
+                    notifs.forEach(n => showNotification(n));
+                    localStorage.setItem('lastNotificationTime', Date.now().toString());
+                } else {
+                    pendingPeriodicNotification = true;
+                }
+
+                const sysAlerts = [];
+                for(let i=2; i<=10; i++) { if(sheet['J'+i] && sheet['J'+i].v && String(sheet['J'+i].v).trim() !== "") sysAlerts.push(String(sheet['J'+i].v)); }
+                if(sysAlerts.length > 0) sendSystemNotifications(sysAlerts);
+
+                waterPlanData = XLSX.utils.sheet_to_json(sheet);
+                
+                let monthDisplay = "";
+                if(sheet['H1'] && sheet['H1'].v) {
+                    const rawMonthValue = sheet['H1'].v;
+                    const dateObj = convertToDate(rawMonthValue);
+                    if(dateObj) {
+                        monthDisplay = `${dateObj.getMonth() + 1}-${dateObj.getFullYear()}`;
+                    } else {
+                        monthDisplay = String(rawMonthValue);
+                    }
+                } else {
+                    const now = new Date();
+                    monthDisplay = `${now.getMonth() + 1}-${now.getFullYear()}`;
+                }
+                
+                localStorage.setItem('currentPlanMonth', monthDisplay);
+                const currentActivePage = document.querySelector('.page.active')?.id;
+                if(currentActivePage === 'page-plan') {
+                    document.getElementById('planMonthDisplay').innerHTML = `لشهر ${monthDisplay}`;
+                } else {
+                    const monthSpan = document.getElementById('planMonthDisplay');
+                    if(monthSpan) monthSpan.innerHTML = `لشهر ${monthDisplay}`;
+                }
+
+                populateUnits();
+                localStorage.setItem('cached_news', JSON.stringify(news));
+            } catch(e) { 
+                newsEl.className = 'news-bar-inner'; newsEl.style.width=''; 
+                const c = localStorage.getItem('cached_news'); 
+                if(c && JSON.parse(c).length) newsEl.innerHTML = "🌀 " + JSON.parse(c).join("  •  "); 
+                else newsEl.innerHTML = "🚰 مياه طرطوس - لا يوجد اتصال"; 
+                const savedMonth = localStorage.getItem('currentPlanMonth');
+                if(savedMonth) {
+                    document.getElementById('planMonthDisplay').innerHTML = `لشهر ${savedMonth}`;
+                }
+            }
+        }
+
+        function convertToDate(v) { 
+            if (!v) return null; 
+            if (v instanceof Date && !isNaN(v)) return new Date(v.getFullYear(), v.getMonth(), v.getDate()); 
+            if (typeof v === 'number' && v > 0) { 
+                let d = new Date(new Date(1899, 11, 30).getTime() + (v * 86400000)); 
+                if (!isNaN(d.getTime())) return new Date(d.getFullYear(), d.getMonth(), d.getDate()); 
+            } 
+            if (typeof v === 'string') { 
+                let p = new Date(v); 
+                if (!isNaN(p.getTime())) return new Date(p.getFullYear(), p.getMonth(), p.getDate()); 
+                let parts = v.split('/'); 
+                if (parts.length === 3) return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0])); 
+            } 
+            return null; 
+        }
+
+        function formatDate(v) { 
+            const d = convertToDate(v); 
+            return d ? `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}` : '—'; 
+        }
+
+        function isToday(v) { 
+            const d = convertToDate(v); 
+            if (!d) return false; 
+            const t = new Date(); 
+            return d.getDate() === t.getDate() && d.getMonth() === t.getMonth() && d.getFullYear() === t.getFullYear(); 
+        }
+        
+        function populateUnits() { 
+            const s = document.getElementById('unitSelect'); 
+            s.innerHTML = '<option value="">-- اختر الوحدة --</option>'; 
+            [...new Set(waterPlanData.map(r => r['المحافظة']).filter(Boolean))].forEach(u => s.innerHTML += `<option value="${u}">${u}</option>`); 
+            s.onchange = null; 
+            s.onchange = filterProjects; 
+        }
+
+        function filterProjects() { 
+            const u = document.getElementById('unitSelect').value; 
+            const p = document.getElementById('projectSelect'); 
+            p.innerHTML = '<option value="">-- اختر المشروع --</option>'; 
+            document.getElementById('tableWrapper').style.display = 'none'; 
+            if(!u) return; 
+            [...new Set(waterPlanData.filter(r => r['المحافظة'] === u).map(r => r['محور الضخ']).filter(Boolean))].forEach(pr => p.innerHTML += `<option value="${pr}">${pr}</option>`); 
+            p.onchange = null; 
+            p.onchange = renderTable; 
+            renderTable(); 
+        }
+        
+        function renderTable() {
+            const u = document.getElementById('unitSelect').value; 
+            const p = document.getElementById('projectSelect').value; 
+            const tbody = document.getElementById('scheduleBody'); 
+            const wrapper = document.getElementById('tableWrapper'); 
+            if(!u || !p) { wrapper.style.display = 'none'; return; }
+            const f = waterPlanData.filter(r => r['المحافظة'] === u && r['محور الضخ'] === p); 
+            tbody.innerHTML = '';
+            if(!f.length) { wrapper.style.display = 'none'; showToast('لا توجد بيانات لهذا المشروع'); return; }
+            f.forEach(r => { 
+                const isT = isToday(r['التاريخ']); 
+                const tr = document.createElement('tr'); 
+                if(isT) tr.classList.add('highlight-today'); 
+                let dt = formatDate(r['التاريخ']); 
+                if(isT) dt = `<span class="today-badge">اليوم 🌟</span><br>${dt}`; 
+                tr.innerHTML = `
+                    <td>${r['اليوم'] || '—'}</td>
+                    <td>${dt}</td>
+                    <td>${r['محور الضخ'] || '—'}</td>
+                    <td style="white-space:normal; font-size:0.7rem; text-align:right;">${r['المجمعات المستفيدة'] || '—'}</td>
+                    <td>${r['عدد ساعات الضخ'] || '—'}</td>
+                `; 
+                tbody.appendChild(tr); 
+            });
+            wrapper.style.display = 'block';
+        }
+        
+        function shareWhatsApp() {
+            const u = document.getElementById('unitSelect').value; 
+            const p = document.getElementById('projectSelect').value;
+            if(!u || !p) { showToast('الرجاء اختيار الوحدة والمشروع أولاً'); return; }
+            let t = `💧 *مؤسسة مياه طرطوس - خطة التوزيع* 💧%0A📍 *الوحدة:* ${u}%0A⚙️ *المشروع:* ${p}%0A%0A`;
+            const f = waterPlanData.filter(r => r['المحافظة'] === u && r['محور الضخ'] === p); 
+            const td = f.find(r => isToday(r['التاريخ']));
+            if(td) t += `✅ *توزيع اليوم:* ${td['المجمعات المستفيدة']}%0A⏰ *الساعات:* ${td['عدد ساعات الضخ']}%0A%0A`;
+            t += `📲 حمل تطبيق مياه طرطوس الآن:%0Ahttps://twc.ct.ws/app/miyah-tartus.apk`;
+            window.open(`https://api.whatsapp.com/send?text=${t}`, '_blank');
+        }
+
+        /* ========== وظائف صفحة استعلام عن الفاتورة ========== */
+
+        function updateSearchPlaceholder() {
+            const input = document.getElementById('searchInput');
+            const type = document.getElementById('searchType').value;
+            const placeholders = {
+                nationalId: 'أدخل الرقم الوطني...',
+                name: 'أدخل اسم المشترك...',
+                barcode: 'أدخل رقم الباركود...',
+                phone: 'أدخل رقم الجوال...',
+                subNumber: 'أدخل رقم الاشتراك...'
+            };
+            input.placeholder = placeholders[type] || 'أدخل قيمة البحث هنا...';
+        }
+
+        function showInvoiceEmptyState() {
+            const container = document.getElementById('invoiceResults');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <p>ابحث عن فاتورتك</p>
+                    <span>اختر نوع البحث وأدخل القيمة للبحث في بيانات المشتركين</span>
+                </div>
+            `;
+        }
+
+        async function loadInvoiceData() {
+            if (invoiceDataLoaded) return;
+            try {
+                const res = await fetch('Foater.xlsx?v=' + Date.now());
+                if (!res.ok) throw new Error('File not found');
+                const buf = await res.arrayBuffer();
+                const wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                invoiceData = XLSX.utils.sheet_to_json(sheet, { raw: true });
+                invoiceDataLoaded = true;
+            } catch(e) {
+                invoiceData = [];
+                invoiceDataLoaded = false;
+                console.error('خطأ في تحميل بيانات الفواتير:', e);
+            }
+        }
+
+        function findColumnValue(row, possibleNames) {
+            for (const name of possibleNames) {
+                if (row.hasOwnProperty(name) && row[name] !== undefined && row[name] !== null && String(row[name]).trim() !== '') {
+                    return row[name];
+                }
+            }
+            const normalizedKeys = Object.keys(row).map(k => ({
+                original: k,
+                normalized: k.replace(/[\s\-–—_]/g, '')
+            }));
+            for (const name of possibleNames) {
+                const normName = name.replace(/[\s\-–—_]/g, '');
+                for (const nk of normalizedKeys) {
+                    if (nk.normalized === normName && row[nk.original] !== undefined && row[nk.original] !== null && String(row[nk.original]).trim() !== '') {
+                        return row[nk.original];
+                    }
+                }
+            }
+            const keywords = possibleNames.filter(n => n.length > 3).map(n => n.replace(/[\s\-–—_]/g, ''));
+            for (const nk of normalizedKeys) {
+                for (const kw of keywords) {
+                    if (nk.normalized.includes(kw) || kw.includes(nk.normalized)) {
+                        const val = row[nk.original];
+                        if (val !== undefined && val !== null && String(val).trim() !== '') {
+                            return val;
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        function formatCurrentBill(val) {
+            return '—';
+        }
+
+        function getStatusInfo(status) {
+            const str = String(status || '');
+            if (str.includes('شغال')) return { text: 'شغال', cls: 'status-active' };
+            if (str.includes('معطل')) return { text: 'معطل', cls: 'status-disabled' };
+            if (str.includes('مغلق')) return { text: 'مغلق', cls: 'status-closed' };
+            if (str.includes('وصلة')) return { text: 'وصلة', cls: 'status-connection' };
+            return { text: str || '—', cls: '' };
+        }
+
+        function getCalcType(code) {
+            const str = String(code || '');
+            if (str.includes('منزلي')) return 'منزلي';
+            if (str.includes('تجاري')) return 'تجاري';
+            return str || '—';
+        }
+
+        function formatNumber(num) {
+            const n = Number(num);
+            if (isNaN(n)) return '—';
+            return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+
+        function toArabicWords(num) {
+            if (!num && num !== 0) return '—';
+            num = parseInt(num);
+            if (isNaN(num)) return '—';
+            if (num === 0) return 'صفر ليرة سورية فقط';
+
+            const units = ['', 'واحد', 'اثنان', 'ثلاثة', 'أربعة', 'خمسة', 'ستة', 'سبعة', 'ثمانية', 'تسعة'];
+            const teens = ['عشرة', 'أحد عشر', 'اثنا عشر', 'ثلاثة عشر', 'أربعة عشر', 'خمسة عشر', 'ستة عشر', 'سبعة عشر', 'ثمانية عشر', 'تسعة عشر'];
+            const tensArr = ['', '', 'عشرون', 'ثلاثون', 'أربعون', 'خمسون', 'ستون', 'سبعون', 'ثمانون', 'تسعون'];
+            const hundredsArr = ['', 'مائة', 'مائتان', 'ثلاثمائة', 'أربعمائة', 'خمسمائة', 'ستمائة', 'سبعمائة', 'ثمانمائة', 'تسعمائة'];
+
+            function convertBelow100(n) {
+                if (n === 0) return '';
+                if (n >= 10 && n <= 19) return teens[n - 10];
+                if (n >= 20) {
+                    const rem = n % 10;
+                    return (rem > 0 ? units[rem] + ' و' : '') + tensArr[Math.floor(n / 10)];
+                }
+                return units[n];
+            }
+
+            function convertBelow1000(n) {
+                if (n === 0) return '';
+                if (n >= 100) {
+                    const h = Math.floor(n / 100);
+                    const rem = n % 100;
+                    return hundredsArr[h] + (rem > 0 ? ' و' + convertBelow100(rem) : '');
+                }
+                return convertBelow100(n);
+            }
+
+            function convertBelowMillion(n) {
+                if (n === 0) return '';
+                if (n >= 1000) {
+                    const thousands = Math.floor(n / 1000);
+                    const rem = n % 1000;
+                    let r = '';
+                    if (thousands === 1) r = 'ألف';
+                    else if (thousands === 2) r = 'ألفان';
+                    else if (thousands <= 10) r = convertBelow1000(thousands) + ' آلاف';
+                    else r = convertBelow1000(thousands) + ' ألف';
+                    if (rem > 0) r += ' و' + convertBelow1000(rem);
+                    return r;
+                }
+                return convertBelow1000(n);
+            }
+
+            let result = '';
+            if (num >= 1000000) {
+                const millions = Math.floor(num / 1000000);
+                const rem = num % 1000000;
+                if (millions === 1) result = 'مليون';
+                else if (millions === 2) result = 'مليونان';
+                else if (millions <= 10) result = convertBelow1000(millions) + ' ملايين';
+                else result = convertBelow1000(millions) + ' مليون';
+                if (rem > 0) result += ' و' + convertBelowMillion(rem);
+            } else {
+                result = convertBelowMillion(num);
+            }
+
+            return result + ' ليرة سورية فقط';
+        }
+
+        async function searchInvoice() {
+            const searchType = document.getElementById('searchType').value;
+            const searchValue = document.getElementById('searchInput').value.trim();
+            const container = document.getElementById('invoiceResults');
+
+            if (!searchType || !searchValue) {
+                showToast('يرجى اختيار نوع البحث وإدخال القيمة');
+                return;
+            }
+
+            container.innerHTML = '<div class="invoice-loading"><div class="spinner"></div><p style="color:var(--text-sub);font-size:0.9rem;">جاري البحث...</p></div>';
+
+            if (!invoiceDataLoaded) {
+                await loadInvoiceData();
+            }
+
+            if (!invoiceDataLoaded || invoiceData.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <p>لم يتم تحميل بيانات الفواتير</p>
+                        <p style="font-size:0.8rem;margin-top:5px;opacity:0.7;">تأكد من اتصالك بالإنترنت وأن ملف Foater.xlsx متوفر</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const sv = searchValue.toLowerCase();
+            let results = [];
+
+            if (searchType === 'nationalId') {
+                results = invoiceData.filter(r => String(r['الرقم الوطني'] || '').includes(sv));
+            } else if (searchType === 'name') {
+                results = invoiceData.filter(r => r['الاسم'] && String(r['الاسم']).toLowerCase().includes(sv));
+            } else if (searchType === 'barcode') {
+                results = invoiceData.filter(r => {
+                    const bc = String(r['باركود'] || '');
+                    const svClean = sv.replace(/^0+/, '');
+                    const bcClean = bc.replace(/^0+/, '');
+                    return bc.includes(sv) || bc === searchValue || bcClean === svClean;
+                });
+            } else if (searchType === 'phone') {
+                const cleanPhone = sv.replace(/^0/, '');
+                results = invoiceData.filter(r => {
+                    const phone = String(r['رقم الجوال'] || '');
+                    return phone.includes(sv) || phone.includes(cleanPhone);
+                });
+            } else if (searchType === 'subNumber') {
+                results = invoiceData.filter(r => String(r['رقم الاشتراك'] || '').includes(sv));
+            }
+
+            if (results.length === 0) {
+                container.innerHTML = `
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <p>لا توجد نتائج مطابقة لـ "${searchValue}"</p>
+                        <p style="font-size:0.8rem;margin-top:5px;opacity:0.7;">تأكد من صحة البيانات المدخلة وحاول مرة أخرى</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            if (results.length > 1) {
+                html += `<div class="results-count-label">تم العثور على ${results.length} نتيجة</div>`;
+            }
+            html += '<div class="result-cards">';
+
+            results.forEach((r, idx) => {
+                const status = getStatusInfo(findColumnValue(r, ['حالة العداد']));
+                const calcType = getCalcType(findColumnValue(r, ['رمز الاحتساب']));
+                const total = Number(findColumnValue(r, ['إجمالي الفواتير الغير مدفوعة', 'إجمالي الفواتير غير المدفوعة']) || 0);
+                const count = Number(findColumnValue(r, ['عدد الفواتير الغير مدفوعة', 'عدد الفواتير غير المدفوعة']) || 0);
+                const phone = String(findColumnValue(r, ['رقم الجوال']) || '');
+                const address = String(findColumnValue(r, ['العنوان']) || '—');
+                const subNum = String(findColumnValue(r, ['رقم الاشتراك']) || '—');
+                const barcode = String(findColumnValue(r, ['باركود']) || '—');
+                const meterNum = String(findColumnValue(r, ['رقم العداد']) || '');
+                const meterDisplay = (meterNum === '' || meterNum === 'undefined' || meterNum === 'null') ? '—' : meterNum;
+                const natId = String(findColumnValue(r, ['الرقم الوطني']) || '—');
+                const phoneDisplay = (phone === '*' || phone === 'undefined' || phone === 'null') ? '—' : phone;
+
+                html += `
+                    <div class="invoice-result-card" style="animation-delay:${idx * 0.1}s">
+                        <div class="result-header">
+                            <div class="subscriber-name">${r['الاسم'] || '—'}</div>
+                            <div class="subscriber-meta">
+                                <span><i class="fas fa-id-card"></i> ${natId}</span>
+                                <span><i class="fas fa-map-marker-alt"></i> ${address}</span>
+                                <span class="status-badge ${status.cls}">${status.text}</span>
+                            </div>
+                        </div>
+                        <div class="result-body">
+                            <div class="detail-grid">
+                                <div class="detail-item">
+                                    <span class="detail-label">رقم الاشتراك</span>
+                                    <span class="detail-value">${subNum}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">الباركود</span>
+                                    <span class="detail-value">${barcode}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">رقم العداد</span>
+                                    <span class="detail-value">${meterDisplay}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">نوع الاحتساب</span>
+                                    <span class="detail-value">${calcType}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">رقم الجوال</span>
+                                    <span class="detail-value">${phoneDisplay}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">التأشيرة الحالية</span>
+                                    <span class="detail-value">${formatCurrentBill()}</span>
+                                </div>
+                            </div>
+                            <div class="amount-section">
+                                <div class="amount-value">${formatNumber(total)} ل.س</div>
+                                <div class="arabic-amount">${toArabicWords(total)}</div>
+                                <div class="warning-badge">
+                                    <i class="fas fa-exclamation-circle"></i>
+                                    <span class="fees-disclaimer">غير متضمنة الرسوم</span>
+                                </div>
+                                <div class="invoices-count">📄 عدد الفواتير الغير مدفوعة: ${count}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+
+            html += `
+                <div class="disclaimer-box">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>تنبيه هام:</strong> القيمة الظاهرة أعلاه هي البيانات المتوفرة بشكل <strong>أوف لاين</strong> (غير متصلة بالخادم المباشر).
+                        من الممكن أن يكون المشترك قد قام بسداد فاتورته ولكنها ستظل ظاهرة هنا لحين تحديث الملف من قبل الإدارة.
+                        يرجى مراجعة قسم الحسابات في المؤسسة للتأكد من الرصيد الفعلي.
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        async function exportInvoicePDF() {
+            const cards = document.querySelectorAll('.invoice-result-card');
+            if (!cards.length) {
+                showToast('لا توجد نتائج للتصدير');
+                return;
+            }
+
+            showToast('جاري تجهيز ملف PDF...');
+
+            const printContent = document.createElement('div');
+            printContent.style.direction = 'rtl';
+            printContent.style.fontFamily = 'Tajawal, sans-serif';
+            printContent.style.padding = '20px';
+            printContent.style.background = 'white';
+
+            const header = document.createElement('div');
+            header.style.textAlign = 'center';
+            header.style.marginBottom = '20px';
+            header.style.borderBottom = '3px solid #007BFF';
+            header.style.paddingBottom = '12px';
+            header.innerHTML = `
+                <h1 style="color:#007BFF;margin:0;">🧾 استعلام عن فاتورة</h1>
+                <p style="color:#666;font-size:12px;margin-top:6px;">شركة مياه طرطوس | تاريخ الاستعلام: ${new Date().toLocaleDateString('ar-EG')}</p>
+            `;
+            printContent.appendChild(header);
+
+            cards.forEach(card => {
+                const cardClone = card.cloneNode(true);
+                cardClone.style.boxShadow = 'none';
+                cardClone.style.border = '1px solid #ddd';
+                cardClone.style.animation = 'none';
+                cardClone.style.marginBottom = '20px';
+                printContent.appendChild(cardClone);
+            });
+
+            const disclaimer = document.querySelector('.disclaimer-box');
+            if (disclaimer) {
+                const disclaimerClone = disclaimer.cloneNode(true);
+                disclaimerClone.style.marginTop = '15px';
+                disclaimerClone.style.padding = '10px 15px';
+                printContent.appendChild(disclaimerClone);
+            }
+
+            const footer = document.createElement('div');
+            footer.style.textAlign = 'center';
+            footer.style.marginTop = '15px';
+            footer.style.paddingTop = '10px';
+            footer.style.borderTop = '1px solid #ccc';
+            footer.style.fontSize = '10px';
+            footer.style.color = '#999';
+            footer.innerHTML = 'المكتب الإعلامي - شركة مياه طرطوس | محمد حاج معلا';
+            printContent.appendChild(footer);
+
+            const style = document.createElement('style');
+            style.textContent = `
+                .result-header { background: #007BFF !important; color: white !important; padding: 12px 15px; }
+                .result-header * { color: white !important; }
+                .subscriber-name { font-size: 14px; font-weight: 800; }
+                .subscriber-meta { display: flex; gap: 10px; font-size: 11px; flex-wrap: wrap; margin-top: 6px; }
+                .status-badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; color: white; }
+                .status-active { background: #28a745; }
+                .status-disabled { background: #dc3545; }
+                .status-closed { background: #6c757d; }
+                .status-connection { background: #17a2b8; }
+                .result-body { padding: 12px 15px; }
+                .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+                .detail-item { padding: 8px; background: #f5f5f5; border-radius: 10px; }
+                .detail-label { font-size: 10px; color: #666; }
+                .detail-value { font-size: 12px; font-weight: 700; color: #333; }
+                .amount-section { margin-top: 12px; padding: 14px; background: #f0fff0; border-radius: 12px; text-align: center; border: 1px solid #c8e6c9; }
+                .amount-value { font-size: 20px; font-weight: 800; color: #1b5e20; }
+                .arabic-amount { font-size: 12px; color: #2e7d32; margin-top: 4px; font-weight: 700; }
+                .warning-badge { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: rgba(211,47,47,0.12); padding: 8px 12px; border-radius: 40px; margin-top: 8px; }
+                .fees-disclaimer { color: #d32f2f; font-weight: bold; font-size: 12px; }
+                .invoices-count { font-size: 11px; color: #666; margin-top: 6px; }
+            `;
+            printContent.appendChild(style);
+
+            const opt = {
+                margin: [0.4, 0.4, 0.4, 0.4],
+                filename: `فاتورة_${new Date().getTime()}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(printContent).save().then(() => {
+                showToast('تم حفظ ملف PDF بنجاح');
+            }).catch(err => {
+                console.error(err);
+                showToast('حدث خطأ أثناء التصدير');
+            });
+        }
+
+        function clearAppMemory() {
+            notificationQueue = [];
+            isShowingNotification = false;
+            pendingPeriodicNotification = false;
+            cachedNotificationMessages = [];
+            const notifCenter = document.getElementById('notification-center');
+            if (notifCenter) notifCenter.innerHTML = '';
+            localStorage.clear();
+            sessionStorage.clear();
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                }).catch(() => {});
+            }
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    registrations.forEach(reg => reg.unregister());
+                }).catch(() => {});
+            }
+            invoiceDataLoaded = false;
+            invoiceData = [];
+            showToast('تم افراغ الذاكرة بنجاح، جاري إعادة التحميل...');
+            setTimeout(() => {
+                window.location.reload(true);
+            }, 1500);
+        }
+
+        window.onload = () => {
+            const lc = '?v=' + Date.now();
+            ['splash-logo', 'header-logo'].forEach(id => { 
+                const img = document.getElementById(id); 
+                if (img) { 
+                    if (!img.src.includes('?v=')) img.src = 'logo.png' + lc; 
+                    img.onerror = function() { this.src = 'https://placehold.co/100x100/007BFF/white?text=💧'; }; 
+                }
+            });
+            handleOfflineStatus();
+            checkAppStartup();
+        };
     </script>
 </body>
 </html>
