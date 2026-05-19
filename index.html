@@ -361,7 +361,6 @@
         .btn-sanitation { background: linear-gradient(135deg, #17a2b8, #138496); }
         .btn-facebook { background: linear-gradient(135deg, #FF7F00, #e67300); }
         .btn-install { background: linear-gradient(135deg, #6f42c1, #5e35b1); }
-        .btn-guide { background: linear-gradient(135deg, #00bcd4, #0097a7); }
         
         .btn-back { 
             background: linear-gradient(135deg, #757575, #616161); 
@@ -392,6 +391,8 @@
         }
 
         .btn-pdf-inv { background: linear-gradient(135deg, #dc3545, #b02a37); }
+
+        .btn-help { background: linear-gradient(135deg, #17a2b8, #0f6b7a); }
 
         .actions-row {
             display: flex;
@@ -449,6 +450,7 @@
         .input-group label { 
             font-weight: 800; color: var(--text-main); margin-bottom: 6px; 
             display: block; font-size: 0.8rem; 
+            display: flex; justify-content: space-between; align-items: center;
         }
         
         select, input {
@@ -802,7 +804,114 @@
             width: 100%;
         }
 
-        /* ========== STYLES FOR COMING SOON ========== */
+        /* ========== الأزرار الدائرية - المفضلة ========== */
+        .fav-btn {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+            border: none;
+            color: white;
+            cursor: pointer;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+        }
+
+        .fav-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .fav-btn.active {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+        }
+
+        .fav-btn.active:hover {
+            transform: scale(1.05);
+        }
+
+        /* ========== قائمة المفضلات ========== */
+        .favorites-list {
+            background: var(--input-bg);
+            border-radius: 20px;
+            margin-bottom: 15px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .favorites-header {
+            background: linear-gradient(135deg, #ffc107, #ff9800);
+            color: white;
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        
+        .favorites-header i { font-size: 0.9rem; }
+        
+        .favorites-items {
+            padding: 8px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .fav-item {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+        }
+        
+        .fav-item:hover { background: var(--border-color); }
+        
+        .fav-item-info { flex: 1; }
+        
+        .fav-item-title {
+            font-weight: bold;
+            font-size: 0.85rem;
+            color: var(--text-main);
+        }
+        
+        .fav-item-sub {
+            font-size: 0.7rem;
+            color: var(--text-sub);
+        }
+        
+        .fav-item-delete {
+            background: rgba(220, 53, 69, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+            color: #dc3545;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .fav-item-delete:hover { background: rgba(220, 53, 69, 0.2); transform: scale(1.05); }
+        
+        .fav-collapsed .favorites-items { display: none; }
+
+        /* ========== COMING SOON ========== */
         .coming-soon-wrapper {
             position: relative;
             padding: 40px 20px;
@@ -942,139 +1051,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ================= END COMING SOON STYLES ================= */
-        
-        /* ================= GUIDE PAGE STYLES ================= */
-        .guide-wrapper {
-            direction: rtl;
-        }
-        
-        .guide-header {
-            background: linear-gradient(135deg, #007BFF, #004999);
-            color: white;
-            padding: 25px 20px;
-            border-radius: 25px;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .guide-header h2 {
-            font-size: 1.6rem;
-            margin-bottom: 8px;
-        }
-        
-        .guide-header h2 i {
-            margin-left: 10px;
-        }
-        
-        .guide-header p {
-            opacity: 0.9;
-            font-size: 0.9rem;
-        }
-        
-        .guide-section {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 18px;
-            margin-bottom: 18px;
-            border: 1px solid var(--border-color);
-        }
-        
-        .guide-section-title {
-            font-size: 1.2rem;
-            font-weight: 800;
-            color: #007BFF;
-            border-right: 4px solid #007BFF;
-            padding-right: 12px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .guide-step {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: var(--input-bg);
-            padding: 12px 15px;
-            border-radius: 16px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-        
-        .guide-step-num {
-            background: #007BFF;
-            color: white;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            flex-shrink: 0;
-        }
-        
-        .guide-step-text {
-            flex: 1;
-            font-size: 0.85rem;
-            color: var(--text-main);
-        }
-        
-        .guide-step-text strong {
-            color: #007BFF;
-        }
-        
-        .guide-tip {
-            background: #fff3cd;
-            border-right: 4px solid #ffc107;
-            padding: 12px 15px;
-            border-radius: 14px;
-            margin: 12px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        [data-theme="dark"] .guide-tip {
-            background: #2e2a1a;
-            border-right-color: #ffc107;
-        }
-        
-        .guide-tip i {
-            color: #ffc107;
-            font-size: 1.2rem;
-        }
-        
-        .guide-tip span {
-            flex: 1;
-            font-size: 0.8rem;
-            color: var(--text-main);
-        }
-        
-        .guide-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: linear-gradient(135deg, #28a745, #1e7e34);
-            color: white;
-            padding: 3px 10px;
-            border-radius: 50px;
-            font-size: 0.7rem;
-        }
-        
-        .guide-badge.gold {
-            background: linear-gradient(135deg, #ff9800, #f57c00);
-        }
-        
-        .btn-guide-back {
-            background: linear-gradient(135deg, #6c757d, #495057);
-            margin-top: 10px;
-        }
-        /* ================= END GUIDE STYLES ================= */
-
         @media (max-width: 600px) { 
             #notification-center { width: 280px; right: 8px; top: 85px; } 
             .btn, .btn-action { padding: 10px 12px; font-size: 0.8rem; gap: 8px; } 
@@ -1102,8 +1078,7 @@
             .warning-badge { padding: 8px 12px; }
             .cs-title-en { font-size: 2rem; }
             .cs-title-ar { font-size: 1.1rem; }
-            .guide-header h2 { font-size: 1.3rem; }
-            .guide-section-title { font-size: 1rem; }
+            .fav-btn { width: 32px; height: 32px; font-size: 0.85rem; }
         }
         
         .table-container::-webkit-scrollbar { height: 4px; }
@@ -1114,7 +1089,8 @@
             .fixed-top, footer, .actions-row, .invoice-footer-actions, .form-controls, 
             .dark-mode-toggle, .invoice-search-box, .disclaimer-box, 
             .news-bar, #notification-center, #toast-container,
-            .results-count-label, #pull-to-refresh, .empty-state, .coming-soon-wrapper, .cs-back-btn {
+            .results-count-label, #pull-to-refresh, .empty-state, .coming-soon-wrapper, .cs-back-btn,
+            .favorites-list {
                 display: none !important;
             }
             .page { 
@@ -1144,7 +1120,6 @@
             }
             .detail-item { background: #f5f5f5 !important; }
             .result-cards { gap: 0; }
-            
             #invoice-form-container { display: block !important; }
         }
     </style>
@@ -1184,10 +1159,6 @@
                         <i class="fas fa-file-invoice-dollar btn-icon"></i>
                         <span class="btn-text">🧾 استعلام عن فاتورة</span>
                     </button>
-                    <button onclick="navigateTo('guide')" class="btn btn-guide">
-                        <i class="fas fa-question-circle btn-icon"></i>
-                        <span class="btn-text">📚 التعليمات والدعم</span>
-                    </button>
                     <a href="https://ee.kobotoolbox.org/x/VcxqvTkO" class="btn btn-sanitation" target="_blank">
                         <i class="fas fa-wrench btn-icon"></i>
                         <span class="btn-text">🔧 خدمات الصرف الصحي</span>
@@ -1204,6 +1175,10 @@
                         <i class="fas fa-broom btn-icon"></i>
                         <span class="btn-text">🧹 افراغ الذاكرة المؤقتة</span>
                     </button>
+                    <button onclick="openHelpPage()" class="btn btn-help">
+                        <i class="fas fa-question-circle btn-icon"></i>
+                        <span class="btn-text">📖 التعليمات والدعم الفني</span>
+                    </button>
                 </div>
             </div>
 
@@ -1214,13 +1189,28 @@
                     <span class="plan-subtitle">اختر الوحدة والمشروع الخاص بك</span>
                 </div>
 
+                <!-- ========== قائمة المفضلات ========== -->
+                <div class="favorites-list" id="planFavoritesList" style="display:none;">
+                    <div class="favorites-header" onclick="togglePlanFavoritesCollapse()">
+                        <span><i class="fas fa-star" style="color:#ffc107;"></i> مشاريعي المفضلة</span>
+                        <i class="fas fa-chevron-down" id="planFavToggleIcon"></i>
+                    </div>
+                    <div class="favorites-items" id="planFavItems"></div>
+                </div>
+
                 <div class="form-controls">
                     <div class="input-group">
                         <label><i class="fas fa-city"></i> الوحدة الإدارية:</label>
                         <select id="unitSelect"><option value="">-- اختر الوحدة --</option></select>
                     </div>
                     <div class="input-group">
-                        <label><i class="fas fa-tachometer-alt"></i> مشروع الضخ:</label>
+                        <label>
+                            <span><i class="fas fa-tachometer-alt"></i> مشروع الضخ:</span>
+                            <!-- ========== زر المفضلة ========== -->
+                            <button class="fav-btn" id="btn-fav-plan" onclick="togglePlanFavorite()" title="إضافة هذا المشروع إلى قائمتي">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </label>
                         <select id="projectSelect"><option value="">-- اختر المشروع أولاً --</option></select>
                     </div>
                 </div>
@@ -1270,7 +1260,6 @@
                             <div class="cs-loader-bar"></div>
                         </div>
                         <p class="cs-sub-text">نقوم حالياً بتطوير الخدمة لتقديم تجربة أفضل</p>
-                        
                         <button class="cs-back-btn" onclick="navigateTo('home')">
                             <i class="fas fa-home"></i> العودة للرئيسية
                         </button>
@@ -1282,7 +1271,6 @@
                         <span class="plan-main-title" style="color: #65a30d;">🧾 استعلام عن فاتورة</span>
                         <span class="plan-subtitle">ابحث عن اشتراكك بأي من الطرق التالية</span>
                     </div>
-
                     <div class="invoice-search-box">
                         <div class="input-group">
                             <label><i class="fas fa-search"></i> نوع البحث:</label>
@@ -1303,9 +1291,7 @@
                             <i class="fas fa-search"></i> بحث
                         </button>
                     </div>
-
                     <div id="invoiceResults"></div>
-
                     <div class="invoice-footer-actions">
                         <button onclick="exportInvoicePDF()" class="btn-action btn-pdf-inv">
                             <i class="fas fa-file-pdf"></i> تصدير PDF
@@ -1330,186 +1316,6 @@
                     <a href="https://ee.kobotoolbox.org/x/On9oIBqp" class="btn btn-safita" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في صافيتا</span></a>
                     <a href="https://ee.kobotoolbox.org/x/rzcL7DMH" class="btn btn-dreikish" target="_blank"><i class="fas fa-tint btn-icon"></i><span class="btn-text">إبلاغ عن هدر مياه في الدريكيش</span></a>
                     <button onclick="navigateTo('home')" class="btn btn-back"><i class="fas fa-arrow-right btn-icon"></i><span class="btn-text">العودة للرئيسية</span></button>
-                </div>
-            </div>
-
-            <!-- صفحة التعليمات والدعم -->
-            <div id="page-guide" class="page">
-                <div class="guide-wrapper">
-                    <div class="guide-header">
-                        <h2><i class="fas fa-question-circle"></i> دليل استخدام التطبيق</h2>
-                        <p>دليل كامل وشامل لكل وظائف التطبيق - خطوة بخطوة</p>
-                    </div>
-
-                    <!-- بدء التشغيل -->
-                    <div class="guide-section">
-                        <div class="guide-section-title">
-                            <i class="fas fa-play-circle"></i> بدء التشغيل
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">1</div>
-                            <div class="guide-step-text"><strong>افتح التطبيق</strong> - ستظهر شاشة ترحيب عليها شعار المؤسسة</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">2</div>
-                            <div class="guide-step-text"><strong>اضغط على الزر الأزرق</strong> المكتوب عليه "اضغط لتفعيل الصوت والدخول"</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">3</div>
-                            <div class="guide-step-text"><strong>سيتم نقلك تلقائياً</strong> إلى الصفحة الرئيسية للتطبيق</div>
-                        </div>
-                        <div class="guide-tip">
-                            <i class="fas fa-info-circle"></i>
-                            <span><strong>ملاحظة:</strong> بعد المرة الأولى، لن تظهر لك شاشة الترحيب مرة أخرى، وستفتح مباشرة على الصفحة الرئيسية.</span>
-                        </div>
-                    </div>
-
-                    <!-- الصفحة الرئيسية -->
-                    <div class="guide-section">
-                        <div class="guide-section-title">
-                            <i class="fas fa-home"></i> الصفحة الرئيسية
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">📢</div>
-                            <div class="guide-step-text"><strong>إبلاغ عن هدر المياه:</strong> ينقلك لصفحة فيها روابط جميع مناطق طرطوس للإبلاغ</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">🗓️</div>
-                            <div class="guide-step-text"><strong>خطة توزيع المياه:</strong> يعرض مواعيد ضخ المياه حسب منطقتك ومشروع الضخ</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">🧾</div>
-                            <div class="guide-step-text"><strong>استعلام عن فاتورة:</strong> للبحث عن فاتورة المياه (قيد التطوير)</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">📚</div>
-                            <div class="guide-step-text"><strong>التعليمات والدعم:</strong> هذا الدليل الشامل لاستخدام التطبيق</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">🔧</div>
-                            <div class="guide-step-text"><strong>خدمات الصرف الصحي:</strong> رابط مباشر لمنصة تقديم طلبات الصرف الصحي</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">📘</div>
-                            <div class="guide-step-text"><strong>تابعونا على فيسبوك:</strong> يفتح صفحة المؤسسة الرسمية على فيسبوك</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">📲</div>
-                            <div class="guide-step-text"><strong>حمل التطبيق الآن:</strong> رابط تحميل APK لمشاركة التطبيق مع الآخرين</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">🧹</div>
-                            <div class="guide-step-text"><strong>افراغ الذاكرة المؤقتة:</strong> لتنظيف التطبيق (دون فقدان المفضلات)</div>
-                        </div>
-                    </div>
-
-                    <!-- خطة المياه -->
-                    <div class="guide-section">
-                        <div class="guide-section-title">
-                            <i class="fas fa-calendar-alt"></i> خطة توزيع المياه
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">1</div>
-                            <div class="guide-step-text"><strong>اختر الوحدة الإدارية</strong> - اضغط على القائمة المنسدلة واختر منطقتك</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">2</div>
-                            <div class="guide-step-text"><strong>اختر مشروع الضخ</strong> - بعد اختيار الوحدة، ستظهر قائمة ثانية</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">3</div>
-                            <div class="guide-step-text"><strong>شاهد الجدول</strong> - سيظهر جدول يحتوي على أيام الضخ والمناطق المستفيدة</div>
-                        </div>
-                        <div class="guide-tip">
-                            <i class="fas fa-star"></i>
-                            <span><strong>🌟 اليوم الحالي</strong> يظهر بلون أخضر فاتح وعليه شارة "اليوم"</span>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">📤</div>
-                            <div class="guide-step-text"><strong>مشاركة الخطة:</strong> زر واتساب - يرسل تفاصيل الخطة عبر واتساب</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">📄</div>
-                            <div class="guide-step-text"><strong>تصدير PDF:</strong> يحفظ الخطة كملف PDF على هاتفك</div>
-                        </div>
-                    </div>
-
-                    <!-- الإشعارات -->
-                    <div class="guide-section">
-                        <div class="guide-section-title">
-                            <i class="fas fa-bell"></i> الإشعارات والتنبيهات
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">🔔</div>
-                            <div class="guide-step-text"><strong>متى تظهر؟</strong> - فقط عندما تكون في الصفحة الرئيسية</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">📢</div>
-                            <div class="guide-step-text"><strong>ماذا تحتوي؟</strong> - أخبار وتنبيهات مهمة من المؤسسة</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">⏱️</div>
-                            <div class="guide-step-text"><strong>كم تبقى؟</strong> - تختفي تلقائياً بعد 7 ثوانٍ</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">👆</div>
-                            <div class="guide-step-text"><strong>كيف تخفيها؟</strong> - اسحب الإشعار إلى اليسار لإخفائه فوراً</div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="guide-step-num">🔊</div>
-                            <div class="guide-step-text"><strong>صوت الإشعار</strong> - يصدر صوت قطرات ماء مع كل إشعار جديد</div>
-                        </div>
-                    </div>
-
-                    <!-- نصائح سريعة -->
-                    <div class="guide-section">
-                        <div class="guide-section-title">
-                            <i class="fas fa-lightbulb"></i> نصائح سريعة
-                        </div>
-                        <div class="guide-tip">
-                            <i class="fas fa-sync-alt"></i>
-                            <span><strong>التطبيق لا يستجيب؟</strong> - اسحب الشاشة من أعلى إلى أسفل للتحديث</span>
-                        </div>
-                        <div class="guide-tip">
-                            <i class="fas fa-moon"></i>
-                            <span><strong>تفعيل الوضع الليلي:</strong> - اضغط على زر القمر/الشمس في أعلى اليمين</span>
-                        </div>
-                        <div class="guide-tip">
-                            <i class="fas fa-star"></i>
-                            <span><strong>حفظ المشاريع المفضلة:</strong> - في صفحة الخطة، اضغط على الزر الأخضر "أضف لقائمتي"</span>
-                        </div>
-                        <div class="guide-tip">
-                            <i class="fas fa-trash-alt"></i>
-                            <span><strong>حذف مشروع من المفضلة:</strong> - اضغط على علامة (X) بجانبه في القائمة</span>
-                        </div>
-                        <div class="guide-tip">
-                            <i class="fas fa-share-alt"></i>
-                            <span><strong>مشاركة التطبيق مع صديق:</strong> - استخدم زر "📲 حمل التطبيق الآن"</span>
-                        </div>
-                    </div>
-
-                    <!-- التحديثات القادمة -->
-                    <div class="guide-section">
-                        <div class="guide-section-title">
-                            <i class="fas fa-clock"></i> التحديثات القادمة
-                        </div>
-                        <div class="guide-tip">
-                            <i class="fas fa-search"></i>
-                            <span><strong>استعلام عن الفواتير:</strong> تتيح لك معرفة قيمة فواتيرك بكل سهولة</span>
-                        </div>
-                        <div class="guide-tip">
-                            <i class="fas fa-chart-line"></i>
-                            <span><strong>سجل الاستهلاك:</strong> لمتابعة كمية المياه المستهلكة بشكل دوري</span>
-                        </div>
-                        <div class="guide-tip">
-                            <i class="fas fa-money-bill-wave"></i>
-                            <span><strong>دفع الفواتير:</strong> دفع آمن وسريع عبر التطبيق</span>
-                        </div>
-                    </div>
-
-                    <button onclick="navigateTo('home')" class="btn btn-guide-back">
-                        <i class="fas fa-home"></i> العودة للرئيسية
-                    </button>
                 </div>
             </div>
         </div>
@@ -1552,6 +1358,133 @@
         let pendingPeriodicNotification = false;
         let cachedNotificationMessages = [];
 
+        // ========== فتح صفحة التعليمات ==========
+        function openHelpPage() {
+            try { window.open('Help.html', '_blank'); }
+            catch(e) { showToast('⚠️ حدث خطأ في فتح صفحة التعليمات'); }
+        }
+
+        // ========== إدارة المفضلات - خطة المياه (حتى 5 مشاريع) ==========
+        function getPlanFavorites() {
+            try { return JSON.parse(localStorage.getItem('planFavorites') || '[]'); }
+            catch(e) { return []; }
+        }
+        
+        function savePlanFavorites(favorites) {
+            try { localStorage.setItem('planFavorites', JSON.stringify(favorites.slice(0, 5))); }
+            catch(e) {}
+        }
+        
+        function togglePlanFavorite() {
+            const unit = document.getElementById('unitSelect').value;
+            const project = document.getElementById('projectSelect').value;
+            const btn = document.getElementById('btn-fav-plan');
+
+            if (!unit || !project) {
+                showToast('الرجاء اختيار الوحدة والمشروع أولاً');
+                return;
+            }
+
+            let favorites = getPlanFavorites();
+            const existingIndex = favorites.findIndex(f => f.unit === unit && f.project === project);
+            
+            if (existingIndex !== -1) {
+                favorites.splice(existingIndex, 1);
+                btn.innerHTML = '<i class="fas fa-plus"></i>';
+                btn.classList.remove('active');
+                showToast('✓ تم إزالة المشروع من قائمتي');
+            } else {
+                if (favorites.length >= 5) {
+                    showToast('⚠️ لا يمكن إضافة أكثر من 5 مشاريع مفضلة');
+                    return;
+                }
+                favorites.push({ unit, project, name: project });
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                btn.classList.add('active');
+                showToast('✓ تم إضافة المشروع إلى قائمتي');
+            }
+            savePlanFavorites(favorites);
+            renderPlanFavorites();
+        }
+        
+        function renderPlanFavorites() {
+            const favorites = getPlanFavorites();
+            const container = document.getElementById('planFavItems');
+            const listContainer = document.getElementById('planFavoritesList');
+            
+            if (favorites.length === 0) {
+                listContainer.style.display = 'none';
+                return;
+            }
+            listContainer.style.display = 'block';
+            container.innerHTML = '';
+            favorites.forEach((fav, idx) => {
+                const div = document.createElement('div');
+                div.className = 'fav-item';
+                div.innerHTML = `
+                    <div class="fav-item-info" onclick="loadPlanFavorite('${fav.unit.replace(/'/g, "\\'")}', '${fav.project.replace(/'/g, "\\'")}')">
+                        <div class="fav-item-title">${fav.project}</div>
+                        <div class="fav-item-sub">${fav.unit}</div>
+                    </div>
+                    <button class="fav-item-delete" onclick="deletePlanFavorite(${idx})">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+        
+        function loadPlanFavorite(unit, project) {
+            const unitSelect = document.getElementById('unitSelect');
+            const projSelect = document.getElementById('projectSelect');
+            unitSelect.value = unit;
+            filterProjects();
+            setTimeout(() => {
+                projSelect.value = project;
+                renderTable();
+                showToast(`✓ تم تحميل المخطط: ${project}`);
+            }, 200);
+        }
+        
+        function deletePlanFavorite(index) {
+            let favorites = getPlanFavorites();
+            favorites.splice(index, 1);
+            savePlanFavorites(favorites);
+            renderPlanFavorites();
+            checkPlanFavoriteStatus();
+            showToast('✓ تم حذف المشروع من قائمتي');
+        }
+        
+        let planFavCollapsed = false;
+        function togglePlanFavoritesCollapse() {
+            planFavCollapsed = !planFavCollapsed;
+            const items = document.getElementById('planFavItems');
+            const icon = document.getElementById('planFavToggleIcon');
+            if (planFavCollapsed) {
+                items.parentElement.classList.add('fav-collapsed');
+                icon.className = 'fas fa-chevron-left';
+            } else {
+                items.parentElement.classList.remove('fav-collapsed');
+                icon.className = 'fas fa-chevron-down';
+            }
+        }
+
+        function checkPlanFavoriteStatus() {
+            const unit = document.getElementById('unitSelect').value;
+            const project = document.getElementById('projectSelect').value;
+            const btn = document.getElementById('btn-fav-plan');
+            const favorites = getPlanFavorites();
+            const isFav = favorites.some(f => f.unit === unit && f.project === project);
+            if (isFav) {
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                btn.classList.add('active');
+            } else {
+                btn.innerHTML = '<i class="fas fa-plus"></i>';
+                btn.classList.remove('active');
+            }
+        }
+
+        // ========== الدوال الأساسية ==========
         function toggleDarkMode() {
             const body = document.body;
             const icon = document.getElementById('dark-mode-icon');
@@ -1573,19 +1506,8 @@
             }
         }
 
-        function initAudio() { 
-            try { 
-                notificationSound = new Audio('water_drops.mp3'); 
-                notificationSound.volume = 0.5; 
-            } catch(e) {} 
-        }
-        
-        function playSound() { 
-            if(audioAllowed && notificationSound) { 
-                notificationSound.currentTime = 0; 
-                notificationSound.play().catch(()=>{}); 
-            } 
-        }
+        function initAudio() { try { notificationSound = new Audio('water_drops.mp3'); notificationSound.volume = 0.5; } catch(e) {} }
+        function playSound() { if(audioAllowed && notificationSound) { notificationSound.currentTime = 0; notificationSound.play().catch(()=>{}); } }
 
         function hideSplash() {
             const splash = document.getElementById('splash-screen');
@@ -1637,7 +1559,6 @@
         scrollableDiv.addEventListener('touchstart', (e) => { 
             if (scrollableDiv.scrollTop === 0) pullStartY = e.touches[0].clientY; 
         });
-        
         scrollableDiv.addEventListener('touchmove', (e) => { 
             if (pullStartY > 0 && scrollableDiv.scrollTop === 0) { 
                 if (e.touches[0].clientY - pullStartY > 70) { 
@@ -1646,7 +1567,6 @@
                 } 
             } 
         });
-        
         scrollableDiv.addEventListener('touchend', () => { 
             if (isPulling) { 
                 setTimeout(() => document.getElementById('pull-to-refresh').classList.remove('show'), 1000); 
@@ -1671,7 +1591,7 @@
         }
 
         document.addEventListener('click', (e) => {
-            const target = e.target.closest('.btn, .btn-action, .cs-back-btn');
+            const target = e.target.closest('.btn, .btn-action, .cs-back-btn, .fav-btn, .fav-item-delete');
             if (target) {
                 const circle = document.createElement('span'); 
                 circle.className = 'ripple-effect';
@@ -1712,6 +1632,8 @@
                 if(savedMonth && savedMonth !== '--') {
                     document.getElementById('planMonthDisplay').innerHTML = `لشهر ${savedMonth}`;
                 }
+                renderPlanFavorites();
+                checkPlanFavoriteStatus();
             }
             else if(pageName === 'invoice') { 
                 mainTitle.innerHTML = '🧾 استعلام عن فاتورة'; 
@@ -1722,11 +1644,6 @@
                 mainTitle.innerHTML = 'الإبلاغ عن أعطال<br>الشبكات وهدر المياه'; 
                 subTitle.innerHTML = 'محافظة طرطوس - اختر المنطقة'; 
                 m.content = '#1e7e34'; 
-            }
-            else if(pageName === 'guide') { 
-                mainTitle.innerHTML = '📚 التعليمات والدعم'; 
-                subTitle.innerHTML = 'دليل استخدام التطبيق'; 
-                m.content = '#0097a7'; 
             }
             scrollableDiv.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -1988,6 +1905,7 @@
             const p = document.getElementById('projectSelect'); 
             p.innerHTML = '<option value="">-- اختر المشروع --</option>'; 
             document.getElementById('tableWrapper').style.display = 'none'; 
+            checkPlanFavoriteStatus();
             if(!u) return; 
             [...new Set(waterPlanData.filter(r => r['المحافظة'] === u).map(r => r['محور الضخ']).filter(Boolean))].forEach(pr => p.innerHTML += `<option value="${pr}">${pr}</option>`); 
             p.onchange = null; 
@@ -2000,6 +1918,7 @@
             const p = document.getElementById('projectSelect').value; 
             const tbody = document.getElementById('scheduleBody'); 
             const wrapper = document.getElementById('tableWrapper'); 
+            checkPlanFavoriteStatus();
             if(!u || !p) { wrapper.style.display = 'none'; return; }
             const f = waterPlanData.filter(r => r['المحافظة'] === u && r['محور الضخ'] === p); 
             tbody.innerHTML = '';
@@ -2050,8 +1969,7 @@
         }
 
         function showInvoiceEmptyState() {
-            const container = document.getElementById('invoiceResults');
-            container.innerHTML = `
+            document.getElementById('invoiceResults').innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-file-invoice-dollar"></i>
                     <p>ابحث عن فاتورتك</p>
@@ -2272,12 +2190,12 @@
                 const total = Number(findColumnValue(r, ['إجمالي الفواتير الغير مدفوعة', 'إجمالي الفواتير غير المدفوعة']) || 0);
                 const count = Number(findColumnValue(r, ['عدد الفواتير الغير مدفوعة', 'عدد الفواتير غير المدفوعة']) || 0);
                 const phone = String(findColumnValue(r, ['رقم الجوال']) || '');
-                const address = String(findColumnValue(r, ['العنوان']) || '—');
-                const subNum = String(findColumnValue(r, ['رقم الاشتراك']) || '—');
-                const barcode = String(findColumnValue(r, ['باركود']) || '—');
+                const address = String(findColumnValue(r, ['العنوان']) || '—';
+                const subNum = String(findColumnValue(r, ['رقم الاشتراك']) || '—';
+                const barcode = String(findColumnValue(r, ['باركود']) || '—';
                 const meterNum = String(findColumnValue(r, ['رقم العداد']) || '');
                 const meterDisplay = (meterNum === '' || meterNum === 'undefined' || meterNum === 'null') ? '—' : meterNum;
-                const natId = String(findColumnValue(r, ['الرقم الوطني']) || '—');
+                const natId = String(findColumnValue(r, ['الرقم الوطني']) || '—';
                 const phoneDisplay = (phone === '*' || phone === 'undefined' || phone === 'null') ? '—' : phone;
 
                 html += `
@@ -2448,8 +2366,16 @@
             cachedNotificationMessages = [];
             const notifCenter = document.getElementById('notification-center');
             if (notifCenter) notifCenter.innerHTML = '';
+            
+            // نسخ احتياطي للمفضلات
+            const planFavBackup = getPlanFavorites();
+            
             localStorage.clear();
             sessionStorage.clear();
+            
+            // إعادة المفضلات فقط
+            savePlanFavorites(planFavBackup);
+            
             if ('caches' in window) {
                 caches.keys().then(names => {
                     names.forEach(name => caches.delete(name));
