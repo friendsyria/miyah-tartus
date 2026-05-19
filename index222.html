@@ -22,7 +22,6 @@
     <script async src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     
     <style>
-        /* جميع الأنماط كما هي دون أي تغيير - تم الحفاظ عليها بالكامل */
         html, body {
             overscroll-behavior-y: contain;
             -webkit-tap-highlight-color: transparent;
@@ -1213,90 +1212,6 @@
         let pendingPeriodicNotification = false;
         let cachedNotificationMessages = [];
 
-        // ========== فهارس البحث السريعة للفواتير (جديدة) ==========
-        let nationalIdMap = new Map();
-        let subNumberMap = new Map();
-        let barcodeMap = new Map();
-        let phoneMap = new Map();
-        let nameMap = new Map();
-
-        // ========== IndexedDB للتخزين المحلي (جديد) ==========
-        const DB_NAME = 'InvoiceDB';
-        const STORE_NAME = 'invoiceStore';
-        const DB_VERSION = 1;
-
-        function openDB() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(DB_NAME, DB_VERSION);
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => resolve(request.result);
-                request.onupgradeneeded = (event) => {
-                    const db = event.target.result;
-                    if (!db.objectStoreNames.contains(STORE_NAME)) {
-                        db.createObjectStore(STORE_NAME);
-                    }
-                };
-            });
-        }
-
-        async function saveInvoiceDataToIndexedDB(data) {
-            try {
-                const db = await openDB();
-                const tx = db.transaction(STORE_NAME, 'readwrite');
-                const store = tx.objectStore(STORE_NAME);
-                store.put(data, 'invoiceData');
-                await new Promise((resolve, reject) => {
-                    tx.oncomplete = resolve;
-                    tx.onerror = reject;
-                });
-                db.close();
-            } catch(e) { console.warn('IndexedDB save error:', e); }
-        }
-
-        async function loadInvoiceDataFromIndexedDB() {
-            try {
-                const db = await openDB();
-                const tx = db.transaction(STORE_NAME, 'readonly');
-                const store = tx.objectStore(STORE_NAME);
-                const data = await new Promise((resolve, reject) => {
-                    const req = store.get('invoiceData');
-                    req.onsuccess = () => resolve(req.result);
-                    req.onerror = reject;
-                });
-                db.close();
-                return data;
-            } catch(e) { return null; }
-        }
-
-        // ========== بناء الفهارس (جديد) ==========
-        function buildSearchIndexes() {
-            nationalIdMap.clear();
-            subNumberMap.clear();
-            barcodeMap.clear();
-            phoneMap.clear();
-            nameMap.clear();
-            
-            for (const row of invoiceData) {
-                const natId = String(findColumnValue(row, ['الرقم الوطني']) || '').trim();
-                const subNum = String(findColumnValue(row, ['رقم الاشتراك']) || '').trim();
-                const barcode = String(findColumnValue(row, ['باركود']) || '').trim();
-                const phone = String(findColumnValue(row, ['رقم الجوال']) || '').trim();
-                const name = String(findColumnValue(row, ['الاسم']) || '').toLowerCase().trim();
-                
-                if (natId) nationalIdMap.set(natId, row);
-                if (subNum) subNumberMap.set(subNum, row);
-                if (barcode) barcodeMap.set(barcode, row);
-                if (phone) {
-                    if (!phoneMap.has(phone)) phoneMap.set(phone, []);
-                    phoneMap.get(phone).push(row);
-                }
-                if (name && name !== '—') {
-                    if (!nameMap.has(name)) nameMap.set(name, []);
-                    nameMap.get(name).push(row);
-                }
-            }
-        }
-
         // ========== فتح صفحة التعليمات والدعم ==========
         function openHelpPage() {
             try {
@@ -1567,7 +1482,6 @@
             localStorage.setItem('audioPermissionGranted', 'true');
             hideSplash();
             loadExcelData();
-            loadInvoiceData(); // تحميل بيانات الفواتير
         }
         
         function checkAppStartup() {
@@ -1581,7 +1495,6 @@
                 splash.style.display = 'flex';
                 setTimeout(hideSplash, 2000);
                 loadExcelData();
-                loadInvoiceData();
             } else {
                 splash.style.display = 'flex';
             }
@@ -1590,7 +1503,7 @@
         function handleOfflineStatus() {
             if (!navigator.onLine) document.getElementById('offline-screen').style.display = 'flex';
             window.addEventListener('offline', () => { document.getElementById('offline-screen').style.display = 'flex'; });
-            window.addEventListener('online', () => { document.getElementById('offline-screen').style.display = 'none'; loadExcelData(); loadInvoiceData(); });
+            window.addEventListener('online', () => { document.getElementById('offline-screen').style.display = 'none'; loadExcelData(); });
         }
 
         let pullStartY = 0, isPulling = false;
@@ -1611,7 +1524,6 @@
             if (isPulling) { 
                 setTimeout(() => document.getElementById('pull-to-refresh').classList.remove('show'), 1000); 
                 loadExcelData(); 
-                loadInvoiceData(true);
                 showToast('جاري تحديث البيانات...'); 
             } 
             pullStartY = 0; 
@@ -1776,6 +1688,7 @@
             if (typeof XLSX === 'undefined') {
                 newsEl.className = 'news-bar-inner'; newsEl.style.width=''; 
                 newsEl.innerHTML = "🚰 مياه طرطوس - جاري تحميل المكتبة...";
+                // نحاول الانتظار قليلاً لعل المكتبة تُحمّل
                 await new Promise(resolve => setTimeout(resolve, 3000));
                 if (typeof XLSX === 'undefined') {
                     newsEl.innerHTML = "🚰 مياه طرطوس - لا يوجد اتصال"; 
@@ -1983,7 +1896,7 @@
             html2pdf().set(opt).from(printContent).save().then(() => showToast('تم حفظ ملف PDF بنجاح')).catch(err => { console.error(err); showToast('حدث خطأ أثناء تصدير PDF'); });
         }
 
-        // ========== دوال الفواتير المعدلة للبحث من JSON ==========
+        // ========== دوال الفواتير ==========
         function updateSearchPlaceholder() {
             const input = document.getElementById('searchInput');
             const type = document.getElementById('searchType').value;
@@ -1996,36 +1909,21 @@
             container.innerHTML = `<div class="empty-state"><i class="fas fa-file-invoice-dollar"></i><p>ابحث عن فاتورتك</p><span>اختر نوع البحث وأدخل القيمة للبحث في بيانات المشتركين</span></div>`;
         }
 
-        // تحميل البيانات من JSON مباشرة
-        async function loadInvoiceData(forceRefresh = false) {
-            if (invoiceDataLoaded && !forceRefresh) return;
-            
-            // محاولة القراءة من IndexedDB أولاً
-            const cached = await loadInvoiceDataFromIndexedDB();
-            if (cached && cached.length > 0 && !forceRefresh) {
-                invoiceData = cached;
-                buildSearchIndexes();
-                invoiceDataLoaded = true;
-                showToast('✓ تم تحميل بيانات الفواتير من الذاكرة المحلية');
+        async function loadInvoiceData() {
+            if (invoiceDataLoaded) return;
+            if (typeof XLSX === 'undefined') {
+                showToast('⚠️ مكتبة الجداول غير محملة بعد، يرجى الانتظار أو التحقق من الاتصال');
                 return;
             }
-            
-            // تحميل من GitHub
             try {
-                showToast('جاري تحميل بيانات الفواتير...');
-                const response = await fetch('https://raw.githubusercontent.com/friendsyria/miyah-tartus/main/data_compact.json?v=' + Date.now());
-                if (!response.ok) throw new Error('File not found');
-                invoiceData = await response.json();
-                await saveInvoiceDataToIndexedDB(invoiceData);
-                buildSearchIndexes();
+                const res = await fetch('Foater.xlsx?v=' + Date.now());
+                if (!res.ok) throw new Error('File not found');
+                const buf = await res.arrayBuffer();
+                const wb = XLSX.read(new Uint8Array(buf), { type: 'array' });
+                const sheet = wb.Sheets[wb.SheetNames[0]];
+                invoiceData = XLSX.utils.sheet_to_json(sheet, { raw: true });
                 invoiceDataLoaded = true;
-                showToast('✓ تم تحميل بيانات الفواتير بنجاح');
-            } catch(e) {
-                invoiceData = [];
-                invoiceDataLoaded = false;
-                console.error('خطأ في تحميل بيانات الفواتير:', e);
-                showToast('⚠️ فشل تحميل بيانات الفواتير، تأكد من الاتصال بالإنترنت');
-            }
+            } catch(e) { invoiceData = []; invoiceDataLoaded = false; console.error('خطأ في تحميل بيانات الفواتير:', e); }
         }
 
         function findColumnValue(row, possibleNames) {
@@ -2090,69 +1988,36 @@
             return result + ' ليرة سورية فقط';
         }
 
-        // دالة البحث المعدلة - تستخدم الفهارس السريعة
         async function searchInvoice() {
             const searchType = document.getElementById('searchType').value;
-            let searchValue = document.getElementById('searchInput').value.trim();
+            const searchValue = document.getElementById('searchInput').value.trim();
             const container = document.getElementById('invoiceResults');
+            if (!searchType || !searchValue) { showToast('يرجى اختيار نوع البحث وإدخال القيمة'); return; }
             
-            if (!searchType || !searchValue) {
-                showToast('يرجى اختيار نوع البحث وإدخال القيمة');
+            if (typeof XLSX === 'undefined') {
+                container.innerHTML = `<div class="no-results"><i class="fas fa-exclamation-circle"></i><p>مكتبة الجداول غير محملة بعد</p><p style="font-size:0.8rem;margin-top:5px;opacity:0.7;">تأكد من اتصالك بالإنترنت وأن مكتبة XLSX تم تحميلها بالكامل</p></div>`;
                 return;
             }
+
+            container.innerHTML = '<div class="invoice-loading"><div class="spinner"></div><p style="color:var(--text-sub);font-size:0.9rem;">جاري البحث...</p></div>';
             
-            if (!invoiceDataLoaded) {
-                container.innerHTML = '<div class="invoice-loading"><div class="spinner"></div><p>جاري تحميل بيانات الفواتير...</p></div>';
-                await loadInvoiceData();
-                if (!invoiceDataLoaded) {
-                    container.innerHTML = `<div class="no-results"><i class="fas fa-exclamation-circle"></i><p>فشل تحميل البيانات، تأكد من اتصالك بالإنترنت</p></div>`;
-                    return;
-                }
+            if (!invoiceDataLoaded) await loadInvoiceData();
+            if (!invoiceDataLoaded || invoiceData.length === 0) {
+                container.innerHTML = `<div class="no-results"><i class="fas fa-exclamation-circle"></i><p>لم يتم تحميل بيانات الفواتير</p><p style="font-size:0.8rem;margin-top:5px;opacity:0.7;">تأكد من اتصالك بالإنترنت وأن ملف Foater.xlsx متوفر</p></div>`;
+                return;
             }
-            
+            const sv = searchValue.toLowerCase();
             let results = [];
-            switch(searchType) {
-                case 'nationalId':
-                    const row = nationalIdMap.get(searchValue);
-                    if (row) results = [row];
-                    break;
-                case 'subNumber':
-                    const rowSub = subNumberMap.get(searchValue);
-                    if (rowSub) results = [rowSub];
-                    break;
-                case 'barcode':
-                    let found = barcodeMap.get(searchValue);
-                    if (!found) {
-                        const cleanBarcode = searchValue.replace(/^0+/, '');
-                        for (let [key, val] of barcodeMap.entries()) {
-                            if (key.replace(/^0+/, '') === cleanBarcode) {
-                                found = val;
-                                break;
-                            }
-                        }
-                    }
-                    if (found) results = [found];
-                    break;
-                case 'phone':
-                    const cleanPhone = searchValue.replace(/^0/, '');
-                    let phoneResults = phoneMap.get(searchValue);
-                    if (!phoneResults) phoneResults = phoneMap.get(cleanPhone);
-                    if (phoneResults) results = phoneResults;
-                    break;
-                case 'name':
-                    const lowerName = searchValue.toLowerCase();
-                    results = nameMap.get(lowerName) || [];
-                    break;
-                default:
-                    results = [];
-            }
-            
+            if (searchType === 'nationalId') results = invoiceData.filter(r => String(r['الرقم الوطني'] || '').includes(sv));
+            else if (searchType === 'name') results = invoiceData.filter(r => r['الاسم'] && String(r['الاسم']).toLowerCase().includes(sv));
+            else if (searchType === 'barcode') results = invoiceData.filter(r => { const bc = String(r['باركود'] || ''); const svClean = sv.replace(/^0+/, ''); const bcClean = bc.replace(/^0+/, ''); return bc.includes(sv) || bc === searchValue || bcClean === svClean; });
+            else if (searchType === 'phone') { const cleanPhone = sv.replace(/^0/, ''); results = invoiceData.filter(r => { const phone = String(r['رقم الجوال'] || ''); return phone.includes(sv) || phone.includes(cleanPhone); }); }
+            else if (searchType === 'subNumber') results = invoiceData.filter(r => String(r['رقم الاشتراك'] || '').includes(sv));
             const favorites = getInvoiceFavorites();
             if (results.length === 0) {
                 container.innerHTML = `<div class="no-results"><i class="fas fa-search"></i><p>لا توجد نتائج مطابقة لـ "${searchValue}"</p><p style="font-size:0.8rem;margin-top:5px;opacity:0.7;">تأكد من صحة البيانات المدخلة وحاول مرة أخرى</p></div>`;
                 return;
             }
-            
             let html = '';
             if (results.length > 1) html += `<div class="results-count-label">تم العثور على ${results.length} نتيجة</div>`;
             html += '<div class="result-cards">';
@@ -2248,19 +2113,18 @@
             if ('serviceWorker' in navigator) { navigator.serviceWorker.getRegistrations().then(registrations => { registrations.forEach(reg => reg.unregister()); }).catch(() => {}); }
             invoiceDataLoaded = false;
             invoiceData = [];
-            // حذف IndexedDB أيضاً
-            indexedDB.deleteDatabase(DB_NAME);
             showToast('✓ تم افراغ الذاكرة بنجاح، جاري إعادة التحميل...');
             setTimeout(() => { window.location.reload(true); }, 1500);
         }
 
-        // بدء التشغيل
+        // تم تغيير window.onload إلى DOMContentLoaded لضمان عمل الواجهة فوراً
         document.addEventListener('DOMContentLoaded', () => {
             const lc = '?v=' + Date.now();
             ['splash-logo', 'header-logo'].forEach(id => { 
                 const img = document.getElementById(id); 
                 if (img) { 
                     if (!img.src.includes('?v=')) img.src = 'logo.png' + lc; 
+                    // استخدام كود SVG مدمج كصورة بديلة بدلاً من رابط خارجي قد يكون محجوباً
                     img.onerror = function() { 
                         this.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23007BFF" rx="15"/><text x="50" y="65" font-size="45" text-anchor="middle" fill="white">💧</text></svg>'; 
                     }; 
