@@ -3,472 +3,1242 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>الشركة العامة لمياه الشرب والصرف الصحي بطرطوس</title>
-    
+    <title>شركة مياه طرطوس</title>
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="مياه طرطوس">
     <meta name="theme-color" id="theme-color-meta" content="#004999">
-    
     <link rel="apple-touch-icon" href="logo.png?v=2">
     <link rel="icon" href="logo.png?v=2">
-    
-    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <script async src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
-    
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        html, body {
-            overscroll-behavior-y: contain;
-            -webkit-tap-highlight-color: transparent;
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow-x: hidden;
+        :root {
+            --primary: #0077B6; --primary-dark: #023E8A; --accent: #00B4D8; --gold: #F4A261;
+            --success: #0077B6; --success-dark: #023E8A; --bg: #EDF4F8; --bg-card: #FFFFFF;
+            --text: #1A2332; --text-sec: #3D5266; --text-muted: #7A8FA3; --border: #D1E3ED;
+            --radius: 18px; --radius-sm: 12px; --trans: 0.3s ease; --header-bg: #004a99;
+            --header-text: #fff; --input-bg: #f0f4f8; --footer-bg: #003366; --footer-text: rgba(255,255,255,0.8);
+            --danger: #d32f2f; --info-bg: #e0f0ff; --info-text: #004085; --warn-bg: #fff3cd; --warn-text: #856404;
+            --success-bg: #e0f2fe; --success-text: #075985;
         }
-
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-            font-family: 'Tajawal', sans-serif; 
+        [data-theme="dark"] {
+            --primary: #00B4D8; --primary-dark: #0077B6; --bg: #0B1929; --bg-card: #122640;
+            --text: #E0ECF5; --text-sec: #B0C8DA; --text-muted: #6B8BA5; --border: #1E3A5F;
+            --header-bg: #001a33; --header-text: #8ec8ff; --input-bg: #0a1628;
+            --footer-bg: #000d1a; --footer-text: rgba(255,255,255,0.6);
+            --danger: #ef5350; --info-bg: rgba(0,123,255,0.1); --info-text: #8ec8ff;
+            --warn-bg: rgba(255,193,7,0.1); --warn-text: #ffc107;
+            --success-bg: rgba(0,119,182,0.15); --success-text: #38bdf8;
         }
+        body[data-font-size="small"] { font-size: 14px; }
+        body[data-font-size="large"] { font-size: 18px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { overscroll-behavior-y: contain; width: 100%; height: 100%; overflow: hidden; }
+        body { font-family: 'Tajawal', sans-serif; background: var(--bg); color: var(--text); transition: background .3s, color .3s, font-size .3s; }
 
-        .app-container {
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            width: 100%;
+        /* شاشة الترحيب */
+        #page-welcome { position: fixed; inset: 0; z-index: 20000; background: linear-gradient(160deg, #001f3f 0%, #003366 30%, #005599 60%, #0077cc 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 40px 24px; transition: opacity .8s ease, transform .8s ease; }
+        #page-welcome.hide { opacity: 0; transform: scale(1.05); pointer-events: none; }
+        .w-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+        .w-p { position: absolute; width: 3px; height: 3px; background: rgba(255,255,255,0.15); border-radius: 50%; animation: pUp linear infinite; }
+        @keyframes pUp { 0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:1}90%{opacity:.8}100%{transform:translateY(-10vh) scale(1.5);opacity:0} }
+        .w-logo { width: 110px; height: 110px; border-radius: 28px; border: 3px solid rgba(255,255,255,0.2); object-fit: cover; margin-bottom: 24px; animation: wPulse 3s ease-in-out infinite; box-shadow: 0 8px 30px rgba(0,0,0,0.3); position: relative; z-index: 2; }
+        @keyframes wPulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.03)} }
+        .w-title { font-size: 1.8rem; font-weight: 900; color: #fff; position: relative; z-index: 2; margin-bottom: 6px; }
+        .w-sub { font-size: .95rem; color: rgba(255,255,255,.75); margin-bottom: 36px; position: relative; z-index: 2; }
+        .w-btn { background: #fff; color: #003366; border: none; padding: 15px 40px; border-radius: 60px; font-size: 1.05rem; font-weight: 800; cursor: pointer; box-shadow: 0 10px 40px rgba(0,0,0,.25); transition: var(--trans); position: relative; z-index: 2; font-family: 'Tajawal', sans-serif; }
+        .w-btn:active { transform: scale(.96); }
+        .w-loader { display: none; flex-direction: column; align-items: center; gap: 14px; position: relative; z-index: 2; }
+        .w-spinner { width: 40px; height: 40px; border: 3px solid rgba(255,255,255,.2); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        .w-waves { position: absolute; bottom: -5px; left: 0; right: 0; height: 70px; overflow: hidden; z-index: 1; }
+        .w-waves svg { position: absolute; bottom: 0; width: 200%; animation: waveM 4s linear infinite; }
+        @keyframes waveM { 0%{transform:translateX(0)}100%{transform:translateX(-50%)} }
+
+        /* شريط الحالة */
+        .status-bar { position: fixed; top: 0; left: 0; right: 0; z-index: 1001; background: var(--header-bg); color: var(--header-text); height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; }
+        .status-left, .status-right { display: flex; gap: 8px; }
+        .status-icon { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--trans); font-size: 1rem; position: relative; }
+        .status-icon:active { transform: scale(.9); }
+        .status-center { font-size: .85rem; font-weight: 700; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .notif-badge-dot { position: absolute; top: -2px; right: -2px; width: 10px; height: 10px; background: #e74c3c; border-radius: 50%; display: none; border: 2px solid var(--header-bg); }
+        .notif-badge-dot.show { display: block; }
+
+        /* الإشعارات */
+        #notification-center { position: fixed; top: 48px; right: 10px; width: 300px; z-index: 10001; pointer-events: none; }
+        .android-notification { background: var(--bg-card); border-right: 5px solid #ffcc00; border-radius: 14px; padding: 11px 13px; margin-bottom: 8px; box-shadow: 0 10px 25px rgba(0,0,0,.2); display: flex; align-items: flex-start; gap: 10px; pointer-events: auto; transition: transform .3s ease, opacity .3s ease; animation: slideN .4s ease; cursor: grab; color: var(--text); font-size: .82rem; touch-action: none; user-select: none; }
+        .android-notification.dragging { cursor: grabbing; transition: none; }
+        .android-notification.expanded { align-items: flex-start; }
+        @keyframes slideN { from{transform:translateX(130%);opacity:0}to{transform:translateX(0);opacity:1} }
+        .notif-icon-w { width: 36px; height: 36px; border-radius: 11px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: #fff; display: flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0; }
+        .notif-body { flex: 1; min-width: 0; }
+        .notif-body strong { display: block; font-size: .8rem; margin-bottom: 2px; }
+        .notif-body .notif-text { font-size: .75rem; color: var(--text-muted); line-height: 1.5; word-wrap: break-word; }
+        .notif-body .notif-text.truncated { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .notif-body .read-more-btn { background: none; border: none; color: var(--primary); font-size: .72rem; font-weight: 700; cursor: pointer; padding: 4px 0 0; font-family: 'Tajawal', sans-serif; display: inline-block; }
+        .notif-body .read-more-btn:active { opacity: 0.7; }
+        .notif-dismiss { color: #aaa; cursor: pointer; padding: 4px; flex-shrink: 0; }
+        .toast { position: fixed; bottom: -80px; left: 50%; transform: translateX(-50%); background: #1A2332; color: #fff; padding: 13px 26px; border-radius: 60px; font-size: .86rem; font-weight: 600; z-index: 9999; transition: bottom .4s ease; white-space: nowrap; max-width: 90vw; text-overflow: ellipsis; overflow: hidden; }
+        .toast.show { bottom: 56px; }
+        #pull-refresh { position: fixed; top: 44px; left: 50%; transform: translateX(-50%); width: 40px; height: 40px; background: var(--bg-card); border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,.2); z-index: 9998; display: flex; align-items: center; justify-content: center; transition: top .3s ease; opacity: 0; pointer-events: none; }
+        #pull-refresh.show { top: 80px; opacity: 1; }
+        #pull-refresh i { color: var(--primary); animation: spin 1s linear infinite; }
+
+        /* التطبيق */
+        #app { position: relative; width: 100%; height: 100vh; height: 100dvh; overflow: hidden; padding-top: 44px; padding-bottom: 40px; }
+        .page { position: absolute; inset: 0; top: 44px; bottom: 0; overflow-y: auto; overflow-x: hidden; opacity: 0; pointer-events: none; transform: translateY(20px); transition: opacity .35s ease, transform .35s ease; padding-bottom: 60px; -webkit-overflow-scrolling: touch; }
+        .page.active { opacity: 1; pointer-events: auto; transform: translateY(0); z-index: 10; }
+        
+        /* الفوتر الثابت */
+        .app-footer { 
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000; 
+            background: linear-gradient(135deg, #003366, #001a33); color: rgba(255,255,255,0.85); 
+            height: 40px; display: flex; align-items: center; justify-content: center; 
+            font-size: .72rem; font-weight: 600; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); 
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        [data-theme="dark"] .app-footer { background: linear-gradient(135deg, #000d1a, #000000); color: rgba(255,255,255,0.7); }
+        .app-footer i { margin-left: 6px; color: var(--accent); font-size: .8rem; }
+        .app-footer .footer-name { font-weight: 800; color: var(--gold); margin-right: 4px; }
+
+        /* الرئيسية */
+        .home-hero { background: linear-gradient(160deg, var(--primary-dark) 0%, var(--primary) 60%, var(--accent) 100%); padding: 28px 20px 42px; text-align: center; color: #fff; position: relative; }
+        .home-hero::after { content:''; position: absolute; bottom: -2px; left: 0; right: 0; height: 24px; background: var(--bg); border-radius: 24px 24px 0 0; }
+        .home-hero-logo { width: 64px; height: 64px; border-radius: 18px; border: 2px solid rgba(255,255,255,.2); object-fit: cover; margin-bottom: 10px; display: inline-block; }
+        .home-hero h1 { font-size: 1.3rem; font-weight: 900; } .home-hero p { font-size: .82rem; opacity: .85; }
+        .home-content { padding: 14px 14px 0; margin-top: -8px; position: relative; z-index: 2; }
+        .main-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .main-card { background: var(--bg-card); border-radius: var(--radius); padding: 16px 10px; text-align: center; border: 1px solid var(--border); cursor: pointer; transition: var(--trans); position: relative; overflow: hidden; }
+        .main-card::before { content:''; position: absolute; top:0; left:0; right:0; height:3px; border-radius: var(--radius) var(--radius) 0 0; }
+        .main-card:active { transform: scale(.96); }
+        .mc-icon { width: 44px; height: 44px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #fff; margin-bottom: 8px; }
+        .main-card h3 { font-size: .76rem; font-weight: 800; color: var(--text); } .main-card p { font-size: .64rem; color: var(--text-muted); }
+        .mc-green .mc-icon{background:linear-gradient(135deg,#0077B6,#023E8A)}.mc-green::before{background:linear-gradient(90deg,#0077B6,#023E8A)}
+        .mc-blue .mc-icon{background:linear-gradient(135deg,#0077B6,#023E8A)}.mc-blue::before{background:linear-gradient(90deg,#0077B6,#023E8A)}
+        .mc-lime .mc-icon{background:linear-gradient(135deg,#84cc16,#65a30d)}.mc-lime::before{background:linear-gradient(90deg,#84cc16,#65a30d)}
+        .mc-teal .mc-icon{background:linear-gradient(135deg,#17a2b8,#138496)}.mc-teal::before{background:linear-gradient(90deg,#17a2b8,#138496)}
+        .mc-orange .mc-icon{background:linear-gradient(135deg,#F4A261,#E76F51)}.mc-orange::before{background:linear-gradient(90deg,#F4A261,#E76F51)}
+        .mc-purple .mc-icon{background:linear-gradient(135deg,#7C3AED,#5B21B6)}.mc-purple::before{background:linear-gradient(90deg,#7C3AED,#5B21B6)}
+        .mc-gray .mc-icon{background:linear-gradient(135deg,#78909C,#546E7A)}.mc-gray::before{background:linear-gradient(90deg,#78909C,#546E7A)}
+        .mc-cyan .mc-icon{background:linear-gradient(135deg,#00B4D8,#0077B6)}.mc-cyan::before{background:linear-gradient(90deg,#00B4D8,#0077B6)}
+
+        .back-home-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: calc(100% - 28px); margin: 16px 14px; padding: 13px; border: none; border-radius: var(--radius-sm); background: linear-gradient(135deg, #78909C, #546E7A); color: #fff; font-size: .88rem; font-weight: 700; cursor: pointer; font-family: 'Tajawal', sans-serif; }
+        .back-home-btn:active { transform: scale(.97); }
+
+        /* خطة المياه */
+        .plan-header { text-align: center; padding: 16px 18px 10px; }
+        .plan-main-title { font-size: 1.2rem; font-weight: 900; color: var(--primary); display: block; }
+        .plan-month-title { font-size: 1rem; font-weight: 800; color: #ff9800; display: block; margin-top: 2px; }
+        .plan-subtitle { font-size: .8rem; color: var(--text-muted); margin-top: 6px; }
+        .plan-filters { padding: 10px 14px; display: flex; flex-direction: column; gap: 12px; }
+        .filter-group { display: flex; flex-direction: column; gap: 5px; }
+        .filter-group label { font-size: .82rem; font-weight: 700; color: var(--text-sec); }
+        .filter-select { width: 100%; padding: 12px 14px; border: 2px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text); font-size: .92rem; cursor: pointer; font-family: 'Tajawal', sans-serif; }
+        .filter-select:focus { outline: none; border-color: var(--primary); }
+
+        /* ===== تحسين عرض جدول خطة المياه ===== */
+        .plan-table-wrap {
+            margin: 0 14px 12px;
+            border-radius: var(--radius);
             overflow: hidden;
-            background: var(--bg-main);
-        }
-
-        .fixed-top {
-            flex-shrink: 0;
-            z-index: 1000;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            display: none;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.07);
             position: relative;
         }
-
-        .scrollable-content {
-            flex: 1;
+        .plan-table-scroll {
+            max-height: 55vh;
             overflow-y: auto;
-            overflow-x: hidden;
+            overflow-x: auto;
             -webkit-overflow-scrolling: touch;
-            padding-bottom: 70px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--input-bg);
+            position: relative;
         }
-
-        :root {
-            --bg-main: linear-gradient(135deg, #e8f0fe 0%, #d4e0f0 100%);
-            --bg-card: #ffffff;
-            --text-main: #333333;
-            --text-sub: #666666;
-            --border-color: #e9ecef;
-            --input-bg: #f8f9fa;
-            --header-bg: linear-gradient(135deg, #007BFF, #004999);
-            --news-bg: #ffcc00;
-            --news-text: #1a3a4a;
+        .plan-table-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+        .plan-table-scroll::-webkit-scrollbar-track { background: var(--input-bg); }
+        .plan-table-scroll::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        .plan-table-scroll-hint {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: linear-gradient(to top, var(--bg-card), transparent);
+            pointer-events: none;
+            z-index: 3;
+            opacity: 0;
+            transition: opacity .3s;
         }
-
-        [data-theme="dark"] {
-            --bg-main: linear-gradient(135deg, #121212 0%, #1e1e1e 100%);
-            --bg-card: #2c2c2c;
-            --text-main: #e0e0e0;
-            --text-sub: #aaaaaa;
-            --border-color: #444444;
-            --input-bg: #383838;
-            --header-bg: linear-gradient(135deg, #004e99, #002b55);
-            --news-bg: #3e3e00;
-            --news-text: #e0e0e0;
-        }
-
-        body { 
-            background: var(--bg-main); 
-            color: var(--text-main); 
-            transition: background 0.3s, color 0.3s; 
-            height: 100%;
-            overflow: hidden;
-        }
-
-        header { 
-            background: var(--header-bg); 
-            color: white; 
-            padding: 12px 12px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            width: 100%;
-            min-height: 80px;
-        }
-        
-        .header-content { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 10px; 
-            flex: 1; 
-            overflow: hidden;
-        }
-        
-        header img { 
-            height: 52px; 
-            width: 52px; 
-            border-radius: 15px; 
-            border: 2px solid white; 
-            object-fit: cover; 
-            flex-shrink: 0; 
-        }
-        
-        .header-text { 
-            overflow: hidden; 
-            text-align: center;
+        .plan-table-scroll-hint.show { opacity: 1; }
+        .plan-table-count {
+            padding: 8px 14px;
+            font-size: .72rem;
+            color: var(--text-muted);
             display: flex;
-            flex-direction: column;
-            gap: 4px;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--border);
+            background: var(--input-bg);
         }
-        
-        header h1 { 
-            font-size: 0.95rem; 
-            font-weight: 800;
-            line-height: 1.3;
-            white-space: normal;
-            word-break: break-word;
-            max-width: 180px;
+        .plan-table-count span { font-weight: 700; color: var(--primary); }
+        .plan-table {
+            width: 100%;
+            min-width: 520px;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: .74rem;
         }
-        
-        header .subtitle { 
-            font-size: 0.65rem; 
-            opacity: 0.9;
+        .plan-table thead {
+            position: sticky;
+            top: 0;
+            z-index: 4;
+        }
+        .plan-table th {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: #fff;
+            padding: 12px 8px;
             white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-weight: 700;
+            font-size: .72rem;
+            text-align: center;
+            border-bottom: none;
+            letter-spacing: 0.3px;
         }
+        .plan-table th:first-child { border-radius: 0 0 0 0; }
+        .plan-table th:last-child { border-radius: 0 0 0 0; }
+        .plan-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-sec);
+            font-size: .72rem;
+            vertical-align: middle;
+            transition: background .2s;
+        }
+        .plan-table tbody tr {
+            transition: background .2s;
+        }
+        .plan-table tbody tr:nth-child(even) {
+            background: rgba(0,119,182,0.03);
+        }
+        [data-theme="dark"] .plan-table tbody tr:nth-child(even) {
+            background: rgba(0,180,216,0.04);
+        }
+        .plan-table tbody tr:active {
+            background: rgba(0,119,182,0.08) !important;
+        }
+        .plan-table tr.today-row {
+            background: rgba(40, 167, 69, 0.12) !important;
+            border-right: 4px solid #28a745;
+        }
+        .plan-table tr.today-row td {
+            font-weight: 700;
+            color: var(--text);
+        }
+        [data-theme="dark"] .plan-table tr.today-row {
+            background: rgba(40, 167, 69, 0.18) !important;
+        }
+        .today-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 50px;
+            font-size: .65rem;
+            margin-left: 5px;
+            font-weight: 800;
+            box-shadow: 0 2px 6px rgba(40,167,69,0.3);
+            animation: todayPulse 2s ease-in-out infinite;
+        }
+        @keyframes todayPulse {
+            0%, 100% { box-shadow: 0 2px 6px rgba(40,167,69,0.3); }
+            50% { box-shadow: 0 2px 12px rgba(40,167,69,0.5); }
+        }
+        .plan-table td.beneficiaries-cell {
+            text-align: right;
+            white-space: normal;
+            line-height: 1.5;
+            max-width: 160px;
+            font-size: .68rem;
+        }
+        .plan-table td.day-cell {
+            font-weight: 700;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        .plan-table td.hours-cell {
+            font-weight: 800;
+            color: var(--primary);
+            white-space: nowrap;
+        }
+        .plan-table td.date-cell {
+            white-space: nowrap;
+            font-weight: 600;
+        }
+        /* ================================================ */
 
-        .dark-mode-toggle { 
-            background: rgba(255,255,255,0.2); 
-            border: none; 
-            color: white; 
-            width: 42px; 
-            height: 42px; 
+        .plan-actions { display: flex; gap: 8px; padding: 0 14px 12px; }
+        .pa-btn { flex: 1; padding: 12px 10px; border-radius: var(--radius-sm); border: none; font-size: .82rem; font-weight: 700; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: 'Tajawal', sans-serif; }
+        .pa-btn.whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); }
+        .pa-btn.pdf { background: linear-gradient(135deg, #E76F51, #c0392b); }
+
+        /* الفاتورة */
+        .inv-header { text-align: center; padding: 16px 18px 10px; }
+        .inv-main-title { font-size: 1.2rem; font-weight: 900; color: #65a30d; display: block; }
+        .inv-subtitle { font-size: .8rem; color: var(--text-muted); margin-top: 6px; }
+        .trial-notice { margin: 0 14px 12px; padding: 12px 14px; border-radius: var(--radius-sm); background: var(--warn-bg); border-right: 4px solid var(--gold); display: flex; gap: 9px; font-size: .78rem; color: var(--warn-text); }
+        .inv-search { padding: 0 14px 14px; }
+        .search-row { margin-bottom: 10px; }
+        .search-input { width: 100%; padding: 12px 14px; border: 2px solid var(--border); border-radius: var(--radius-sm); background: var(--bg-card); color: var(--text); font-size: .92rem; font-family: 'Tajawal', sans-serif; }
+        .search-input:focus { outline: none; border-color: var(--primary); }
+        .search-btn { width: 100%; padding: 14px; border: none; border-radius: var(--radius-sm); background: linear-gradient(135deg, var(--success), var(--success-dark)); color: #fff; font-size: 1rem; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; font-family: 'Tajawal', sans-serif; }
+        .search-btn:active { transform: scale(.97); }
+        .inv-results { padding: 0 14px 14px; }
+        .inv-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 12px; animation: slideU .4s ease; }
+        @keyframes slideU { from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)} }
+        .inv-card-hdr { background: linear-gradient(135deg, var(--success-dark), var(--success)); color: #fff; padding: 12px 14px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+        .s-name { font-size: 1rem; font-weight: 800; }
+        .s-meta { display: flex; gap: 10px; font-size: .72rem; opacity: .9; margin-top: 5px; flex-wrap: wrap; }
+        .inv-card-body { padding: 14px; }
+        .inv-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 12px; }
+        .inv-grid-item { padding: 9px; background: var(--input-bg); border-radius: 10px; }
+        .d-l { font-size: .66rem; color: var(--text-muted); display: block; }
+        .d-v { font-size: .82rem; font-weight: 700; color: var(--text); display: block; word-break: break-all; }
+        .inv-amount { text-align: center; padding: 16px 14px; background: linear-gradient(135deg, rgba(0,119,182,.08), rgba(2,62,138,.06)); border-radius: var(--radius-sm); }
+        .a-value { font-size: 1.7rem; font-weight: 900; color: #023E8A; }
+        [data-theme="dark"] .a-value { color: #38bdf8; }
+        .a-arabic { font-size: .85rem; color: #0077B6; margin-top: 5px; font-weight: 700; line-height: 1.6; }
+        [data-theme="dark"] .a-arabic { color: #7dd3fc; }
+        .inv-warn { display: inline-flex; align-items: center; gap: 7px; background: rgba(211,47,47,.08); padding: 9px 14px; border-radius: 50px; margin-top: 10px; border-right: 3px solid var(--danger); }
+        .inv-warn-text { color: var(--danger); font-weight: 800; font-size: .85rem; }
+        .inv-count { font-size: .78rem; color: var(--text-muted); margin-top: 8px; }
+        .inv-footer { display: flex; gap: 8px; padding: 0 14px 14px; }
+        .inv-disclaimer { margin: 0 14px 20px; padding: 14px 15px; background: var(--warn-bg); border: 1px solid rgba(255,204,2,0.3); border-radius: var(--radius-sm); display: flex; gap: 10px; font-size: .76rem; color: var(--warn-text); line-height: 1.7; align-items: flex-start; }
+        .inv-disclaimer i { flex-shrink: 0; margin-top: 3px; font-size: .9rem; }
+        .inv-disclaimer div { flex: 1; }
+        .inv-disclaimer strong { display: block; margin-bottom: 4px; font-size: .82rem; }
+        .no-results { text-align: center; padding: 36px 18px; color: var(--text-muted); }
+        .no-results i { font-size: 2.8rem; margin-bottom: 14px; display: block; opacity: .35; }
+        .inv-loading { text-align: center; padding: 28px; }
+        .inv-loading .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--success); border-radius: 50%; animation: spin .8s linear infinite; margin: 0 auto 8px; }
+
+        /* مفضلات الفاتورة */
+        .fav-list { margin: 0 14px 12px; background: linear-gradient(135deg, #023E8A, #0077B6); border-radius: var(--radius); padding: 14px; color: #fff; }
+        .fl-title { font-size: .88rem; font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; gap: 7px; }
+        .fl-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 11px; background: rgba(255,255,255,.12); border-radius: 8px; margin-bottom: 5px; cursor: pointer; transition: background 0.2s; }
+        .fl-item:active { background: rgba(255,255,255,.25); }
+        .fl-item span { font-weight: 600; font-size: .82rem; }
+        .fl-sub { font-size: .68rem; opacity: .7; display: block; }
+        .fl-remove { 
+            width: 28px; 
+            height: 28px; 
             border-radius: 50%; 
-            font-size: 1.2rem; 
+            border: none; 
+            background: rgba(255,255,255,.25); 
+            color: #fff; 
             cursor: pointer; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
+            font-size: 0.75rem; 
+            flex-shrink: 0;
+            transition: background 0.2s;
+            line-height: 1;
+        }
+        .fl-remove:active { 
+            background: rgba(255,255,255,.4); 
+            transform: scale(0.95);
+        }
+        .fl-remove i {
+            margin: 0;
+            padding: 0;
+            display: block;
+        }
+        .fav-small-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 14px; border-radius: 50px; border: none; font-size: .72rem; font-weight: 700; cursor: pointer; transition: var(--trans); font-family: 'Tajawal', sans-serif; flex-shrink: 0; }
+        .fav-small-btn.add { background: var(--success); color: #fff; }
+        .fav-small-btn.added { background: var(--gold); color: #fff; }
+
+        /* الإبلاغ */
+        .report-instruction { padding: 10px 14px 4px; text-align: center; font-size: .85rem; }
+        .report-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 8px 14px 14px; }
+        .report-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 10px; text-align: center; cursor: pointer; transition: var(--trans); }
+        .report-card:active { transform: scale(.95); }
+        .rc-icon { width: 44px; height: 44px; border-radius: 14px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #fff; margin-bottom: 8px; }
+        .report-card h4 { font-size: .8rem; font-weight: 800; color: var(--text); }
+
+        /* الإشعارات والأخبار */
+        .notif-page-list, .news-page-list { padding: 14px; }
+        .notif-page-item, .news-page-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; display: flex; gap: 12px; animation: slideU .4s ease; }
+        .npi-icon, .news-icon { 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 12px; 
+            background: linear-gradient(135deg, var(--primary), var(--accent)); 
+            color: #fff; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 1.1rem; 
             flex-shrink: 0; 
         }
-
-        .page { 
-            display: none; width: 95%; max-width: 950px; margin: 15px auto; 
-            background: var(--bg-card); border-radius: 28px; padding: 1.5rem; 
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1); transition: background 0.3s, color 0.3s; 
+        .news-icon { 
+            background: linear-gradient(135deg, var(--gold), #e76f51); 
         }
-        
-        .page.active { display: block; animation: slideInFromLeft 0.3s ease; }
-        
-        @keyframes slideInFromLeft { 
-            from { opacity: 0; transform: translateX(20px); } 
-            to { opacity: 1; transform: translateX(0); } 
+        .npi-icon i, .news-icon i {
+            margin: 0;
+            padding: 0;
+            display: block;
+            line-height: 1;
         }
+        .npi-text, .news-desc { font-size: .84rem; color: var(--text-sec); line-height: 1.6; word-wrap: break-word; }
+        .npi-text.truncated, .news-desc.truncated { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+        .npi-time, .news-date { font-size: .68rem; color: var(--text-muted); margin-top: 4px; }
+        .news-title { font-weight: 800; font-size: .9rem; color: var(--text); margin-bottom: 6px; }
+        .read-more-btn { background: none; border: none; color: var(--primary); font-size: .72rem; font-weight: 700; cursor: pointer; padding: 4px 0 0; font-family: 'Tajawal', sans-serif; display: inline-block; }
+        .read-more-btn:active { opacity: 0.7; }
+        .clear-notifs-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: calc(100% - 28px); margin: 0 14px 14px; padding: 12px; border: none; border-radius: var(--radius-sm); background: linear-gradient(135deg, #e74c3c, #c0392b); color: #fff; font-size: .88rem; font-weight: 700; cursor: pointer; font-family: 'Tajawal', sans-serif; }
+        .clear-notifs-btn:active { transform: scale(.97); }
 
-        .invoice-search-box {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
+        /* الإعدادات */
+        .settings-container { padding: 14px; }
+        .settings-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-bottom: 14px; }
+        .settings-card-header { padding: 14px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+        .settings-card-header i { font-size: 1.1rem; color: var(--primary); }
+        .settings-card-header h3 { font-size: .95rem; font-weight: 800; color: var(--text); }
+        .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid var(--border); gap: 10px; }
+        .settings-item:last-child { border-bottom: none; }
+        .settings-item-info { flex: 1; min-width: 0; }
+        .settings-item-title { font-size: .88rem; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 8px; }
+        .settings-item-title i { width: 22px; text-align: center; color: var(--primary); font-size: .9rem; }
+        .settings-item-desc { font-size: .72rem; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
+        .toggle-switch { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+        .toggle-switch input { opacity: 0; width: 0; height: 0; }
+        .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .3s; border-radius: 26px; }
+        .toggle-slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+        .toggle-switch input:checked + .toggle-slider { background-color: var(--primary); }
+        .toggle-switch input:checked + .toggle-slider:before { transform: translateX(22px); }
+        .settings-select { padding: 8px 12px; border-radius: 50px; border: 1px solid var(--border); background: var(--input-bg); color: var(--text); font-size: .82rem; cursor: pointer; font-weight: 600; font-family: 'Tajawal', sans-serif; }
+        .settings-action-btn { width: 100%; padding: 14px; border: none; background: var(--input-bg); color: var(--text-sec); font-size: .85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: 'Tajawal', sans-serif; border-top: 1px solid var(--border); transition: background .2s; }
+        .settings-action-btn:active { background: var(--border); }
+        .settings-action-btn.danger { color: var(--danger); }
+        .settings-version { text-align: center; padding: 16px; font-size: .75rem; color: var(--text-muted); }
+        .settings-version span { color: var(--primary); font-weight: 700; }
 
-        .invoice-search-box input {
-            padding: 12px 16px;
-            border-radius: 60px;
-            border: 2px solid var(--border-color);
-            font-size: 0.9rem;
-            width: 100%;
-            background: var(--input-bg);
-            color: var(--text-main);
-            font-family: 'Tajawal';
-            transition: 0.2s;
-        }
-
-        .invoice-search-box input:focus {
-            border-color: #84cc16;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.2);
-        }
-
-        .btn-search {
-            background: linear-gradient(135deg, #84cc16, #65a30d);
-            color: white;
-            border: none;
-            padding: 13px;
-            border-radius: 60px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            font-family: 'Tajawal';
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            box-shadow: 0 5px 12px rgba(132, 204, 22, 0.3);
-            transition: transform 0.1s;
-        }
-
-        .btn-search:active { transform: scale(0.97); }
-        .btn-search:disabled { background: #cbd5e1; cursor: not-allowed; box-shadow: none; }
-
-        .result-cards { display: flex; flex-direction: column; gap: 15px; }
-
-        .invoice-result-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            overflow: hidden;
-            animation: slideInFromLeft 0.4s ease;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
-        }
-
-        .result-header {
-            background: linear-gradient(135deg, #007BFF, #0056b3);
-            color: white;
-            padding: 14px 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .result-header .subscriber-name {
-            font-size: 1.1rem;
-            font-weight: 800;
-        }
-
-        .result-body { padding: 15px; }
-        .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
-        .detail-item {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            padding: 10px;
-            background: var(--input-bg);
-            border-radius: 14px;
-        }
-
-        .detail-item .detail-label { font-size: 0.68rem; color: var(--text-sub); font-weight: 500; }
-        .detail-item .detail-value { font-size: 0.88rem; font-weight: 700; color: var(--text-main); }
-
-        .amount-section {
-            margin-top: 14px;
-            padding: 20px 16px;
-            background: linear-gradient(135deg, #f0fff0, #e8f5e9);
-            border-radius: 16px;
-            text-align: center;
-            border: 1px solid #c8e6c9;
-        }
-
-        [data-theme="dark"] .amount-section { background: linear-gradient(135deg, #1b3a1b, #1e4d1e); border-color: #2e5a2e; }
-        .amount-value { font-size: 1.8rem; font-weight: 800; color: #1b5e20; }
-        [data-theme="dark"] .amount-value { color: #66bb6a; }
-
-        .invoice-loading { text-align: center; padding: 30px; }
-        .invoice-loading .spinner {
-            width: 40px; height: 40px;
-            border: 4px solid var(--border-color);
-            border-top-color: #84cc16; border-radius: 50%;
-            animation: spin 0.8s linear infinite; margin: 0 auto 10px;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-
-        .no-results { text-align: center; padding: 30px; color: var(--text-sub); }
-        .no-results i { font-size: 3rem; color: #ccc; margin-bottom: 10px; display: block; }
-
-        .db-status-text {
-            font-size: 0.8rem;
-            color: #64748b;
-            text-align: center;
-            margin-bottom: 10px;
-            font-weight: 500;
-        }
-
-        @media (max-width: 600px) { 
-            .page { padding: 1.2rem; width: 96%; margin: 10px auto; }
-            .detail-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
-            .detail-item { padding: 8px; }
-            .amount-value { font-size: 1.5rem; }
-            .result-header .subscriber-name { font-size: 1rem; }
+        /* التعليمات */
+        .guide-container { max-width: 1200px; margin: 0 auto; padding: 14px; }
+        .guide-hero { background: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--accent)); padding: 32px 20px; text-align: center; color: white; border-radius: 24px; margin-bottom: 20px; position: relative; overflow: hidden; }
+        .guide-hero::before { content:''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+        .guide-hero-content { position: relative; z-index: 2; }
+        .guide-hero-icon { font-size: 3rem; margin-bottom: 12px; display: block; animation: wPulse 3s ease-in-out infinite; }
+        .guide-hero h1 { font-size: 1.6rem; margin-bottom: 8px; font-weight: 900; }
+        .guide-hero p { font-size: 0.85rem; opacity: 0.9; line-height: 1.5; }
+        .guide-badge { display: inline-block; background: rgba(255,255,255,.2); padding: 6px 16px; border-radius: 50px; margin-top: 12px; font-size: .8rem; }
+        .guide-nav { background: var(--bg-card); border-radius: var(--radius); padding: 16px; margin-bottom: 20px; border: 1px solid var(--border); }
+        .guide-nav h3 { margin-bottom: 12px; font-size: 1rem; color: var(--primary); display: flex; align-items: center; gap: 8px; }
+        .guide-nav-links { display: flex; flex-wrap: wrap; gap: 8px; }
+        .guide-nav-link { background: var(--input-bg); padding: 8px 14px; border-radius: 50px; color: var(--primary); font-size: .78rem; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; font-weight: 600; }
+        .guide-nav-link:active { transform: scale(.96); background: var(--primary); color: #fff; }
+        .guide-section { background: var(--bg-card); border-radius: var(--radius); padding: 18px; margin-bottom: 18px; border: 1px solid var(--border); }
+        .guide-section-title { font-size: 1.1rem; font-weight: 800; color: var(--primary); border-right: 4px solid var(--primary); padding-right: 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .guide-step { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; padding: 12px; background: var(--input-bg); border-radius: 12px; }
+        .guide-step-number { width: 28px; height: 28px; background: linear-gradient(135deg, var(--primary), var(--accent)); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.8rem; flex-shrink: 0; }
+        .guide-step-text { flex: 1; font-size: 0.85rem; line-height: 1.6; color: var(--text-sec); }
+        .guide-step-text strong { color: var(--text); font-weight: 800; }
+        .guide-grid-icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; margin-top: 12px; }
+        .guide-icon-card { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: white; padding: 14px 10px; border-radius: 14px; text-align: center; }
+        .guide-icon-card i { font-size: 1.4rem; margin-bottom: 6px; display: block; }
+        .guide-icon-card span { font-size: .7rem; font-weight: 700; display: block; line-height: 1.3; }
+        .guide-tip-box { padding: 14px; border-radius: 12px; margin-top: 12px; display: flex; gap: 10px; align-items: flex-start; }
+        .guide-tip-box i { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+        .guide-tip-box p { font-size: 0.8rem; line-height: 1.6; }
+        .guide-tip-box.info { background: var(--info-bg); border-right: 4px solid var(--primary); }
+        .guide-tip-box.info i { color: var(--primary); }
+        .guide-tip-box.info p { color: var(--info-text); }
+        .guide-tip-box.success { background: var(--success-bg); border-right: 4px solid var(--success); }
+        .guide-tip-box.success i { color: var(--success); }
+        .guide-tip-box.success p { color: var(--success-text); }
+        .guide-tip-box.warn { background: var(--warn-bg); border-right: 4px solid var(--gold); }
+        .guide-tip-box.warn i { color: var(--gold); }
+        .guide-tip-box.warn p { color: var(--warn-text); }
+        .guide-tip-box.danger { background: rgba(211,47,47,0.08); border-right: 4px solid var(--danger); }
+        .guide-tip-box.danger i { color: var(--danger); }
+        .guide-tip-box.danger p { color: var(--danger); }
+        .guide-sub-section { margin-top: 14px; padding: 12px; background: var(--input-bg); border-radius: 12px; }
+        .guide-sub-section h4 { font-size: .9rem; font-weight: 800; color: var(--primary); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .guide-faq-item { margin-bottom: 12px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+        .guide-faq-question { font-weight: 800; color: var(--text); padding: 14px; display: flex; align-items: center; gap: 10px; cursor: pointer; background: var(--input-bg); transition: background .2s; font-size: .88rem; }
+        .guide-faq-question:active { background: var(--border); }
+        .guide-faq-question i { color: var(--primary); transition: transform .3s; font-size: .8rem; flex-shrink: 0; }
+        .guide-faq-question.open i { transform: rotate(180deg); }
+        .guide-faq-answer { font-size: 0.82rem; color: var(--text-sec); line-height: 1.7; padding: 0 14px 14px 42px; display: none; }
+        .guide-faq-answer.show { display: block; animation: slideU .3s ease; }
+        .guide-footer { background: linear-gradient(135deg, var(--primary-dark), var(--primary)); color: white; text-align: center; padding: 24px 20px; border-radius: 18px; margin-top: 20px; }
+        .guide-footer h3 { margin: 8px 0 4px; }
+        .guide-footer p { font-size: .8rem; opacity: .8; }
+        .guide-footer .credit { font-size: .75rem; margin-top: 10px; opacity: .6; }
+        .ripple-fx { position: absolute; border-radius: 50%; background: rgba(255,255,255,.35); transform: scale(0); animation: ripA .6s linear; pointer-events: none; z-index: 5; }
+        @keyframes ripA { to{transform:scale(4);opacity:0} }
+        .btn-press { transition: transform 0.1s ease; }
+        .btn-press.pressing { transform: scale(0.95); }
+        @media (max-width: 768px) {
+            .main-grid { gap: 8px; } .main-card { padding: 12px 8px; }
+            .mc-icon { width: 38px; height: 38px; font-size: 1rem; }
+            .inv-grid { grid-template-columns: 1fr; }
+            .status-center { max-width: 110px; font-size: .75rem; }
+            #notification-center { width: 280px; }
+            .guide-grid-icons { grid-template-columns: repeat(2, 1fr); }
+            .plan-table { min-width: 480px; font-size: .7rem; }
+            .plan-table th { padding: 10px 6px; font-size: .68rem; }
+            .plan-table td { padding: 8px 6px; font-size: .68rem; }
+            .plan-table td.beneficiaries-cell { max-width: 130px; font-size: .65rem; }
         }
     </style>
 </head>
 <body>
-
-<div class="app-container">
-    <div class="fixed-top">
-        <header>
-            <div class="header-content">
-                <img src="logo.png?v=2" alt="شعار شركة المياه">
-                <div class="header-text">
-                    <h1>شركة مياه طرطوس</h1>
-                    <div class="subtitle">نظام الاستعلام الرقمي عن الفواتير</div>
-                </div>
-            </div>
-            <button class="dark-mode-toggle" id="darkModeBtn" onclick="toggleTheme()">
-                <i class="fas fa-moon"></i>
-            </button>
-        </header>
+    <div id="page-welcome">
+        <div class="w-particles" id="w-particles"></div>
+        <img src="logo.png?v=2" class="w-logo" id="w-logo">
+        <h1 class="w-title">شركة مياه طرطوس</h1>
+        <p class="w-sub">مؤسسة المياه والصرف الصحي</p>
+        <button class="w-btn btn-press" id="w-enter-btn" onclick="grantAudioAndEnter()"><i class="fas fa-volume-up"></i> اضغط للدخول</button>
+        <div class="w-loader" id="w-loader"><div class="w-spinner"></div><div style="color:#fff;font-size:.9rem;">جاري التحميل...</div></div>
+        <div class="w-waves"><svg viewBox="0 0 1200 80"><path d="M0,40 C200,80 400,0 600,40 C800,80 1000,0 1200,40 L1200,80 L0,80 Z" fill="rgba(255,255,255,.07)"/></svg><svg viewBox="0 0 1200 80"><path d="M0,50 C300,10 500,70 700,30 C900,0 1100,60 1200,30 L1200,80 L0,80 Z" fill="rgba(255,255,255,.04)"/></svg></div>
     </div>
 
-    <div class="scrollable-content">
-        <div id="invoice-page" class="page active">
-            <div id="dbStatusLabel" class="db-status-text">
-                <i class="fas fa-circle-notch fa-spin"></i> جاري تهيئة محرك الاستعلام الفوري الذكي...
-            </div>
+    <div id="offline-screen" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:15000;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:2rem;">
+        <i class="fas fa-wifi" style="font-size:3rem;color:var(--danger);margin-bottom:1rem;display:block;"></i>
+        <h2 style="margin-bottom:8px;">لا يوجد اتصال بالإنترنت</h2>
+        <p style="color:var(--text-muted);font-size:.85rem;margin-bottom:20px;">يحتاج التطبيق للاتصال لتحميل البيانات</p>
+        <button onclick="location.reload()" style="padding:12px 24px;border-radius:50px;border:none;background:var(--primary);color:#fff;cursor:pointer;font-family:'Tajawal';font-weight:700;font-size:.9rem;">إعادة المحاولة</button>
+    </div>
 
-            <div class="invoice-search-box">
-                <input type="text" id="invoiceInput" placeholder="أدخل رقم الحساب المالي للمشترك..." disabled>
-                <button id="searchInvoiceBtn" class="btn-search" disabled>
-                    <i class="fas fa-search"></i> استعلام فوري
-                </button>
-            </div>
+    <div class="status-bar">
+        <div class="status-left">
+            <div class="status-icon btn-press" onclick="showPage('notifications')"><i class="fas fa-bell"></i><span class="notif-badge-dot" id="notif-badge-dot"></span></div>
+            <div class="status-icon btn-press" onclick="showPage('news')"><i class="fas fa-newspaper"></i></div>
+        </div>
+        <div class="status-center" id="status-title">شركة مياه طرطوس</div>
+        <div class="status-right">
+            <div class="status-icon btn-press" onclick="showPage('settings')"><i class="fas fa-cog"></i></div>
+            <div class="status-icon btn-press" id="sound-icon" onclick="SM.toggleSoundFromBar()"><i class="fas fa-volume-up"></i></div>
+            <div class="status-icon btn-press" onclick="SM.toggleThemeBar()"><i class="fas fa-moon" id="theme-icon"></i></div>
+        </div>
+    </div>
 
-            <div id="invoiceResultsContainer">
-                <div class="no-results">
-                    <i class="fas fa-file-invoice"></i>
-                    <p>يرجى إدخال رقم الحساب المالي المكتوب على الإيصال للاستعلام فوراً.</p>
+    <div id="notification-center"></div>
+    <div class="toast" id="toast"></div>
+    <div id="pull-refresh"><i class="fas fa-sync-alt"></i></div>
+
+    <div id="app">
+        <!-- الصفحة الرئيسية -->
+        <div id="page-home" class="page active">
+            <div class="home-hero">
+                <img src="logo.png?v=2" class="home-hero-logo" id="home-logo">
+                <h1>شركة مياه طرطوس</h1>
+                <p>خدمتكم أولاً - نسعى لخدمتكم بشكل أفضل</p>
+            </div>
+            <div class="home-content">
+                <div class="main-grid">
+                    <div class="main-card mc-green btn-press" onclick="showPage('report')"><div class="mc-icon"><i class="fas fa-exclamation-triangle"></i></div><h3>إبلاغ عن هدر المياه</h3><p>روابط جميع المناطق</p></div>
+                    <div class="main-card mc-blue btn-press" onclick="showPage('plan')"><div class="mc-icon"><i class="fas fa-tint"></i></div><h3>خطة توزيع المياه</h3><p>مواعيد الضخ حسب منطقتك</p></div>
+                    <div class="main-card mc-lime btn-press" onclick="showPage('invoice')"><div class="mc-icon"><i class="fas fa-file-invoice-dollar"></i></div><h3>استعلام عن فاتورة</h3><p>بحث عن فاتورة المياه</p></div>
+                    <div class="main-card mc-teal btn-press" onclick="window.open('https://ee.kobotoolbox.org/x/VcxqvTkO','_blank')"><div class="mc-icon"><i class="fas fa-wrench"></i></div><h3>خدمات الصرف الصحي</h3><p>منصة تقديم الطلبات</p></div>
+                    <div class="main-card mc-orange btn-press" onclick="window.open('https://www.facebook.com/tawsse.com.sy','_blank')"><div class="mc-icon"><i class="fab fa-facebook-f"></i></div><h3>تابعونا على فيسبوك</h3><p>الصفحة الرسمية</p></div>
+                    <div class="main-card mc-purple btn-press" onclick="downloadOrShareApp()"><div class="mc-icon"><i class="fas fa-download"></i></div><h3>حمل التطبيق الآن</h3><p>شاركه مع الآخرين</p></div>
+                    <div class="main-card mc-gray btn-press" onclick="clearAppMemory()"><div class="mc-icon"><i class="fas fa-broom"></i></div><h3>افراغ الذاكرة المؤقتة</h3><p>تنظيف دون فقدان المفضلات</p></div>
+                    <div class="main-card mc-cyan btn-press" onclick="showPage('guide')"><div class="mc-icon"><i class="fas fa-question-circle"></i></div><h3>التعليمات والدعم</h3><p>دليل استخدام التطبيق</p></div>
                 </div>
             </div>
         </div>
+
+        <!-- صفحة خطة المياه -->
+        <div id="page-plan" class="page">
+            <div class="plan-header"><span class="plan-main-title">خطة توزيع المياه</span><span class="plan-month-title" id="planMonthDisplay">--</span><span class="plan-subtitle">اختر الوحدة والمشروع الخاص بك</span></div>
+            <div class="plan-filters">
+                <div class="filter-group"><label>الوحدة الإدارية:</label><select class="filter-select btn-press" id="plan-unit" onchange="onUnitChange()"><option value="">-- اختر الوحدة --</option></select></div>
+                <div class="filter-group"><label>مشروع الضخ:</label><select class="filter-select btn-press" id="plan-project" onchange="onProjectChange()" disabled><option value="">-- اختر المشروع أولاً --</option></select></div>
+            </div>
+            <div class="plan-table-wrap" id="plan-table-area">
+                <div class="plan-table-scroll" id="plan-table-scroll">
+                    <table class="plan-table">
+                        <thead>
+                            <tr><th>اليوم</th><th>التاريخ</th><th>المشروع</th><th>المستفيدين</th><th>الساعات</th></tr>
+                        </thead>
+                        <tbody id="plan-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="plan-table-scroll-hint" id="plan-scroll-hint"></div>
+                <div class="plan-table-count" id="plan-table-count" style="display:none;">
+                    <span><i class="fas fa-list"></i> عدد النتائج: <b id="plan-row-count">0</b></span>
+                    <span style="font-size:.65rem;"><i class="fas fa-arrows-alt-v"></i> اسحب للتصفح</span>
+                </div>
+            </div>
+            <div id="plan-actions-area" style="display:none" class="plan-actions"><button class="pa-btn whatsapp btn-press" onclick="sharePlanWhatsApp()"><i class="fab fa-whatsapp"></i> واتساب</button><button class="pa-btn pdf btn-press" onclick="exportPlanPDF()"><i class="fas fa-file-pdf"></i> PDF</button></div>
+            <button class="back-home-btn btn-press" onclick="goHome()"><i class="fas fa-home"></i> العودة للرئيسية</button>
+        </div>
+
+        <!-- صفحة الفاتورة -->
+        <div id="page-invoice" class="page">
+            <div class="inv-header"><span class="inv-main-title">استعلام عن فاتورة</span><span class="inv-subtitle">ابحث عن اشتراكك بأي من الطرق التالية</span></div>
+            <div id="inv-fav-area"></div>
+            <div class="trial-notice"><i class="fas fa-wifi-slash"></i><div><strong>تنبيه:</strong> هذه الخدمة تعمل بشكل أوف لاين (غير متصلة بالخادم المباشر).</div></div>
+            <div class="inv-search">
+                <div class="search-row"><select class="filter-select btn-press" id="inv-type" onchange="updateInvPH()"><option value="">-- اختر نوع البحث --</option><option value="nationalId">الرقم الوطني</option><option value="name">اسم المشترك</option><option value="barcode">الباركود</option><option value="phone">رقم الجوال</option><option value="subNumber">رقم الاشتراك</option></select></div>
+                <div class="search-row"><input type="text" class="search-input" id="inv-value" placeholder="أدخل قيمة البحث هنا..." onkeydown="if(event.key==='Enter')searchInvoice()"></div>
+                <button class="search-btn btn-press" onclick="searchInvoice()"><i class="fas fa-search"></i> بحث</button>
+            </div>
+            <div id="inv-results-area" class="inv-results"><div class="no-results"><i class="fas fa-file-invoice-dollar"></i><p>ابحث عن فاتورتك</p><span style="font-size:.75rem;">اختر نوع البحث وأدخل القيمة</span></div></div>
+            <button class="back-home-btn btn-press" onclick="goHome()"><i class="fas fa-home"></i> العودة للرئيسية</button>
+        </div>
+
+        <!-- صفحة الإبلاغ -->
+        <div id="page-report" class="page">
+            <p class="report-instruction"><i class="fas fa-water"></i> يرجى اختيار المنطقة لإرسال البلاغ</p>
+            <div class="report-grid" id="report-grid"></div>
+            <button class="back-home-btn btn-press" onclick="goHome()"><i class="fas fa-home"></i> العودة للرئيسية</button>
+        </div>
+
+        <!-- صفحة الإشعارات -->
+        <div id="page-notifications" class="page">
+            <div class="plan-header"><span class="plan-main-title">مركز الإشعارات</span><span class="plan-subtitle">جميع التنبيهات السابقة</span></div>
+            <button class="clear-notifs-btn btn-press" id="clear-notifs-btn" onclick="clearAllNotifications()" style="display:none;"><i class="fas fa-trash-alt"></i> مسح جميع الإشعارات</button>
+            <div class="notif-page-list" id="notif-page-list"></div>
+            <button class="back-home-btn btn-press" onclick="goHome()"><i class="fas fa-home"></i> العودة للرئيسية</button>
+        </div>
+
+        <!-- صفحة الأخبار -->
+        <div id="page-news" class="page">
+            <div class="plan-header"><span class="plan-main-title">آخر الأخبار</span><span class="plan-subtitle">أحدث المستجدات من المؤسسة</span></div>
+            <div class="news-page-list" id="news-page-list"></div>
+            <button class="back-home-btn btn-press" onclick="goHome()"><i class="fas fa-home"></i> العودة للرئيسية</button>
+        </div>
+
+        <!-- صفحة الإعدادات -->
+        <div id="page-settings" class="page">
+            <div class="plan-header"><span class="plan-main-title">إعدادات التطبيق</span><span class="plan-subtitle">تحكم كامل بسلوك ومظهر وأداء التطبيق</span></div>
+            <div class="settings-container">
+                <div class="settings-card">
+                    <div class="settings-card-header"><i class="fas fa-paint-brush"></i><h3>المظهر والعرض</h3></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-adjust"></i><span>وضع الألوان</span></div><div class="settings-item-desc">تلقائي: يتفعيل ليلاً بناءً على وقت الجهاز</div></div><select id="set-theme-mode" class="settings-select" onchange="SM.changeThemeMode(this.value)"><option value="light">نهاري</option><option value="dark">ليلي</option><option value="auto">تلقائي</option></select></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-text-height"></i><span>حجم الخط</span></div><div class="settings-item-desc">تكبير أو تصغير الخط في جميع الصفحات</div></div><select id="set-font-size" class="settings-select" onchange="SM.changeFontSize(this.value)"><option value="small">صغير</option><option value="medium">متوسط</option><option value="large">كبير</option></select></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-expand-arrows-alt"></i><span>ملء الشاشة (APK)</span></div><div class="settings-item-desc">إخفاء شريط تنقل الأندرويد - Median فقط</div></div><label class="toggle-switch"><input type="checkbox" id="set-fullscreen" onchange="SM.toggleFullscreen(this.checked)"><span class="toggle-slider"></span></label></div>
+                </div>
+                <div class="settings-card">
+                    <div class="settings-card-header"><i class="fas fa-tint"></i><h3>خطة المياه والبيانات</h3></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-history"></i><span>تذكر آخر مشروع</span></div><div class="settings-item-desc">تحميل آخر مشروع تم اختياره تلقائياً</div></div><label class="toggle-switch"><input type="checkbox" id="set-remember-plan" onchange="SM.save('rememberPlan', this.checked)"><span class="toggle-slider"></span></label></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-sync-alt"></i><span>تحديث تلقائي عند الفتح</span></div><div class="settings-item-desc">تحميل بيانات Excel فور فتح التطبيق</div></div><label class="toggle-switch"><input type="checkbox" id="set-auto-update" onchange="SM.save('autoUpdate', this.checked)"><span class="toggle-slider"></span></label></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-star"></i><span>الحد الأقصى لمفضلات الفواتير</span></div><div class="settings-item-desc">عدد الفواتير القابلة للحفظ في القائمة</div></div><select id="set-fav-limit" class="settings-select" onchange="SM.changeFavLimit(this.value)"><option value="3">3</option><option value="5">5</option><option value="7">7</option><option value="10">10</option></select></div>
+                </div>
+                <div class="settings-card">
+                    <div class="settings-card-header"><i class="fas fa-hand-pointer"></i><h3>التفاعل والاستجابة</h3></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-volume-up"></i><span>أصوات التطبيق</span></div><div class="settings-item-desc">أصوات النقرات وإشعارات التنبيهات</div></div><label class="toggle-switch"><input type="checkbox" id="set-sound" onchange="SM.toggleSound(this.checked)"><span class="toggle-slider"></span></label></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-mobile-alt"></i><span>اهتزاز اللمس</span></div><div class="settings-item-desc">اهتزاز خفيف عند الضغط على الأزرار</div></div><label class="toggle-switch"><input type="checkbox" id="set-vibrate" onchange="SM.save('vibrate', this.checked)"><span class="toggle-slider"></span></label></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-water"></i><span>تأثيرات الحركة (Ripple)</span></div><div class="settings-item-desc">تموجات بصرية عند الضغط - إيقافها يوفر أداء أسرع</div></div><label class="toggle-switch"><input type="checkbox" id="set-ripple" onchange="SM.save('ripple', this.checked)"><span class="toggle-slider"></span></label></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-hand-point-down"></i><span>سحب لتحديث البيانات</span></div><div class="settings-item-desc">اسحب الصفحة للأسفل لتحميل البيانات الجديدة</div></div><label class="toggle-switch"><input type="checkbox" id="set-pull-refresh" onchange="SM.save('pullRefresh', this.checked)"><span class="toggle-slider"></span></label></div>
+                </div>
+                <div class="settings-card">
+                    <div class="settings-card-header"><i class="fas fa-bell"></i><h3>الإشعارات</h3></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-bell"></i><span>إشعارات الترحيب</span></div><div class="settings-item-desc">عرض إشعارات التنبيهات عند العودة للرئيسية</div></div><label class="toggle-switch"><input type="checkbox" id="set-welcome-notifs" onchange="SM.save('welcomeNotifs', this.checked)"><span class="toggle-slider"></span></label></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-clock"></i><span>مدة عرض الإشعار</span></div><div class="settings-item-desc">الفترة قبل إخفاء الإشعار تلقائياً</div></div><select id="set-notif-duration" class="settings-select" onchange="SM.save('notifDuration', parseInt(this.value))"><option value="5">5 ثوانٍ</option><option value="7">7 ثوانٍ</option><option value="10">10 ثوانٍ</option><option value="15">15 ثانية</option></select></div>
+                </div>
+                <div class="settings-card">
+                    <div class="settings-card-header"><i class="fas fa-database"></i><h3>البيانات والخصوصية</h3></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-hdd"></i><span>حجم البيانات المحفوظة</span></div><div class="settings-item-desc" id="storage-size">جاري الحساب...</div></div></div>
+                    <button class="settings-action-btn" onclick="SM.clearCache()"><i class="fas fa-broom"></i> مسح الذاكرة المؤقتة (الكاش) فقط</button>
+                    <button class="settings-action-btn danger" onclick="SM.resetApp()"><i class="fas fa-trash-alt"></i> إعادة ضبط التطبيق بالكامل (مسح الكل)</button>
+                </div>
+                <div class="settings-card">
+                    <div class="settings-card-header"><i class="fas fa-info-circle"></i><h3>حول التطبيق</h3></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-code-branch"></i><span>إصدار التطبيق</span></div><div class="settings-item-desc">الإصدار 2.0 - Build 2026</div></div></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-user"></i><span>المطور</span></div><div class="settings-item-desc">المكتب الإعلامي - محمد حاج معلا</div></div></div>
+                    <div class="settings-item"><div class="settings-item-info"><div class="settings-item-title"><i class="fas fa-shield-alt"></i><span>الخصوصية</span></div><div class="settings-item-desc">لا يجمع التطبيق أي بيانات شخصية. جميع العمليات تتم محلياً أو عبر السيرفر الآمن.</div></div></div>
+                </div>
+                <div class="settings-version">شركة مياه طرطوس - مؤسسة المياه والصرف الصحي &copy; <span>2026</span></div>
+            </div>
+            <button class="back-home-btn btn-press" onclick="goHome()"><i class="fas fa-home"></i> العودة للرئيسية</button>
+        </div>
+
+        <!-- صفحة التعليمات والدعم -->
+        <div id="page-guide" class="page">
+            <div class="guide-container">
+                <div class="guide-hero"><div class="guide-hero-content"><span class="guide-hero-icon"><i class="fas fa-life-ring"></i></span><h1>دليل استخدام التطبيق</h1><p>شرح مفصل وشامل لجميع وظائف وميزات تطبيق شركة مياه طرطوس</p><div class="guide-badge"><i class="fas fa-mobile-alt"></i> متوافق مع Android و iOS والمتصفح</div></div></div>
+                <div class="guide-nav"><h3><i class="fas fa-compass"></i> الانتقال السريع للأقسام</h3><div class="guide-nav-links">
+                    <div class="guide-nav-link" onclick="scrollGuide('g-start')">بدء التشغيل</div>
+                    <div class="guide-nav-link" onclick="scrollGuide('g-home')">الرئيسية</div>
+                    <div class="guide-nav-link" onclick="scrollGuide('g-plan')">خطة المياه</div>
+                    <div class="guide-nav-link" onclick="scrollGuide('g-invoice')">الفاتورة</div>
+                    <div class="guide-nav-link" onclick="scrollGuide('g-report')">الإبلاغ</div>
+                    <div class="guide-nav-link" onclick="scrollGuide('g-favorites')">المفضلات</div>
+                    <div class="guide-nav-link" onclick="scrollGuide('g-notifications')">الإشعارات</div>
+                    <div class="guide-nav-link" onclick="scrollGuide('g-news')">الأخبار</div>
+                    <div class="guide-nav-link" onclick="scrollGuide('g-settings')">الإعدادات</div>
+                    <div class="guide-nav-link" onclick="scrollGuide('g-statusbar')">شريط الحالة</div>
+                    <div class="guide-nav-link" onclick="scrollGuide('g-themes')">المظهر الداكن</div>
+                    <div class="guide-nav-link" onclick="scrollGuide('g-tips')">نصائح هامة</div>
+                    <div class="guide-nav-link" onclick="scrollGuide('g-faq')">أسئلة شائعة</div>
+                </div></div>
+
+                <div class="guide-section" id="g-start"><div class="guide-section-title"><i class="fas fa-rocket"></i><span>بدء التشغيل والدخول</span></div>
+                    <div class="guide-step"><div class="guide-step-number">1</div><div class="guide-step-text">بعد فتح التطبيق لأول مرة، ستظهر <strong>شاشة ترحيب</strong> تعرض شعار الشركة مع خلفية متحركة وجزيئات ماء متطايرة.</div></div>
+                    <div class="guide-step"><div class="guide-step-number">2</div><div class="guide-step-text">اضغط على زر <strong>"اضغط للدخول"</strong> - هذا الزر يفعّل صوت التطبيق (مطلوب لأن المتصفحات تمنع تشغيل الصوت تلقائياً).</div></div>
+                    <div class="guide-step"><div class="guide-step-number">3</div><div class="guide-step-text">سيظهر <strong>مؤشر تحميل</strong> ثم يتم الانتقال تلقائياً للصفحة الرئيسية مع تحميل البيانات.</div></div>
+                    <div class="guide-step"><div class="guide-step-number">4</div><div class="guide-step-text">بعد المرة الأولى، <strong>لن تظهر شاشة الترحيب مرة أخرى</strong> وسيتم الدخول مباشرة.</div></div>
+                    <div class="guide-tip-box info"><i class="fas fa-info-circle"></i><p><strong>ملاحظة:</strong> يحتاج التطبيق إلى اتصال بالإنترنت لتحميل بيانات خطة المياه والأخبار. البيانات تُخزّن مؤقتاً للعمل دون اتصال.</p></div>
+                </div>
+
+                <div class="guide-section" id="g-home"><div class="guide-section-title"><i class="fas fa-home"></i><span>الصفحة الرئيسية</span></div>
+                    <p style="font-size:.85rem;color:var(--text-sec);margin-bottom:12px;line-height:1.6;">تحتوي على <strong>8 أزرار خدمات رئيسية</strong> مرتبة في شبكة منظمة</p>
+                </div>
+
+                <div class="guide-section" id="g-plan"><div class="guide-section-title"><i class="fas fa-calendar-alt"></i><span>خطة توزيع المياه</span></div>
+                    <div class="guide-step"><div class="guide-step-number">1</div><div class="guide-step-text">اختر <strong>الوحدة الإدارية</strong> من القائمة الأولى</div></div>
+                    <div class="guide-step"><div class="guide-step-number">2</div><div class="guide-step-text">اختر <strong>مشروع الضخ</strong> من القائمة الثانية</div></div>
+                    <div class="guide-step"><div class="guide-step-number">3</div><div class="guide-step-text">يُعرض <strong>الجدول الكامل</strong> مع تمييز اليوم الحالي باللون الأخضر</div></div>
+                </div>
+
+                <div class="guide-section" id="g-invoice"><div class="guide-section-title"><i class="fas fa-file-invoice-dollar"></i><span>استعلام عن فاتورة المياه</span></div>
+                    <div class="guide-step"><div class="guide-step-number">1</div><div class="guide-step-text">اختر <strong>نوع البحث</strong> (الرقم الوطني، الاسم، الباركود، رقم الجوال، رقم الاشتراك)</div></div>
+                    <div class="guide-step"><div class="guide-step-number">2</div><div class="guide-step-text">أدخل <strong>قيمة البحث</strong> واضغط "بحث"</div></div>
+                    <div class="guide-step"><div class="guide-step-number">3</div><div class="guide-step-text">تظهر <strong>بطاقة الفاتورة</strong> مع المبلغ المستحق وتفقيطه</div></div>
+                </div>
+
+                <div class="guide-section" id="g-report"><div class="guide-section-title"><i class="fas fa-exclamation-triangle"></i><span>الإبلاغ عن هدر المياه</span></div>
+                    <div class="guide-step"><div class="guide-step-number">1</div><div class="guide-step-text">اضغط على <strong>اسم المنطقة</strong> المطلوبة</div></div>
+                    <div class="guide-step"><div class="guide-step-number">2</div><div class="guide-step-text">يُنقلك إلى <strong>نموذج KoBoToolbox</strong> لإدخال التفاصيل</div></div>
+                </div>
+
+                <div class="guide-section" id="g-favorites"><div class="guide-section-title"><i class="fas fa-star"></i><span>نظام المفضلات</span></div>
+                    <div class="guide-step"><div class="guide-step-number">+</div><div class="guide-step-text">بعد البحث عن فاتورة، اضغط <strong>"أضف لقائمتي"</strong> لحفظ الاشتراك</div></div>
+                    <div class="guide-step"><div class="guide-step-number">+</div><div class="guide-step-text">يمكن حفظ حتى 10 فواتير في المفضلة (قابل للتخصيص من الإعدادات)</div></div>
+                </div>
+
+                <div class="guide-section" id="g-notifications"><div class="guide-section-title"><i class="fas fa-bell"></i><span>الإشعارات والتنبيهات</span></div>
+                    <div class="guide-step"><div class="guide-step-number">1</div><div class="guide-step-text">تظهر الإشعارات في أعلى يمين الشاشة</div></div>
+                    <div class="guide-step"><div class="guide-step-number">2</div><div class="guide-step-text">يمكن <strong>سحب الإشعار في أي اتجاه</strong> لإزالته</div></div>
+                    <div class="guide-step"><div class="guide-step-number">3</div><div class="guide-step-text">إذا كان الإشعار طويلاً، يظهر زر <strong>"اقرأ المزيد"</strong> لعرض النص الكامل</div></div>
+                </div>
+
+                <div class="guide-section" id="g-settings"><div class="guide-section-title"><i class="fas fa-cog"></i><span>صفحة الإعدادات</span></div>
+                    <p style="font-size:.85rem;color:var(--text-sec);line-height:1.6;">إعدادات شاملة: المظهر (نهاري/ليلي/تلقائي)، حجم الخط، ملء الشاشة، تذكر آخر مشروع، تحديث تلقائي، حد المفضلات، الأصوات، الاهتزاز، تأثيرات الحركة، مدة الإشعارات، مسح الكاش، وإعادة ضبط التطبيق.</p>
+                </div>
+
+                <div class="guide-section" id="g-tips"><div class="guide-section-title"><i class="fas fa-lightbulb"></i><span>نصائح هامة</span></div>
+                    <div class="guide-tip-box info"><i class="fas fa-moon"></i><p><strong>الوضع الليلي:</strong> أيقونة القمر/الشمس في شريط الحالة.</p></div>
+                    <div class="guide-tip-box info"><i class="fas fa-volume-mute"></i><p><strong>كتم الصوت:</strong> أيقونة السماعة في شريط الحالة.</p></div>
+                    <div class="guide-tip-box success"><i class="fas fa-sync-alt"></i><p><strong>تحديث البيانات:</strong> اسحب الصفحة للأسفل.</p></div>
+                </div>
+
+                <div class="guide-section" id="g-faq"><div class="guide-section-title"><i class="fas fa-question-circle"></i><span>الأسئلة الشائعة</span></div>
+                    <div class="guide-faq-item"><div class="guide-faq-question" onclick="toggleFAQ(this)"><i class="fas fa-chevron-down"></i><span>كيف أضيف فاتورة إلى المفضلات؟</span></div><div class="guide-faq-answer">ابحث عن الفاتورة، ثم اضغط "أضف لقائمتي" في بطاقة النتيجة.</div></div>
+                    <div class="guide-faq-item"><div class="guide-faq-question" onclick="toggleFAQ(this)"><i class="fas fa-chevron-down"></i><span>لماذا لا تظهر نتيجة البحث؟</span></div><div class="guide-faq-answer">تأكد من اختيار نوع البحث المناسب وصحة البيانات المدخلة.</div></div>
+                    <div class="guide-faq-item"><div class="guide-faq-question" onclick="toggleFAQ(this)"><i class="fas fa-chevron-down"></i><span>كيف أفعّل الوضع الداكن التلقائي؟</span></div><div class="guide-faq-answer">من الإعدادات ← وضع الألوان ← تلقائي.</div></div>
+                </div>
+
+                <div class="guide-footer"><i class="fas fa-tint" style="font-size:1.5rem;"></i><h3>شركة مياه طرطوس</h3><p>مؤسسة المياه والصرف الصحي</p><p><strong>المكتب الإعلامي - محمد حاج معلا</strong></p><p class="credit">نسعى لخدمتكم بشكل أفضل</p></div>
+            </div>
+            <button class="back-home-btn btn-press" onclick="goHome()"><i class="fas fa-home"></i> العودة للرئيسية</button>
+        </div>
     </div>
-</div>
 
-<script>
-    let dbInstance = null;
+    <!-- الفوتر الثابت -->
+    <div class="app-footer">
+        <i class="fas fa-chalkboard-user"></i> المكتب الإعلامي - شركة مياه طرطوس | <span class="footer-name">محمد حاج معلا</span>
+    </div>
 
-    // المظهر الداكن والفاتح
-    function toggleTheme() {
-        const body = document.body;
-        const currentTheme = body.getAttribute('data-theme');
-        const btn = document.getElementById('darkModeBtn').querySelector('i');
-        if (currentTheme === 'dark') {
-            body.removeAttribute('data-theme');
-            btn.className = 'fas fa-moon';
-        } else {
-            body.setAttribute('data-theme', 'dark');
-            btn.className = 'fas fa-sun';
+    <script>
+    // ========== المتغيرات العامة ==========
+    let S = {
+        page:'welcome', theme:localStorage.getItem('tw_theme')||'light',
+        invFavs:JSON.parse(localStorage.getItem('tw_inv_favs')||'[]'),
+        notifLog:JSON.parse(localStorage.getItem('tw_notif_log')||'[]'),
+        soundEnabled:localStorage.getItem('tw_sound_enabled')!=='false',
+        newsItems:[], lastInvoiceResults:[],
+        lastUnit:localStorage.getItem('last_plan_unit')||'',
+        lastProject:localStorage.getItem('last_plan_project')||'',
+        curUnit:'', curProject:''
+    };
+    let waterPlanData=[], cachedNotifs=[], notifQueue=[], isShowingNotif=false;
+    let audioCtx=null, audioAllowed=false;
+
+    const reportAreas=[
+        {name:'مدينة طرطوس',icon:'fas fa-city',color:'#2196F3',url:'https://ee.kobotoolbox.org/x/IvxRabyB'},
+        {name:'ريف طرطوس',icon:'fas fa-tree',color:'#4CAF50',url:'https://ee.kobotoolbox.org/x/E6bhMyLd'},
+        {name:'الصفصافة',icon:'fas fa-water',color:'#FF9800',url:'https://ee.kobotoolbox.org/x/bGeIkAp0'},
+        {name:'بانياس',icon:'fas fa-anchor',color:'#9C27B0',url:'https://ee.kobotoolbox.org/x/CBYvamiG'},
+        {name:'مشتى الحلو',icon:'fas fa-exclamation-circle',color:'#E91E63',url:'https://ee.kobotoolbox.org/x/2wIn8g87'},
+        {name:'الشيخ بدر',icon:'fas fa-mosque',color:'#00BCD4',url:'https://ee.kobotoolbox.org/x/MF0ii7eN'},
+        {name:'القدموس',icon:'fas fa-landmark',color:'#FF5722',url:'https://ee.kobotoolbox.org/x/NJkbEbZT'},
+        {name:'صافيتا',icon:'fas fa-church',color:'#3F51B5',url:'https://ee.kobotoolbox.org/x/On9oIBqp'},
+        {name:'الدريكيش',icon:'fas fa-leaf',color:'#009688',url:'https://ee.kobotoolbox.org/x/rzcL7DMH'}
+    ];
+
+    // ========== دالة التحميل والمشاركة (حل مشكلة Median) ==========
+    function downloadOrShareApp() {
+        const url = 'https://watertartus.rf.gd/miyah-tartus.apk';
+        const isMedian = !!(window.Median && window.Median.share);
+        const ua = navigator.userAgent || '';
+        const isAndroid = /Android/i.test(ua);
+        const isIOS = /iPhone|iPad|iPod/i.test(ua);
+        const isWebView = /; wv\)/i.test(ua) || isMedian;
+
+        // محاولة المشاركة عبر Median Share API (إذا كان متاحاً)
+        if (isMedian) {
+            try {
+                Median.share({
+                    title: 'تطبيق شركة مياه طرطوس',
+                    text: 'حمّل تطبيق شركة مياه طرطوس الرسمي:\n' + url,
+                    url: url
+                });
+                return;
+            } catch(e) { /* fallback */ }
+        }
+
+        // داخل WebView على أندرويد: استخدام Intent لفتح المتصفح الخارجي
+        if (isWebView && isAndroid) {
+            try {
+                const intentUrl = 'intent://watertartus.rf.gd/miyah-tartus.apk#Intent;scheme=https;action=android.intent.action.VIEW;S.browser_fallback_url=' + encodeURIComponent(url) + ';end';
+                window.location.href = intentUrl;
+                setTimeout(() => { window.open(url, '_blank'); }, 500);
+                return;
+            } catch(e) { /* fallback */ }
+        }
+
+        // على iOS داخل WebView: فتح في Safari عبر window.open
+        if (isWebView && isIOS) {
+            try {
+                window.open(url, '_blank');
+                return;
+            } catch(e) { /* fallback */ }
+        }
+
+        // في المتصفح العادي: تحميل مباشر
+        try {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'miyah-tartus.apk';
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => document.body.removeChild(a), 1000);
+        } catch(e) {
+            // محاولة أخيرة
+            window.open(url, '_blank');
         }
     }
 
-    // تهيئة محرك SQLite وجلب ملف قاعدة البيانات فور تشغيل الصفحة
-    initSqlJs({
-        locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
-    }).then(async function(SQL) {
-        const statusLabel = document.getElementById('dbStatusLabel');
-        const inputField = document.getElementById('invoiceInput');
-        const searchBtn = document.getElementById('searchInvoiceBtn');
+    // ========== مدير الإعدادات ==========
+    const SM={
+        cfg:{themeMode:'light',fontSize:'medium',fullscreen:false,rememberPlan:true,autoUpdate:true,favLimit:5,sound:true,vibrate:true,ripple:true,pullRefresh:true,welcomeNotifs:true,notifDuration:7},
+        init:function(){let s=localStorage.getItem('tw_app_settings');if(s){try{this.cfg={...this.cfg,...JSON.parse(s)};}catch(e){}}this.applyAll();},
+        save:function(k,v){this.cfg[k]=v;localStorage.setItem('tw_app_settings',JSON.stringify(this.cfg));this.applyAll();},
+        applyAll:function(){
+            document.body.setAttribute('data-font-size',this.cfg.fontSize);
+            S.soundEnabled=this.cfg.sound;localStorage.setItem('tw_sound_enabled',S.soundEnabled);
+            let si=document.querySelector('#sound-icon i');if(si)si.className=S.soundEnabled?'fas fa-volume-up':'fas fa-volume-mute';
+            if(audioCtx&&!S.soundEnabled){try{audioCtx.suspend();}catch(e){}}else if(audioCtx&&S.soundEnabled&&audioCtx.state==='suspended'){try{audioCtx.resume();}catch(e){}}
+            this._applyTheme();
+            if(window.Median){if(this.cfg.fullscreen){try{Median.navigation.hide();Median.statusBar.hide();}catch(e){}}else{try{Median.navigation.show();Median.statusBar.show();}catch(e){}}}
+        },
+        _applyTheme:function(){
+            if(this.cfg.themeMode==='auto'){let h=new Date().getHours();S.theme=(h>=18||h<6)?'dark':'light';}else{S.theme=this.cfg.themeMode;}
+            document.documentElement.setAttribute('data-theme',S.theme);
+            document.getElementById('theme-icon').className='fas '+(S.theme==='dark'?'fa-sun':'fa-moon');
+            document.getElementById('theme-color-meta').content=S.theme==='dark'?'#0B1929':'#004999';
+            localStorage.setItem('tw_theme',S.theme);
+        },
+        load:function(){
+            document.getElementById('set-theme-mode').value=this.cfg.themeMode;
+            document.getElementById('set-font-size').value=this.cfg.fontSize;
+            document.getElementById('set-fullscreen').checked=this.cfg.fullscreen;
+            document.getElementById('set-remember-plan').checked=this.cfg.rememberPlan;
+            document.getElementById('set-auto-update').checked=this.cfg.autoUpdate;
+            document.getElementById('set-fav-limit').value=this.cfg.favLimit;
+            document.getElementById('set-sound').checked=this.cfg.sound;
+            document.getElementById('set-vibrate').checked=this.cfg.vibrate;
+            document.getElementById('set-ripple').checked=this.cfg.ripple;
+            document.getElementById('set-pull-refresh').checked=this.cfg.pullRefresh;
+            document.getElementById('set-welcome-notifs').checked=this.cfg.welcomeNotifs;
+            document.getElementById('set-notif-duration').value=this.cfg.notifDuration;
+            this._calcStorage();
+        },
+        changeThemeMode:function(v){this.save('themeMode',v);showToast(v==='light'?'الوضع النهاري':v==='dark'?'الوضع الليلي':'الوضع التلقائي');},
+        toggleThemeBar:function(){let m=this.cfg.themeMode==='auto'?(S.theme==='dark'?'light':'dark'):(S.theme==='dark'?'light':'dark');this.changeThemeMode(m);},
+        changeFontSize:function(v){this.save('fontSize',v);showToast('حجم الخط: '+(v==='small'?'صغير':v==='large'?'كبير':'متوسط'));},
+        toggleFullscreen:function(c){if(c&&!window.Median){showToast('تعمل فقط داخل تطبيق الأندرويد');document.getElementById('set-fullscreen').checked=false;return;}this.save('fullscreen',c);showToast(c?'تم تفعيل ملء الشاشة':'تم إلغاء ملء الشاشة');},
+        toggleSound:function(c){this.save('sound',c);showToast(c?'تم تفعيل الصوت':'تم كتم الصوت');},
+        toggleSoundFromBar:function(){this.toggleSound(!this.cfg.sound);},
+        changeFavLimit:function(v){let l=parseInt(v);this.cfg.favLimit=l;localStorage.setItem('tw_app_settings',JSON.stringify(this.cfg));if(S.invFavs.length>l){S.invFavs=S.invFavs.slice(0,l);localStorage.setItem('tw_inv_favs',JSON.stringify(S.invFavs));renderInvFavs();}showToast('الحد الأقصى لمفضلات الفواتير: '+l);},
+        clearCache:function(){let keep=['tw_inv_favs','tw_theme','audioPermissionGranted','tw_app_settings','tw_sound_enabled'];let saved={};keep.forEach(k=>{let v=localStorage.getItem(k);if(v)saved[k]=v;});localStorage.clear();sessionStorage.clear();Object.keys(saved).forEach(k=>localStorage.setItem(k,saved[k]));showToast('تم مسح الذاكرة المؤقتة');if(this.cfg.autoUpdate)loadExcelData();},
+        resetApp:function(){if(confirm('هل أنت متأكد؟ سيتم مسح جميع الإعدادات والمفضلات والإشعارات.')){localStorage.clear();showToast('جاري إعادة الضبط...');setTimeout(()=>window.location.reload(true),1000);}},
+        _calcStorage:function(){let t=0;for(let i=0;i<localStorage.length;i++){let k=localStorage.key(i),v=localStorage.getItem(k);t+=k.length+v.length;}let kb=(t/1024).toFixed(1);let el=document.getElementById('storage-size');if(el)el.textContent=kb+' كيلوبايت ('+localStorage.length+' عنصر)';}
+    };
 
-        statusLabel.innerHTML = `<i class="fas fa-cloud-download-alt fa-bounce"></i> جاري تحميل قاعدة بيانات الفواتير (35 ميغا)...`;
+    // ========== الصوت ==========
+    function getAC(){if(!audioCtx&&S.soundEnabled)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+    function playNS(){if(!S.soundEnabled||!audioAllowed)return;try{let c=getAC();if(!c)return;let o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.setValueAtTime(800,c.currentTime);o.frequency.exponentialRampToValueAtTime(400,c.currentTime+0.08);g.gain.setValueAtTime(0.05,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.08);o.start(c.currentTime);o.stop(c.currentTime+0.08);}catch(e){}}
+    function playCS(){if(!S.soundEnabled||!audioAllowed)return;try{let c=getAC();if(!c)return;let o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.setValueAtTime(1200,c.currentTime);g.gain.setValueAtTime(0.03,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.05);o.start(c.currentTime);o.stop(c.currentTime+0.05);}catch(e){}}
+    function playDS(){if(!S.soundEnabled||!audioAllowed)return;try{let c=getAC();if(!c)return;let o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type='sine';o.frequency.setValueAtTime(600,c.currentTime);o.frequency.exponentialRampToValueAtTime(200,c.currentTime+0.08);g.gain.setValueAtTime(0.05,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+0.08);o.start(c.currentTime);o.stop(c.currentTime+0.08);}catch(e){}}
+
+    // ========== تفقيط ==========
+    function toArabicWords(num){
+        if(num===null||num===undefined||isNaN(num))return'—';num=Math.floor(Math.abs(num));
+        if(num===0)return'صفر ليرة سورية قديمة فقط لا غير';
+        const o=['','واحد','اثنان','ثلاثة','أربعة','خمسة','ستة','سبعة','ثمانية','تسعة','عشرة','أحد عشر','اثنا عشر','ثلاثة عشر','أربعة عشر','خمسة عشر','ستة عشر','سبعة عشر','ثمانية عشر','تسعة عشر'];
+        const t=['','','عشرون','ثلاثون','أربعون','خمسون','ستون','سبعون','ثمانون','تسعون'];
+        const h=['','مائة','مئتان','ثلاثمائة','أربعمائة','خمسمائة','ستمائة','سبعمائة','ثمانمائة','تسعمائة'];
+        const f=['','إحدى','اثنتان','ثلاث','أربع','خمس','ست','سبع','ثمان','تسع','عشر','إحدى عشرة','اثنتا عشرة','ثلاث عشرة','أربع عشرة','خمس عشرة','ست عشرة','سبع عشرة','ثماني عشرة','تسع عشرة'];
+        function u(n,fe){if(!n)return'';if(n<20)return fe?f[n]:o[n];if(n<100){let te=Math.floor(n/10),re=n%10;if(!re)return t[te];let rw=fe?(re===1?'إحدى':re===2?'اثنتين':f[re]):(re===1?'واحد':re===2?'اثنين':o[re]);return rw+' و'+t[te];}if(n<200)return'مائة'+(n%100?' و'+u(n%100,fe):'');if(n<300)return'مئتان'+(n%100?' و'+u(n%100,fe):'');if(n<1000){let nh=Math.floor(n/100);return h[nh]+(n%100?' و'+u(n%100,fe):'');}return'';}
+        function cv(n,fe){if(!n)return'';if(n<1000)return u(n,fe);if(n<1000000){let th=Math.floor(n/1000),rm=n%1000,w='';if(th===1)w='ألف';else if(th===2)w='ألفان';else if(th<11)w=u(th,true)+' آلاف';else w=u(th,false)+' ألفاً';if(rm)w+=' و'+u(rm,fe);return w;}if(n<1000000000){let ml=Math.floor(n/1000000),rm=n%1000000,w='';if(ml===1)w='مليون';else if(ml===2)w='مليونان';else if(ml<11)w=u(ml,false)+' ملايين';else w=u(ml,false)+' مليوناً';if(rm)w+=' و'+cv(rm,fe);return w;}return n.toLocaleString('ar-SY');}
+        return cv(num,false)+' ليرة سورية قديمة فقط لا غير';
+    }
+
+    // ========== الإشعارات ==========
+    function showNotification(msg){if(!msg||S.page!=='home')return;notifQueue.push(msg);processNQ();}
+    function processNQ(){if(isShowingNotif||!notifQueue.length)return;isShowingNotif=true;createNotif(notifQueue.shift());let dur=(SM.cfg.notifDuration||7)*1000;setTimeout(()=>{let ns=document.querySelectorAll('.android-notification');if(ns.length)removeNotif(ns[ns.length-1]);},dur);}
+    function createNotif(msg){
+        let now=new Date(),ts=now.getHours()+':'+(now.getMinutes()<10?'0':'')+now.getMinutes();
+        S.notifLog.unshift({msg,time:ts});if(S.notifLog.length>50)S.notifLog.length=50;
+        localStorage.setItem('tw_notif_log',JSON.stringify(S.notifLog));updateNotifBadge();
+        let c=document.getElementById('notification-center'),el=document.createElement('div');
+        el.className='android-notification';
         
-        try {
-            // جلب ملف الـ SQLite المرفوع بجانب الصفحة
-            const response = await fetch('data_compact.db');
-            if (!response.ok) throw new Error("لم يتم العثور على ملف قاعدة البيانات بجانب الصفحة.");
-            
-            const buffer = await response.arrayBuffer();
-            
-            // فتح قاعدة البيانات داخل ذاكرة المحرك
-            dbInstance = new SQL.Database(new Uint8Array(buffer));
-            
-            // تفعيل حقل الإدخال وزر البحث الفوري
-            statusLabel.innerHTML = `<i class="fas fa-check-circle" style="color:#28a745;"></i> محرك البحث الفوري جاهز ومحدث 100%`;
-            inputField.disabled = false;
-            searchBtn.disabled = false;
-        } catch (err) {
-            statusLabel.innerHTML = `<i class="fas fa-exclamation-triangle" style="color:#dc3545;"></i> فشل التحميل: ${err.message}`;
-            console.error(err);
+        const isLong = msg.length > 50;
+        const displayMsg = isLong ? msg.substring(0, 50) + '...' : msg;
+        
+        el.innerHTML='<div class="notif-icon-w"><i class="fas fa-bell"></i></div><div class="notif-body"><strong>تنبيه</strong><div class="notif-text '+(isLong?'truncated':'')+'">'+displayMsg+'</div>'+(isLong?'<button class="read-more-btn" onclick="toggleNotifExpand(this)">اقرأ المزيد</button>':'')+'</div><i class="fas fa-times notif-dismiss"></i>';
+        el.dataset.fullMsg = msg;
+        
+        el.querySelector('.notif-dismiss').onclick=e=>{e.stopPropagation();removeNotif(el);};
+        
+        let sx=0,sy=0,cx=0,cy=0,drag=false;
+        el.ontouchstart=e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;cx=sx;cy=sy;drag=true;el.style.transition='none';el.classList.add('dragging');};
+        el.ontouchmove=e=>{if(!drag)return;cx=e.touches[0].clientX;cy=e.touches[0].clientY;let dx=cx-sx,dy=cy-sy;el.style.transform='translate('+dx+'px,'+dy+'px)';let dist=Math.sqrt(dx*dx+dy*dy);el.style.opacity=Math.max(0,1-dist/200);};
+        el.ontouchend=()=>{drag=false;el.classList.remove('dragging');let dx=cx-sx,dy=cy-sy,dist=Math.sqrt(dx*dx+dy*dy);if(dist>50)removeNotif(el);else{el.style.transition='transform .3s,opacity .3s';el.style.transform='';el.style.opacity='';}};
+        
+        c.appendChild(el);playNS();
+    }
+    
+    function toggleNotifExpand(btn){
+        let notifBody = btn.parentElement;
+        let textEl = notifBody.querySelector('.notif-text');
+        let notif = btn.closest('.android-notification');
+        let fullMsg = notif.dataset.fullMsg;
+        
+        if(textEl.classList.contains('truncated')){
+            textEl.classList.remove('truncated');
+            textEl.textContent = fullMsg;
+            btn.textContent = 'إخفاء';
+            notif.classList.add('expanded');
+        } else {
+            textEl.classList.add('truncated');
+            textEl.textContent = fullMsg.substring(0, 50) + '...';
+            btn.textContent = 'اقرأ المزيد';
+            notif.classList.remove('expanded');
         }
-    });
-
-    // كود الاستعلام والبحث عند النقر على الزر
-    document.getElementById('searchInvoiceBtn').addEventListener('click', function() {
-        const searchVal = document.getElementById('invoiceInput').value.trim();
-        const container = document.getElementById('invoiceResultsContainer');
+    }
+    
+    function removeNotif(el){el.style.transition='transform .3s,opacity .3s';el.style.transform='translateX(-120%)';el.style.opacity='0';setTimeout(()=>{if(el.parentNode)el.remove();isShowingNotif=false;setTimeout(processNQ,500);},300);}
+    function updateNotifBadge(){let b=document.getElementById('notif-badge-dot');if(S.notifLog.length>0)b.classList.add('show');else b.classList.remove('show');}
+    function renderNotifPage(){
+        let c=document.getElementById('notif-page-list'),btn=document.getElementById('clear-notifs-btn');
+        if(!S.notifLog.length){c.innerHTML='<div class="no-results"><i class="fas fa-bell-slash"></i><p>لا توجد تنبيهات</p></div>';btn.style.display='none';return;}
+        btn.style.display='flex';
+        let h='';
+        for(let n of S.notifLog){
+            const isLong = n.msg.length > 50;
+            const displayMsg = isLong ? n.msg.substring(0, 100) + '...' : n.msg;
+            h+='<div class="notif-page-item"><div class="npi-icon"><i class="fas fa-bell"></i></div><div style="flex:1;min-width:0;"><div class="npi-text '+(isLong?'truncated':'')+'" data-full="'+encodeURIComponent(n.msg)+'">'+displayMsg+'</div>'+(isLong?'<button class="read-more-btn" onclick="togglePageNotifExpand(this)">اقرأ المزيد</button>':'')+'<div class="npi-time">'+n.time+'</div></div></div>';
+        }
+        c.innerHTML=h;
+    }
+    
+    function togglePageNotifExpand(btn){
+        let textEl = btn.previousElementSibling;
+        let fullMsg = decodeURIComponent(textEl.dataset.full);
         
-        if (!searchVal) {
-            alert("يرجى كتابة رقم الحساب المالي أولاً!");
+        if(textEl.classList.contains('truncated')){
+            textEl.classList.remove('truncated');
+            textEl.textContent = fullMsg;
+            btn.textContent = 'إخفاء';
+        } else {
+            textEl.classList.add('truncated');
+            textEl.textContent = fullMsg.substring(0, 100) + '...';
+            btn.textContent = 'اقرأ المزيد';
+        }
+    }
+    
+    function clearAllNotifications(){S.notifLog=[];localStorage.setItem('tw_notif_log','[]');updateNotifBadge();renderNotifPage();showToast('تم مسح الإشعارات');}
+
+    // ========== أساسيات ==========
+    function showToast(msg){let t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+    function showPage(id){
+        document.querySelectorAll('#app .page').forEach(p=>p.classList.remove('active'));
+        let t=document.getElementById('page-'+id);if(t){t.classList.add('active');t.scrollTop=0;}S.page=id;
+        let titles={home:'شركة مياه طرطوس',plan:'خطة المياه',invoice:'الفاتورة',report:'الإبلاغ',notifications:'الإشعارات',news:'الأخبار',settings:'الإعدادات',guide:'التعليمات'};
+        document.getElementById('status-title').textContent=titles[id]||'شركة مياه طرطوس';
+        if(id==='plan'){let sm=localStorage.getItem('currentPlanMonth');if(sm)document.getElementById('planMonthDisplay').innerHTML='لشهر '+sm;if(SM.cfg.rememberPlan&&S.lastUnit&&S.lastProject){setTimeout(()=>{document.getElementById('plan-unit').value=S.lastUnit;onUnitChange();setTimeout(()=>{document.getElementById('plan-project').value=S.lastProject;onProjectChange();},100);},50);}}
+        if(id==='invoice')renderInvFavs();
+        if(id==='notifications')renderNotifPage();
+        if(id==='news')renderNewsPage();
+        if(id==='settings')SM.load();
+        if(id==='home'&&cachedNotifs.length&&SM.cfg.welcomeNotifs&&S.notifLog.length===0){setTimeout(()=>{if(S.page==='home')cachedNotifs.forEach(n=>showNotification(n));},1000);}
+    }
+    function goHome(){showPage('home');}
+    function scrollGuide(id){let el=document.getElementById(id);if(el)document.getElementById('page-guide').scrollTo({top:el.offsetTop-100,behavior:'smooth'});}
+    function toggleFAQ(el){let a=el.nextElementSibling;if(a.classList.contains('show')){a.classList.remove('show');el.classList.remove('open');}else{a.classList.add('show');el.classList.add('open');}}
+
+    // ========== الترحيب والبيانات ==========
+    function grantAudioAndEnter(){if(audioAllowed)return;audioAllowed=true;localStorage.setItem('audioPermissionGranted','true');document.getElementById('w-enter-btn').style.display='none';document.getElementById('w-loader').style.display='flex';if(S.soundEnabled){let c=getAC();if(c&&c.state==='suspended')c.resume();playDS();}setTimeout(()=>{hideWelcome();loadExcelData();},2000);}
+    function hideWelcome(){let w=document.getElementById('page-welcome');w.classList.add('hide');setTimeout(()=>{w.style.display='none';showPage('home');},800);}
+    function initParticles(){let c=document.getElementById('w-particles');for(let i=0;i<18;i++){let p=document.createElement('div');p.className='w-p';p.style.left=Math.random()*100+'%';p.style.animationDuration=(5+Math.random()*7)+'s';p.style.animationDelay=Math.random()*5+'s';let sz=2+Math.random()*3;p.style.width=p.style.height=sz+'px';c.appendChild(p);}}
+    async function loadExcelData(){
+        if(typeof XLSX==='undefined'){await new Promise(r=>setTimeout(r,3000));if(typeof XLSX==='undefined'){showToast('مكتبة الجداول غير محملة');return;}}
+        try{let res=await fetch('toze3.xlsx?v='+Date.now());if(!res.ok)throw new Error();let buf=await res.arrayBuffer();let wb=XLSX.read(new Uint8Array(buf),{type:'array'});let sheet=wb.Sheets[wb.SheetNames[0]];
+        
+        // الأخبار من I1 إلى I50
+        let news=[];
+        for(let i=1;i<=50;i++){
+            let cell=sheet['I'+i];
+            if(cell&&cell.v){
+                news.push({
+                    title:'إعلان هام',
+                    date:new Date().toLocaleDateString('ar-EG'),
+                    desc:String(cell.v)
+                });
+            }
+        }
+        S.newsItems=news;
+        localStorage.setItem('cached_news',JSON.stringify(news));
+        
+        // الإشعارات من H2 إلى H51
+        let notifs=[];
+        for(let i=2;i<=51;i++){
+            let cell=sheet['H'+i];
+            if(cell&&cell.v){
+                notifs.push(String(cell.v));
+            }
+        }
+        cachedNotifs=notifs;
+        
+        waterPlanData=XLSX.utils.sheet_to_json(sheet);
+        let md='';
+        if(sheet['H1']&&sheet['H1'].v){
+            let d=cdt(sheet['H1'].v);
+            md=d?(d.getMonth()+1)+'-'+d.getFullYear():String(sheet['H1'].v);
+        }else{
+            let now=new Date();
+            md=(now.getMonth()+1)+'-'+now.getFullYear();
+        }
+        localStorage.setItem('currentPlanMonth',md);
+        document.getElementById('planMonthDisplay').innerHTML='لشهر '+md;
+        populateUnits();
+        
+        }catch(e){
+            let cn=localStorage.getItem('cached_news');
+            if(cn)S.newsItems=JSON.parse(cn);
+            let sm=localStorage.getItem('currentPlanMonth');
+            if(sm)document.getElementById('planMonthDisplay').innerHTML='لشهر '+sm;
+        }
+    }
+    function cdt(v){if(!v)return null;if(v instanceof Date&&!isNaN(v))return new Date(v.getFullYear(),v.getMonth(),v.getDate());if(typeof v==='number'&&v>0){let d=new Date(new Date(1899,11,30).getTime()+(v*86400000));if(!isNaN(d.getTime()))return new Date(d.getFullYear(),d.getMonth(),d.getDate());}if(typeof v==='string'){let p=new Date(v);if(!isNaN(p.getTime()))return new Date(p.getFullYear(),p.getMonth(),p.getDate());let parts=v.split('/');if(parts.length===3)return new Date(parseInt(parts[2]),parseInt(parts[1])-1,parseInt(parts[0]));}return null;}
+    function fdt(v){let d=cdt(v);return d?d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear():'—';}
+    function isTd(v){let d=cdt(v);if(!d)return false;let t=new Date();return d.getDate()===t.getDate()&&d.getMonth()===t.getMonth()&&d.getFullYear()===t.getFullYear();}
+    function fdn(v){let d=cdt(v);if(!d)return'—';return['الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'][d.getDay()];}
+
+    // ========== خطة المياه ==========
+    function populateUnits(){let sel=document.getElementById('plan-unit');sel.innerHTML='<option value="">-- اختر الوحدة --</option>';[...new Set(waterPlanData.map(r=>r['المحافظة']).filter(Boolean))].forEach(u=>{let o=document.createElement('option');o.value=u;o.textContent=u;sel.appendChild(o);});}
+    function onUnitChange(){let u=document.getElementById('plan-unit').value,ps=document.getElementById('plan-project');ps.innerHTML='<option value="">-- اختر المشروع --</option>';document.getElementById('plan-table-area').style.display='none';document.getElementById('plan-actions-area').style.display='none';if(!u){ps.disabled=true;return;}ps.disabled=false;[...new Set(waterPlanData.filter(r=>r['المحافظة']===u).map(r=>r['محور الضخ']).filter(Boolean))].forEach(p=>{let o=document.createElement('option');o.value=p;o.textContent=p;ps.appendChild(o);});}
+    function onProjectChange(){S.curUnit=document.getElementById('plan-unit').value;S.curProject=document.getElementById('plan-project').value;if(SM.cfg.rememberPlan){localStorage.setItem('last_plan_unit',S.curUnit);localStorage.setItem('last_plan_project',S.curProject);S.lastUnit=S.curUnit;S.lastProject=S.curProject;}renderPlanTable();}
+
+    function renderPlanTable(){
+        let u=S.curUnit,p=S.curProject;
+        let tb=document.getElementById('plan-tbody');
+        let wr=document.getElementById('plan-table-area');
+        let scrollEl=document.getElementById('plan-table-scroll');
+        let hintEl=document.getElementById('plan-scroll-hint');
+        let countEl=document.getElementById('plan-table-count');
+        let countNum=document.getElementById('plan-row-count');
+
+        if(!u||!p||p==='-- اختر المشروع --'){
+            wr.style.display='none';
+            document.getElementById('plan-actions-area').style.display='none';
             return;
         }
 
-        if (!dbInstance) return;
+        let f=waterPlanData.filter(r=>r['المحافظة']===u&&r['محور الضخ']===p);
+        tb.innerHTML='';
 
-        // عرض مؤشر التحميل المؤقت
-        container.innerHTML = `
-            <div class="invoice-loading">
-                <div class="spinner"></div>
-                <p>جاري فحص الـ 300 ألف مشترك واستخراج البيانات...</p>
-            </div>
-        `;
-
-        // استعلام SQL ذكي للبحث عن رقم الحساب في العمود الأول col_0
-        // (ملاحظة: col_0 هو رقم الحساب، col_1 الاسم، col_2 المنطقة، col_3 القيمة)
-        const stmt = dbInstance.prepare("SELECT * FROM invoices WHERE col_0 = ? LIMIT 1");
-        stmt.bind([searchVal]);
-        
-        if (stmt.step()) {
-            const row = stmt.getAsObject();
-            
-            // بناء بطاقة العرض بالبيانات المستخرجة فوراً بلمح البصر
-            container.innerHTML = `
-                <div class="invoice-result-card" id="printableInvoice">
-                    <div class="result-header">
-                        <div class="subscriber-name">${row.col_1 || 'مشترك مياه'}</div>
-                        <div class="subscriber-meta">
-                            <span><i class="fas fa-hashtag"></i> رقم الحساب: ${row.col_0 || searchVal}</span>
-                            <span><i class="fas fa-map-marker-alt"></i> ${row.col_2 || 'طرطوس'}</span>
-                        </div>
-                    </div>
-                    <div class="result-body">
-                        <div class="detail-grid">
-                            <div class="detail-item">
-                                <span class="detail-label">الجهة التابع لها</span>
-                                <span class="detail-value">مياه طرطوس</span>
-                            </div>
-                            <div class="detail-item">
-                                <span class="detail-label">حالة الاشتراك</span>
-                                <span class="detail-value" style="color:#28a745;">نشط / عادي</span>
-                            </div>
-                        </div>
-                        <div class="amount-section">
-                            <div class="amount-value">${Number(row.col_3 || 0).toLocaleString()} ل.س</div>
-                            <div class="arabic-amount">فقط وقدره: ${formatArabicAmount(row.col_3 || 0)} ليرة سورية لا غير.</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        } else {
-            // في حال عدم وجود رقم المشترك
-            container.innerHTML = `
-                <div class="no-results">
-                    <i class="fas fa-search-minus" style="color:#dc3545;"></i>
-                    <p style="color:#dc3545; font-weight:bold;">عذراً، رقم الحساب المالي غير موجود!</p>
-                    <p>تأكد من إدخال الأرقام بشكل صحيح وأعد المحاولة مرة أخرى.</p>
-                </div>
-            `;
+        if(!f.length){
+            wr.style.display='none';
+            document.getElementById('plan-actions-area').style.display='none';
+            showToast('لا توجد بيانات');
+            return;
         }
-        stmt.free();
+
+        let rowCount = 0;
+        f.forEach(r=>{
+            let isT=isTd(r['التاريخ']);
+            let tr=document.createElement('tr');
+            if(isT) tr.className='today-row';
+            let dt=fdt(r['التاريخ']);
+            if(isT) dt='<span class="today-badge"><i class="fas fa-clock"></i> اليوم</span> '+dt;
+
+            let dayName = r['اليوم'] || fdn(r['التاريخ']);
+            let beneficiaries = r['المجمعات المستفيدة'] || '—';
+            let hours = r['عدد ساعات الضخ'] || '—';
+            let projectName = r['محور الضخ'] || '—';
+
+            tr.innerHTML =
+                '<td class="day-cell">' + dayName + '</td>' +
+                '<td class="date-cell">' + dt + '</td>' +
+                '<td>' + projectName + '</td>' +
+                '<td class="beneficiaries-cell">' + beneficiaries + '</td>' +
+                '<td class="hours-cell">' + hours + '</td>';
+            tb.appendChild(tr);
+            rowCount++;
+        });
+
+        // إظهار الجدول
+        wr.style.display='block';
+        document.getElementById('plan-actions-area').style.display='flex';
+
+        // تحديث عداد النتائج
+        countEl.style.display='flex';
+        countNum.textContent = rowCount;
+
+        // فحص إذا كان هناك تمرير عمودي لإظهار التلميح
+        setTimeout(()=>{
+            if(scrollEl.scrollHeight > scrollEl.clientHeight){
+                hintEl.classList.add('show');
+                // إخفاء التلميح عند التمرير
+                scrollEl.onscroll = function(){
+                    if(scrollEl.scrollTop > 30){
+                        hintEl.classList.remove('show');
+                    } else {
+                        hintEl.classList.add('show');
+                    }
+                };
+            } else {
+                hintEl.classList.remove('show');
+                scrollEl.onscroll = null;
+            }
+
+            // التمرير التلقائي لصف اليوم
+            let todayRow = tb.querySelector('.today-row');
+            if(todayRow){
+                let rowTop = todayRow.offsetTop;
+                let scrollCenter = scrollEl.clientHeight / 2 - todayRow.clientHeight / 2;
+                if(rowTop > scrollEl.clientHeight || rowTop < scrollEl.scrollTop){
+                    scrollEl.scrollTo({top: Math.max(0, scrollCenter), behavior:'smooth'});
+                }
+            }
+        }, 100);
+    }
+
+    function sharePlanWhatsApp(){let u=S.curUnit,p=S.curProject;if(!u||!p){showToast('اختر المشروع أولاً');return;}let text='مياه طرطوس - خطة التوزيع\nالوحدة: '+u+'\nالمشروع: '+p+'\n';let td=waterPlanData.find(r=>r['المحافظة']===u&&r['محور الضخ']===p&&isTd(r['التاريخ']));if(td)text+='توزيع اليوم: '+td['المجمعات المستفيدة']+'\nالساعات: '+td['عدد ساعات الضخ']+'\n';text+='حمل التطبيق: https://watertartus.rf.gd/miyah-tartus.apk';window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(text),'_blank');}
+    function exportPlanPDF(){if(typeof html2pdf==='undefined'){showToast('مكتبة التصدير غير محملة');return;}let wr=document.getElementById('plan-table-area');if(wr.style.display!=='block'){showToast('اختر المشروع أولاً');return;}let pc=document.createElement('div');pc.style.direction='rtl';pc.style.fontFamily='Tajawal';pc.style.padding='20px';pc.innerHTML='<div style="text-align:center;"><h1 style="color:#0077B6;">خطة توزيع المياه</h1><h2 style="color:#ff9800;">'+document.getElementById('planMonthDisplay').innerHTML+'</h2><p>'+S.curUnit+' | '+S.curProject+'</p></div>'+document.getElementById('plan-table-scroll').innerHTML;html2pdf().set({margin:0.5,filename:'خطة_توزيع_المياه.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'in',format:'a4',orientation:'landscape'}}).from(pc).save().then(()=>showToast('تم حفظ PDF')).catch(()=>showToast('خطأ'));}
+
+    // ========== الفاتورة ==========
+    async function searchInvoice(){let st=document.getElementById('inv-type').value,sv=document.getElementById('inv-value').value.trim(),c=document.getElementById('inv-results-area');if(!st||!sv){showToast('يرجى اختيار نوع البحث وإدخال القيمة');return;}c.innerHTML='<div class="inv-loading"><div class="spinner"></div><p>جاري البحث...</p></div>';try{let r=await fetch('api.php?type='+encodeURIComponent(st)+'&val='+encodeURIComponent(sv));if(!r.ok)throw new Error('Server Error');let d=await r.json();if(d.error)throw new Error(d.error);S.lastInvoiceResults=d;renderInvResults(d,sv);}catch(e){c.innerHTML='<div class="no-results"><i class="fas fa-exclamation-triangle"></i><p>حدث خطأ في الاتصال</p><span style="font-size:.75rem;">'+e.message+'</span></div>';}}
+    function renderInvResults(results,sv){
+        let c=document.getElementById('inv-results-area');
+        if(!results||!results.length){
+            c.innerHTML='<div class="no-results"><i class="fas fa-search"></i><p>لا توجد نتائج مطابقة لـ "'+sv+'"</p></div>';
+            return;
+        }
+        let html=(results.length>1)?'<div style="font-size:.8rem;color:var(--text-muted);margin-bottom:10px;">تم العثور على '+results.length+' نتيجة</div>':'';
+        for(let r of results){
+            let sn=String(r['رقم الاشتراك']||'—'),nm=r['الاسم']||'—',
+                isF=S.invFavs.some(f=>f.subNumber===sn),
+                ic=isF?'fa-check':'fa-plus',bc=isF?'added':'add',
+                amt=Number(r['إجمالي الفواتير الغير مدفوعة']||0),
+                ad=amt.toLocaleString(),
+                sc=amt>0?'var(--danger)':'#28a745',
+                stx=amt>0?'غير مدفوعة':'مدفوعة';
+
+            html+='<div class="inv-card"><div class="inv-card-hdr"><div style="flex:1"><div class="s-name">'+nm+'</div><div class="s-meta"><span><i class="fas fa-id-card"></i> '+(r['الرقم الوطني']||'—')+'</span><span><i class="fas fa-map-marker-alt"></i> '+(r['العنوان']||'—')+'</span></div></div><button class="fav-small-btn '+bc+' btn-press" onclick="toggleInvFav(\''+sn.replace(/'/g,"\\'")+'\',\''+nm.replace(/'/g,"\\'")+'\')"><i class="fas '+ic+'"></i> '+(isF?'في قائمتي':'أضف لقائمتي')+'</button></div><div class="inv-card-body"><div class="inv-grid"><div class="inv-grid-item"><span class="d-l">رقم الاشتراك</span><span class="d-v">'+sn+'</span></div><div class="inv-grid-item"><span class="d-l">الباركود</span><span class="d-v">'+(r['باركود']||'—')+'</span></div><div class="inv-grid-item"><span class="d-l">رقم العداد</span><span class="d-v">'+(r['رقم العداد']||'—')+'</span></div><div class="inv-grid-item"><span class="d-l">نوع الاحتساب</span><span class="d-v">'+(r['رمز الاحتساب']||'—')+'</span></div><div class="inv-grid-item"><span class="d-l">رقم الجوال</span><span class="d-v">'+(r['رقم الجوال']||'—')+'</span></div><div class="inv-grid-item"><span class="d-l">الحالة</span><span class="d-v" style="color:'+sc+';font-weight:900;">'+stx+'</span></div></div><div class="inv-amount"><div class="a-value">'+ad+' ل.س</div><div class="a-arabic">'+toArabicWords(amt)+'</div>'+(amt>0?'<div class="inv-warn"><i class="fas fa-exclamation-circle"></i><span class="inv-warn-text">غير متضمنة الرسوم</span></div>':'')+'<div class="inv-count">عدد الفواتير غير المدفوعة: '+(r['عدد الفواتير الغير مدفوعة']||0)+'</div></div></div><div class="inv-footer"><button class="pa-btn whatsapp btn-press" style="flex:1;" onclick="shareInvWA(\''+sn.replace(/'/g,"\\'")+'\')"><i class="fab fa-whatsapp"></i> واتساب</button><button class="pa-btn pdf btn-press" style="flex:1;" onclick="exportInvPDF(\''+sn.replace(/'/g,"\\'")+'\')"><i class="fas fa-file-pdf"></i> PDF</button></div></div>';
+        }
+
+        html+='<div class="inv-disclaimer"><i class="fas fa-exclamation-triangle"></i><div><strong>تنبيه هام:</strong> القيمة الظاهرة أعلاه هي البيانات المتوفرة بشكل أوف لاين (غير متصلة بالخادم المباشر). من الممكن أن يكون المشترك قد قام بسداد فاتورته ولكنها ستظل ظاهرة هنا لحين تحديث الملف من قبل الإدارة. يرجى مراجعة قسم شؤون المشتركين في الشركة للتأكد من الرصيد الفعلي علماً أنه سيتم تحديث البيانات كل 15 يوم.</div></div>';
+
+        c.innerHTML=html;
+    }
+    function toggleInvFav(sn,nm){let idx=S.invFavs.findIndex(f=>f.subNumber===sn);if(idx!==-1){S.invFavs.splice(idx,1);showToast('تم إزالة "'+nm.substring(0,20)+'" من قائمتي');}else{if(S.invFavs.length>=SM.cfg.favLimit){showToast('لا يمكن إضافة أكثر من '+SM.cfg.favLimit+' اشتراكات');return;}S.invFavs.push({subNumber:sn,subName:nm});showToast('تم إضافة "'+nm.substring(0,20)+'" إلى قائمتي');if(S.soundEnabled)playDS();}localStorage.setItem('tw_inv_favs',JSON.stringify(S.invFavs));renderInvFavs();if(S.lastInvoiceResults&&S.lastInvoiceResults.length)renderInvResults(S.lastInvoiceResults,document.getElementById('inv-value').value.trim());}
+    function renderInvFavs(){let a=document.getElementById('inv-fav-area');if(!S.invFavs.length){a.innerHTML='';return;}let h='<div class="fav-list"><div class="fl-title"><i class="fas fa-star"></i> اشتراكاتي المفضلة</div>';for(let i=0;i<S.invFavs.length;i++){let f=S.invFavs[i];h+='<div class="fl-item" onclick="quickSearchInv(\''+f.subNumber.replace(/'/g,"\\'")+'\')"><span>'+f.subName.substring(0,26)+'<span class="fl-sub">رقم: '+f.subNumber+'</span></span><button class="fl-remove" onclick="event.stopPropagation();removeInvFav('+i+')"><i class="fas fa-times"></i></button></div>';}h+='</div>';a.innerHTML=h;}
+    async function quickSearchInv(subNumber){document.getElementById('inv-type').value='subNumber';document.getElementById('inv-value').value=subNumber;await searchInvoice();}
+    function removeInvFav(i){S.invFavs.splice(i,1);localStorage.setItem('tw_inv_favs',JSON.stringify(S.invFavs));renderInvFavs();showToast('تم الحذف');}
+    function updateInvPH(){let input=document.getElementById('inv-value'),type=document.getElementById('inv-type').value,ph={nationalId:'أدخل الرقم الوطني...',name:'أدخل اسم المشترك...',barcode:'أدخل رقم الباركود...',phone:'أدخل رقم الجوال...',subNumber:'أدخل رقم الاشتراك...'};input.placeholder=ph[type]||'أدخل قيمة البحث هنا...';}
+    function shareInvWA(subNum){let r=S.lastInvoiceResults.find(i=>String(i['رقم الاشتراك'])===subNum);if(!r)return;let amt=Number(r['إجمالي الفواتير الغير مدفوعة']||0).toLocaleString();let txt='💧 *شركة مياه طرطوس - فاتورة*\n👤 الاسم: '+r['الاسم']+'\n🔢 رقم الاشتراك: '+r['رقم الاشتراك']+'\n🏠 العنوان: '+r['العنوان']+'\n💰 المبلغ المستحق: '+amt+' ل.س\n عدد الفواتير: '+(r['عدد الفواتير الغير مدفوعة']||0)+'\n\n📲 حمل التطبيق: https://watertartus.rf.gd/miyah-tartus.apk';window.open('https://api.whatsapp.com/send?text='+encodeURIComponent(txt),'_blank');}
+    function exportInvPDF(subNum){if(typeof html2pdf==='undefined'){showToast('مكتبة التصدير غير محملة');return;}let r=S.lastInvoiceResults.find(i=>String(i['رقم الاشتراك'])===subNum);if(!r){showToast('لم يتم العثور على البطاقة');return;}let amt=Number(r['إجمالي الفواتير الغير مدفوعة']||0).toLocaleString();let pc=document.createElement('div');pc.style.direction='rtl';pc.style.fontFamily='Tajawal';pc.style.padding='20px';pc.style.background='#fff';pc.style.color='#000';pc.innerHTML='<div style="text-align:center;margin-bottom:20px;border-bottom:2px solid #0077B6;padding-bottom:10px;"><h1 style="color:#0077B6;">شركة مياه طرطوس</h1><h2 style="color:#333;">تفاصيل الفاتورة</h2></div><div style="line-height:1.8;"><p><strong>الاسم:</strong> '+r['الاسم']+'</p><p><strong>رقم الاشتراك:</strong> '+r['رقم الاشتراك']+'</p><p><strong>الرقم الوطني:</strong> '+r['الرقم الوطني']+'</p><p><strong>العنوان:</strong> '+r['العنوان']+'</p><p><strong>المبلغ المستحق:</strong> <span style="color:#d32f2f;font-weight:bold;">'+amt+' ل.س</span></p><p><strong>تفقيط المبلغ:</strong> '+toArabicWords(Number(r['إجمالي الفواتير الغير مدفوعة']||0))+'</p><p><strong>عدد الفواتير غير المدفوعة:</strong> '+(r['عدد الفواتير غير المدفوعة']||0)+'</p></div>';html2pdf().set({margin:0.5,filename:'فاتورة_مياه_'+subNum+'.pdf',image:{type:'jpeg',quality:0.98},html2canvas:{scale:2},jsPDF:{unit:'in',format:'a4',orientation:'portrait'}}).from(pc).save().then(()=>showToast('تم حفظ PDF')).catch(()=>showToast('خطأ في التصدير'));}
+
+    // ========== الإبلاغ والأخبار والذاكرة ==========
+    function initReportPage(){let g=document.getElementById('report-grid'),h='';for(let a of reportAreas)h+='<div class="report-card" onclick="window.open(\''+a.url+'\',\'_blank\')"><div class="rc-icon" style="background:'+a.color+';"><i class="'+a.icon+'"></i></div><h4>'+a.name+'</h4></div>';g.innerHTML=h;}
+    function renderNewsPage(){
+        let c=document.getElementById('news-page-list');
+        if(!S.newsItems.length){c.innerHTML='<div class="no-results"><i class="fas fa-newspaper"></i><p>لا توجد أخبار حالياً</p></div>';return;}
+        let h='';
+        for(let n of S.newsItems){
+            const isLong = n.desc.length > 50;
+            const displayDesc = isLong ? n.desc.substring(0, 100) + '...' : n.desc;
+            h+='<div class="news-page-item"><div class="news-icon"><i class="fas fa-bullhorn"></i></div><div style="flex:1;min-width:0;"><div class="news-title">'+n.title+'</div><div class="news-desc '+(isLong?'truncated':'')+'" data-full="'+encodeURIComponent(n.desc)+'">'+displayDesc+'</div>'+(isLong?'<button class="read-more-btn" onclick="toggleNewsExpand(this)">اقرأ المزيد</button>':'')+'<div class="news-date"><i class="fas fa-calendar-alt"></i> '+n.date+'</div></div></div>';
+        }
+        c.innerHTML=h;
+    }
+    
+    function toggleNewsExpand(btn){
+        let descEl = btn.previousElementSibling;
+        let fullDesc = decodeURIComponent(descEl.dataset.full);
+        
+        if(descEl.classList.contains('truncated')){
+            descEl.classList.remove('truncated');
+            descEl.textContent = fullDesc;
+            btn.textContent = 'إخفاء';
+        } else {
+            descEl.classList.add('truncated');
+            descEl.textContent = fullDesc.substring(0, 100) + '...';
+            btn.textContent = 'اقرأ المزيد';
+        }
+    }
+    
+    function clearAppMemory(){let iv=localStorage.getItem('tw_inv_favs'),th=localStorage.getItem('tw_theme'),ap=localStorage.getItem('audioPermissionGranted'),cn=localStorage.getItem('cached_news'),cm=localStorage.getItem('currentPlanMonth'),se=localStorage.getItem('tw_sound_enabled');localStorage.clear();sessionStorage.clear();if(iv)localStorage.setItem('tw_inv_favs',iv);if(th)localStorage.setItem('tw_theme',th);if(ap)localStorage.setItem('audioPermissionGranted',ap);if(cn)localStorage.setItem('cached_news',cn);if(cm)localStorage.setItem('currentPlanMonth',cm);if(se)localStorage.setItem('tw_sound_enabled',se);showToast('تم افراغ الذاكرة، إعادة التحميل...');setTimeout(()=>window.location.reload(true),1500);}
+    function handleOffline(){if(!navigator.onLine)document.getElementById('offline-screen').style.display='flex';window.addEventListener('offline',()=>document.getElementById('offline-screen').style.display='flex');window.addEventListener('online',()=>{document.getElementById('offline-screen').style.display='none';loadExcelData();});}
+    function initPullRefresh(){document.querySelectorAll('#app .page').forEach(page=>{let sy=0,pulling=false;page.addEventListener('touchstart',e=>{if(page.scrollTop===0)sy=e.touches[0].clientY;});page.addEventListener('touchmove',e=>{if(sy>0&&page.scrollTop===0&&e.touches[0].clientY-sy>70){document.getElementById('pull-refresh').classList.add('show');pulling=true;}});page.addEventListener('touchend',()=>{if(pulling){setTimeout(()=>document.getElementById('pull-refresh').classList.remove('show'),1000);loadExcelData();showToast('جاري تحديث البيانات...');}sy=0;pulling=false;});});}
+
+    // تأثيرات الضغط
+    document.addEventListener('click',function(e){
+        let t=e.target.closest('.main-card, .report-card, .pa-btn, .fav-small-btn, .search-btn, .w-btn, .back-home-btn, .status-icon, .clear-notifs-btn, .guide-nav-link, .settings-action-btn, .settings-select');
+        if(t&&!t.closest('.toggle-switch')){
+            if(SM.cfg.ripple){
+                let c=document.createElement('span');c.className='ripple-fx';
+                let d=Math.max(t.clientWidth,t.clientHeight),r=d/2;
+                c.style.width=c.style.height=d+'px';
+                c.style.left=(e.clientX-t.getBoundingClientRect().left-r)+'px';
+                c.style.top=(e.clientY-t.getBoundingClientRect().top-r)+'px';
+                t.style.position=t.style.position||'relative';t.style.overflow='hidden';
+                t.appendChild(c);setTimeout(()=>c.remove(),600);
+            }
+            if(SM.cfg.vibrate&&navigator.vibrate)navigator.vibrate(10);
+            if(t.classList.contains('search-btn')||t.classList.contains('pa-btn')||t.classList.contains('fav-small-btn'))playCS();
+        }
     });
 
-    // دالة مساعدة لتفقيط المبالغ وتحويلها لنصوص عربية مبسطة
-    function formatArabicAmount(amount) {
-        let num = parseInt(amount);
-        if (isNaN(num) || num === 0) return "صفر";
-        // يمكنك لاحقاً ربط دالة تفقيط كاملة هنا، حالياً تعطي نصاً استرشادياً سريعاً
-        return num + " ليرة سورية";
-    }
-</script>
-
+    // التهيئة
+    document.addEventListener('DOMContentLoaded',function(){
+        SM.init();initParticles();initReportPage();initPullRefresh();handleOffline();updateNotifBadge();
+        let lc='?v='+Date.now();['w-logo','home-logo'].forEach(id=>{let img=document.getElementById(id);if(img&&!img.src.includes('?v='))img.src='logo.png'+lc;});
+        let hasPerm=localStorage.getItem('audioPermissionGranted')==='true';
+        if(hasPerm){audioAllowed=true;document.getElementById('w-enter-btn').style.display='none';document.getElementById('w-loader').style.display='flex';setTimeout(()=>{hideWelcome();if(SM.cfg.autoUpdate)loadExcelData();},2000);}
+    });
+    </script>
 </body>
 </html>
